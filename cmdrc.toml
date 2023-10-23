@@ -1,0 +1,39 @@
+[task.sleep]
+command = "sleep"
+args = ["2"]
+
+[task.echo_hello]
+command = "echo"
+args = ["hello"]
+
+[task.echo_bye]
+command = "echo"
+args = ["bye"]
+
+[task.incrementing]
+mode = "shell"
+script = """
+    for i in $(seq 1 20); do
+        echo $i
+        sleep 1
+    done
+"""
+
+
+[task.greet]
+mode = "sequential"
+tasks = ["echo_hello", "echo_bye"]
+description = "greet to you `hello` and `bye`"
+
+[task.greet-slow]
+mode = "sequential"
+tasks = ["echo_hello", "sleep", "echo_bye"]
+
+[task.greet-parallel]
+mode = "parallel"
+tasks = ["greet-slow", "greet"]
+
+[task.incrementing-watch]
+mode = "watch"
+task = "incrementing"
+watch_list = ["src/**/*.rs"]
