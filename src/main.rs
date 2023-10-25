@@ -4,6 +4,7 @@ mod commander;
 mod config;
 mod error;
 mod task;
+mod taskdef;
 
 async fn cli() -> CmdResult<()> {
     let config_file = "cmdrc.toml";
@@ -11,15 +12,15 @@ async fn cli() -> CmdResult<()> {
     let config: config::CmdConfig = toml::from_str(&config_contents)?;
 
     let commander = commander::Commander::new(config)?;
-    println!("greet: {}", commander.description("greet")?);
+    println!("greet: {}", commander.description("greet".into())?);
     // commander.run("sleep".into()).await?;
     // commander.run("echo_hello".into()).await?;
     // commander.run("greet".into()).await?;
     // commander.run("greet-slow".into()).await?;
     // commander.run("greet-parallel".into()).await?;
     // commander.run("greet-watch").await?;
-    // commander.run("incrementing".into()).await?;
-    commander.run("incrementing-watch".into()).await?;
+    commander.run("incrementing".into()).await?;
+    // commander.run("incrementing-watch".into()).await?;
 
     Ok(())
 }

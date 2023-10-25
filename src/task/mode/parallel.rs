@@ -1,54 +1,90 @@
-use tokio::sync::Mutex;
+use std::{ops::DerefMut, sync::Arc};
+
+use tokio::{sync::Mutex, task::JoinHandle};
 
 use crate::{
     error::{CmdError, CmdResult},
-    task::{runner::Runner, Agent, Context},
+    task::Task,
 };
 
-use super::Run;
+use super::super::runner::Runner;
+
+type CmdHandle = JoinHandle<CmdResult<()>>;
 
 #[derive(Clone)]
 pub struct Parallel {
-    pub tasks: Vec<String>,
-    // pub handles: Arc<Mutex<Vec<>
+    pub tasks: Vec<Task>,
+    pub handles: Arc<Mutex<Option<Vec<CmdHandle>>>>,
 }
 
 #[async_trait::async_trait]
-impl Run for Parallel {
-    async fn run(&mut self, ctx: Context) -> CmdResult<()> {
+impl Runner for Parallel {
+    async fn run(&self) -> CmdResult<()> {
         let mut handles = Vec::new();
         for task in self.tasks.clone() {
-            println!("Running... {}", task.clone());
-            handles.push(ctx.tasks.get_and_run(task, Agent::Task));
+            let handle: JoinHandle<CmdResult<()>> = tokio::spawn({
+                async move {
+                    task.run().await?;
+                    task.wait().await?;
+                    Ok(())
+                }
+            });
+            handles.push(handle);
         }
+        self.handles.lock().await.replace(handles);
 
-        for handle in handles {
-            handle.await?;
+        Ok(())
+    }
+
+    async fn wait(&self) -> CmdResult<()> {
+        loop {
+            if let Some(handles) = self.clone().handles.lock().await.deref_mut() {
+                let mut is_finished = true;
+                for handle in handles.iter() {
+                    if !handle.is_finished() {
+                        is_finished = false;
+                    }
+                }
+                if is_finished {
+                    break;
+                }
+
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            }
         }
+        Ok(())
+    }
 
+    async fn kill(self) -> CmdResult<()> {
+        if let Some(handles) = self.handles.lock().await.deref_mut() {
+            for handle in handles {
+                handle.abort();
+            }
+        }
         Ok(())
     }
 }
 
 impl Parallel {
-    pub fn from_config(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
+    pub fn new(
+        runner_config: crate::config::RunnerConfig,
+        ctx: crate::taskdef::context::Context,
+    ) -> CmdResult<Self> {
         let tasks = runner_config
             .tasks
-            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?;
-        Ok(Self { tasks })
-    }
-
-    pub async fn kill(self) -> CmdResult<()> {
-        // if let Some(child) = self.clone().child {
-        //     child.lock().await.kill().await?;
-        // }
-        todo!();
-        Ok(())
+            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?
+            .into_iter()
+            .map(|task_name| ctx.build(task_name))
+            .collect::<CmdResult<Vec<Task>>>()?;
+        Ok(Self {
+            tasks,
+            handles: Arc::new(Mutex::new(Some(Vec::new()))),
+        })
     }
 }
 
-impl From<Parallel> for Runner {
+impl From<Parallel> for Task {
     fn from(value: Parallel) -> Self {
-        Runner::Parallel(value)
+        Task::Parallel(value)
     }
 }

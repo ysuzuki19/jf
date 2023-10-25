@@ -56,6 +56,7 @@ pub struct CommonConfig {
 }
 
 // TaskConfig without common fields
+#[derive(Clone)]
 pub struct RunnerConfig {
     pub mode: Option<String>,
     pub command: Option<String>,

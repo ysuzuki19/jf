@@ -1,61 +1,77 @@
-use std::sync::Arc;
+use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
 use crate::{
     error::{CmdError, CmdResult},
-    task::{runner::Runner, Context},
+    task::Task,
 };
 
-use super::Run;
+use super::super::runner::Runner;
+
+#[derive(Clone)]
+pub struct CommandConfig {
+    pub command: String,
+    pub args: Vec<String>,
+}
 
 #[derive(Clone)]
 pub struct Command {
-    pub command: String,
-    pub args: Vec<String>,
-    child: Option<Arc<Mutex<tokio::process::Child>>>,
+    config: CommandConfig,
+    child: Arc<Mutex<Option<tokio::process::Child>>>,
 }
 
 #[async_trait::async_trait]
-impl Run for Command {
-    async fn run(&mut self, _: Context) -> CmdResult<()> {
+impl Runner for Command {
+    async fn run(&self) -> CmdResult<()> {
         println!(
             "Run Command\"{}\" with Args({:?})",
-            self.command.clone(),
-            self.args.clone()
+            self.config.command.clone(),
+            self.config.args.clone()
         );
-        let mut cmd = tokio::process::Command::new(self.command.clone());
-        cmd.args(self.args.clone());
+        let mut cmd = tokio::process::Command::new(self.config.command.clone());
+        cmd.args(self.config.args.clone());
         let child = cmd.spawn()?;
-        self.child = Some(Arc::new(Mutex::new(child)));
-        self.child.clone().unwrap().lock().await.wait().await?;
+        self.child.lock().await.replace(child);
         Ok(())
     }
-}
 
-impl Command {
-    pub fn from_config(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
-        let command = runner_config
-            .command
-            .ok_or_else(|| CmdError::TaskdefMissingField("command".into(), "command".into()))?;
-        let args = runner_config.args.unwrap_or_default();
-        Ok(Self {
-            command,
-            args,
-            child: None,
-        })
+    async fn wait(&self) -> CmdResult<()> {
+        loop {
+            if let Some(ref mut child) = self.child.lock().await.deref_mut() {
+                if child.try_wait()?.is_some() {
+                    break;
+                }
+            }
+
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        }
+        Ok(())
     }
 
-    pub async fn kill(self) -> CmdResult<()> {
-        if let Some(child) = self.child {
-            child.lock().await.kill().await?;
+    async fn kill(self) -> CmdResult<()> {
+        if let Some(ref mut child) = self.child.lock().await.deref_mut() {
+            child.kill().await?;
         }
         Ok(())
     }
 }
 
-impl From<Command> for Runner {
+impl Command {
+    pub fn new(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
+        let command = runner_config
+            .command
+            .ok_or_else(|| CmdError::TaskdefMissingField("command".into(), "command".into()))?;
+        let args = runner_config.args.unwrap_or_default();
+        Ok(Self {
+            config: CommandConfig { command, args },
+            child: Arc::new(Mutex::new(None)),
+        })
+    }
+}
+
+impl From<Command> for Task {
     fn from(value: Command) -> Self {
-        Runner::Command(value)
+        Task::Command(value)
     }
 }

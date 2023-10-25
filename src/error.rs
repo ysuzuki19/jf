@@ -19,6 +19,9 @@ pub enum CmdError {
     #[error("TokioJoinError occurred: {0}")]
     TokioJoinError(#[from] tokio::task::JoinError),
 
+    #[error("TokioTryLockError occurred: {0}")]
+    TokioTryLockError(#[from] tokio::sync::TryLockError),
+
     #[error("NotifyError occurred: {0}")]
     NotifyError(#[from] notify::Error),
 

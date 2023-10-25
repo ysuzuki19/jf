@@ -1,12 +1,12 @@
 use crate::{
     config::CmdConfig,
     error::CmdResult,
-    task::{Taskdef, Taskdefs},
+    task::runner::Runner,
+    taskdef::{taskdefs::Taskdefs, Taskdef},
 };
 
-// Layer for user control
 pub struct Commander {
-    tasks: Taskdefs,
+    task_defs: Taskdefs,
 }
 
 impl Commander {
@@ -17,15 +17,18 @@ impl Commander {
             .map(|(name, task_config)| Taskdef::new(name, task_config))
             .collect::<CmdResult<Vec<_>>>()?;
         Ok(Self {
-            tasks: Taskdefs::new(task_vec)?,
+            task_defs: Taskdefs::new(task_vec)?,
         })
     }
 
-    pub async fn run(&self, task: String) -> CmdResult<()> {
-        self.tasks.run(task).await
+    pub async fn run(&self, task_name: String) -> CmdResult<()> {
+        let task = self.task_defs.build(task_name, crate::task::Agent::Cli)?;
+        task.run().await?;
+        task.wait().await?;
+        Ok(())
     }
 
-    pub fn description(&self, task: &str) -> CmdResult<String> {
-        self.tasks.description(task)
+    pub fn description(&self, task_name: String) -> CmdResult<String> {
+        self.task_defs.description(task_name)
     }
 }

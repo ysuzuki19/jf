@@ -1,28 +1,27 @@
+pub mod context;
+pub mod taskdefs;
+
 use crate::error::{CmdError, CmdResult};
 
-use super::{
-    runner::{self, Runner},
-    Agent,
-};
+use crate::task::Agent;
+
+use self::context::Context;
 
 pub struct Taskdef {
     pub(super) name: String,
     private: bool,
     description: String,
-    runner: Runner,
+    runner_config: crate::config::RunnerConfig,
 }
 
 impl Taskdef {
     pub fn new(name: String, task_config: crate::config::TaskConfig) -> CmdResult<Self> {
-        let (common_config, task_config_pruned) = task_config.into_pruned();
-        let runner = Runner::new(task_config_pruned).map_err(|e| {
-            CmdError::TaskdefParse(name.clone(), format!("runner: {}", e.to_string()))
-        })?;
+        let (common_config, runner_config) = task_config.into_pruned();
         Ok(Self {
             name,
-            runner,
             private: common_config.private,
             description: common_config.description,
+            runner_config,
         })
     }
 
@@ -39,9 +38,9 @@ impl Taskdef {
         }
     }
 
-    pub(super) async fn run(&self, ctx: runner::Context, agent: Agent) -> CmdResult<()> {
-        self.visibility_guard(agent.clone())?;
-        self.runner.clone().run(ctx).await
+    pub(super) fn build(&self, ctx: Context, agent: Agent) -> CmdResult<crate::task::Task> {
+        self.visibility_guard(agent)?;
+        crate::task::Task::new(self.runner_config.clone(), ctx)
     }
 
     pub fn description(&self) -> String {

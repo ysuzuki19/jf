@@ -4,49 +4,62 @@ use tokio::sync::Mutex;
 
 use crate::{
     error::{CmdError, CmdResult},
-    task::{runner::Runner, Agent, Context},
+    task::Task,
 };
 
-use super::Run;
+use super::super::runner::Runner;
 
 #[derive(Clone)]
 pub struct Sequential {
-    tasks: Vec<String>, // runners: Vec<Runner>,
-    runner: Option<Arc<Mutex<Runner>>>,
+    tasks: Vec<Task>,
+    running_task: Option<Arc<Mutex<Task>>>,
 }
 
 #[async_trait::async_trait]
-impl Run for Sequential {
-    async fn run(&mut self, ctx: Context) -> CmdResult<()> {
+impl Runner for Sequential {
+    async fn run(&self) -> CmdResult<()> {
         for task in self.tasks.clone() {
-            ctx.tasks.get_and_run(task, Agent::Task).await?;
+            task.run().await?;
         }
         Ok(())
     }
-}
 
-impl Sequential {
-    pub fn from_config(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
-        let tasks = runner_config
-            .tasks
-            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?;
-        Ok(Self {
-            tasks,
-            runner: None,
-        })
+    async fn wait(&self) -> CmdResult<()> {
+        //TODO: change to non-blocking
+        if let Some(runner) = self.clone().running_task {
+            runner.lock().await.wait().await?;
+        }
+        Ok(())
     }
 
-    #[async_recursion::async_recursion]
-    pub async fn kill(self) -> CmdResult<()> {
-        if let Some(runner) = self.runner {
+    async fn kill(self) -> CmdResult<()> {
+        if let Some(runner) = self.running_task {
             runner.lock().await.clone().kill().await?;
         }
         Ok(())
     }
 }
 
-impl From<Sequential> for Runner {
+impl Sequential {
+    pub fn new(
+        runner_config: crate::config::RunnerConfig,
+        ctx: crate::taskdef::context::Context,
+    ) -> CmdResult<Self> {
+        let tasks = runner_config
+            .tasks
+            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?
+            .into_iter()
+            .map(|task_name| ctx.build(task_name))
+            .collect::<CmdResult<Vec<Task>>>()?;
+        Ok(Self {
+            tasks,
+            running_task: None,
+        })
+    }
+}
+
+impl From<Sequential> for Task {
     fn from(value: Sequential) -> Self {
-        Runner::Sequential(value)
+        Task::Sequential(value)
     }
 }
