@@ -18,7 +18,6 @@ pub struct Shell {
 #[async_trait::async_trait]
 impl Runner for Shell {
     async fn run(&self) -> CmdResult<()> {
-        println!("Run Shell Script: {}", self.script.clone());
         let mut cmd = tokio::process::Command::new("sh");
         cmd.arg("-c").arg(self.script.clone());
         let child = cmd.spawn()?;
@@ -47,12 +46,8 @@ impl Shell {
         let script = runner_config
             .script
             .ok_or_else(|| CmdError::TaskdefMissingField("shell".into(), "script".into()))?;
-        let mut cmd = tokio::process::Command::new("sh");
-        cmd.arg("-c").arg(script.clone());
         Ok(Self {
             script,
-            // child: None,
-            // child,
             child: Arc::new(Mutex::new(None)),
         })
     }
