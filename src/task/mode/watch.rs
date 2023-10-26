@@ -69,17 +69,8 @@ impl Runner for Watch {
         }
     }
 
-    async fn wait(&self) -> CmdResult<()> {
-        loop {
-            if let Some(child) = self.child.clone() {
-                if child.lock().await.try_wait()?.is_some() {
-                    break;
-                }
-            }
-
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-        }
-        Ok(())
+    async fn is_finished(&self) -> CmdResult<bool> {
+        todo!("Watch::is_finished");
     }
 
     async fn kill(self) -> CmdResult<()> {

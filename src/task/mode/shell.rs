@@ -25,12 +25,12 @@ impl Runner for Shell {
         Ok(())
     }
 
-    async fn wait(&self) -> CmdResult<()> {
-        //TODO: change to non-blocking
-        if let Some(ref mut child) = self.child.clone().lock().await.deref_mut() {
-            child.wait().await?;
+    async fn is_finished(&self) -> CmdResult<bool> {
+        if let Some(ref mut child) = self.child.lock().await.deref_mut() {
+            Ok(child.try_wait()?.is_some())
+        } else {
+            Ok(true)
         }
-        Ok(())
     }
 
     async fn kill(self) -> CmdResult<()> {

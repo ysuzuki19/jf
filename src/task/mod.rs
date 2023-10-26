@@ -50,15 +50,14 @@ impl Runner for Task {
         Ok(())
     }
 
-    async fn wait(&self) -> CmdResult<()> {
+    async fn is_finished(&self) -> CmdResult<bool> {
         match self.clone() {
-            Self::Command(command) => command.wait().await?,
-            Self::Shell(shell) => shell.wait().await?,
-            Self::Sequential(sequential) => sequential.wait().await?,
-            Self::Parallel(parallel) => parallel.wait().await?,
-            Self::Watch(watch) => watch.wait().await?,
+            Self::Command(command) => command.is_finished().await,
+            Self::Shell(shell) => shell.is_finished().await,
+            Self::Sequential(sequential) => sequential.is_finished().await,
+            Self::Parallel(parallel) => parallel.is_finished().await,
+            Self::Watch(watch) => watch.is_finished().await,
         }
-        Ok(())
     }
 
     async fn kill(self) -> CmdResult<()> {

@@ -36,23 +36,18 @@ impl Runner for Parallel {
         Ok(())
     }
 
-    async fn wait(&self) -> CmdResult<()> {
-        loop {
-            if let Some(handles) = self.clone().handles.lock().await.deref_mut() {
-                let mut is_finished = true;
-                for handle in handles.iter() {
-                    if !handle.is_finished() {
-                        is_finished = false;
-                    }
+    async fn is_finished(&self) -> CmdResult<bool> {
+        if let Some(handles) = self.clone().handles.lock().await.deref_mut() {
+            let mut is_finished = true;
+            for handle in handles.iter() {
+                if !handle.is_finished() {
+                    is_finished = false;
                 }
-                if is_finished {
-                    break;
-                }
-
-                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
             }
+            Ok(is_finished)
+        } else {
+            Ok(true)
         }
-        Ok(())
     }
 
     async fn kill(self) -> CmdResult<()> {

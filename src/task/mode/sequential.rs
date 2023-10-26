@@ -24,12 +24,12 @@ impl Runner for Sequential {
         Ok(())
     }
 
-    async fn wait(&self) -> CmdResult<()> {
-        //TODO: change to non-blocking
+    async fn is_finished(&self) -> CmdResult<bool> {
         if let Some(runner) = self.clone().running_task {
-            runner.lock().await.wait().await?;
+            runner.lock().await.is_finished().await
+        } else {
+            Ok(true)
         }
-        Ok(())
     }
 
     async fn kill(self) -> CmdResult<()> {
