@@ -31,9 +31,8 @@ pub enum CmdError {
     #[error("Taskdef(name={0}) not found")]
     TaskdefNotFound(String),
 
-    #[error("Taskdef(name={0}) occurred parsing error\n{1}")]
-    TaskdefParse(String, String),
-
+    // #[error("Taskdef(name={0}) occurred parsing error\n{1}")]
+    // TaskdefParse(String, String),
     #[error("Taskdef(mode={0}) require the field: \"{1}\"")]
     TaskdefMissingField(String, String),
 
