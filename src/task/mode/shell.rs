@@ -33,7 +33,7 @@ impl Runner for Shell {
         }
     }
 
-    async fn kill(self) -> CmdResult<()> {
+    async fn kill(&self) -> CmdResult<()> {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
             child.kill().await?;
         }

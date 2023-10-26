@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
-use tokio::{sync::Mutex, task::JoinHandle};
+use tokio::sync::Mutex;
 
 use crate::{
     error::{CmdError, CmdResult},
@@ -14,7 +14,6 @@ use super::super::runner::Runner;
 pub struct Watch {
     pub task: Arc<Mutex<Task>>,
     pub watch_list: Vec<String>,
-    child: Option<Arc<Mutex<tokio::process::Child>>>,
 }
 
 #[async_trait::async_trait]
@@ -30,54 +29,32 @@ impl Runner for Watch {
         }
 
         loop {
-            let handle: JoinHandle<CmdResult<()>> = tokio::spawn({
-                let task = self.task.clone();
-
-                async move {
-                    let task = task.lock().await;
-                    task.run().await?;
-                    task.wait().await?;
-                    Ok(())
-                }
-            });
+            self.task.lock().await.run().await?;
 
             loop {
-                match rx.recv()? {
-                    Ok(notify::Event { kind, .. }) => match kind {
-                        notify::EventKind::Modify(_) => {
-                            println!("File modified, restarting task...");
-                            break;
-                        }
-                        notify::EventKind::Create(_) => {
-                            println!("File created, restarting task...");
-                            break;
-                        }
-                        notify::EventKind::Remove(_) => {
-                            println!("File removed, restarting task...");
-                            break;
-                        }
-                        _ => {}
-                    },
-                    Err(e) => {
-                        println!("{:?}", e);
+                match rx.recv()??.kind {
+                    notify::EventKind::Modify(_) => {
                         break;
                     }
+                    notify::EventKind::Create(_) => {
+                        break;
+                    }
+                    notify::EventKind::Remove(_) => {
+                        break;
+                    }
+                    _ => {}
                 }
             }
-            handle.abort();
-            self.clone().kill().await?;
+            self.kill().await?;
         }
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {
-        todo!("Watch::is_finished");
+        Ok(false)
     }
 
-    async fn kill(self) -> CmdResult<()> {
-        if let Some(child) = &self.child {
-            child.lock().await.kill().await?;
-        }
-        Ok(())
+    async fn kill(&self) -> CmdResult<()> {
+        self.task.lock().await.kill().await
     }
 }
 
@@ -96,7 +73,6 @@ impl Watch {
         Ok(Self {
             task: Arc::new(Mutex::new(task)),
             watch_list,
-            child: None,
         })
     }
 }

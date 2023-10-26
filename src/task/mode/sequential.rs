@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
@@ -12,7 +12,7 @@ use super::super::runner::Runner;
 #[derive(Clone)]
 pub struct Sequential {
     tasks: Vec<Task>,
-    running_task: Option<Arc<Mutex<Task>>>,
+    running_task: Arc<Mutex<Option<Task>>>,
 }
 
 #[async_trait::async_trait]
@@ -25,16 +25,16 @@ impl Runner for Sequential {
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {
-        if let Some(runner) = self.clone().running_task {
-            runner.lock().await.is_finished().await
+        if let Some(runner) = self.clone().running_task.lock().await.deref_mut() {
+            runner.is_finished().await
         } else {
             Ok(true)
         }
     }
 
-    async fn kill(self) -> CmdResult<()> {
-        if let Some(runner) = self.running_task {
-            runner.lock().await.clone().kill().await?;
+    async fn kill(&self) -> CmdResult<()> {
+        if let Some(runner) = self.running_task.lock().await.deref_mut() {
+            runner.kill().await?;
         }
         Ok(())
     }
@@ -53,7 +53,7 @@ impl Sequential {
             .collect::<CmdResult<Vec<Task>>>()?;
         Ok(Self {
             tasks,
-            running_task: None,
+            running_task: Arc::new(Mutex::new(None)),
         })
     }
 }

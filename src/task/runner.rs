@@ -14,5 +14,5 @@ pub trait Runner {
         }
         Ok(())
     }
-    async fn kill(self) -> CmdResult<()>;
+    async fn kill(&self) -> CmdResult<()>;
 }

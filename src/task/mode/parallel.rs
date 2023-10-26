@@ -50,7 +50,7 @@ impl Runner for Parallel {
         }
     }
 
-    async fn kill(self) -> CmdResult<()> {
+    async fn kill(&self) -> CmdResult<()> {
         if let Some(handles) = self.handles.lock().await.deref_mut() {
             for handle in handles {
                 handle.abort();

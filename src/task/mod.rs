@@ -60,7 +60,7 @@ impl Runner for Task {
         }
     }
 
-    async fn kill(self) -> CmdResult<()> {
+    async fn kill(&self) -> CmdResult<()> {
         match self.clone() {
             Self::Command(command) => command.kill().await?,
             Self::Shell(shell) => shell.kill().await?,
