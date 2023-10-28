@@ -19,6 +19,14 @@ script = """
     done
 """
 
+[task.incrementing-sequential]
+mode = "sequential"
+tasks = ["incrementing", "incrementing", "incrementing"]
+
+[task.incrementing-sequential-watch]
+mode = "watch"
+task = "incrementing-sequential"
+watch_list = ["src/**/*.rs"]
 
 [task.greet]
 mode = "sequential"
