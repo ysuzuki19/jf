@@ -12,7 +12,9 @@ use super::super::runner::Runner;
 
 #[derive(Clone)]
 pub struct Watch {
-    pub task: Arc<Mutex<Task>>,
+    // pub task: Arc<Mutex<Task>>,
+    pub task: Box<Task>,
+    pub running_task: Arc<Mutex<Option<Box<Task>>>>,
     pub watch_list: Vec<String>,
 }
 
@@ -29,7 +31,10 @@ impl Runner for Watch {
         }
 
         loop {
-            self.task.lock().await.run().await?;
+            let task = self.task.clone();
+            task.run().await?;
+            self.running_task.lock().await.replace(task);
+            // self.running_task.lock().await.run().await?;
 
             loop {
                 match rx.recv()??.kind {
@@ -45,7 +50,13 @@ impl Runner for Watch {
                     _ => {}
                 }
             }
-            self.kill().await?;
+
+            if let Some(running_task) = self.running_task.lock().await.take() {
+                println!("running_task is Some");
+                running_task.kill().await?;
+            } else {
+                println!("running_task is None");
+            }
         }
     }
 
@@ -54,7 +65,11 @@ impl Runner for Watch {
     }
 
     async fn kill(&self) -> CmdResult<()> {
-        self.task.lock().await.kill().await
+        if let Some(running_task) = self.running_task.lock().await.take() {
+            running_task.kill().await?;
+        }
+        Ok(())
+        // self.running_task.lock().await.kill().await
     }
 }
 
@@ -71,7 +86,8 @@ impl Watch {
             .watch_list
             .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "watch_list".into()))?;
         Ok(Self {
-            task: Arc::new(Mutex::new(task)),
+            task: Box::new(task),
+            running_task: Arc::new(Mutex::new(None)),
             watch_list,
         })
     }
