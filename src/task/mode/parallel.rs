@@ -3,17 +3,30 @@ use std::{ops::DerefMut, sync::Arc};
 use tokio::{sync::Mutex, task::JoinHandle};
 
 use crate::{
-    common,
+    common::BuildContext,
     error::{CmdError, CmdResult},
-    task::{runner::Runner, Task},
+    task::{runner::Runner, types::CmdHandle, Task},
 };
-
-type CmdHandle = JoinHandle<CmdResult<()>>;
 
 #[derive(Clone)]
 pub struct Parallel {
     tasks: Vec<Task>,
     handles: Arc<Mutex<Option<Vec<CmdHandle>>>>,
+}
+
+impl Parallel {
+    pub fn new(runner_config: crate::config::RunnerConfig, bc: BuildContext) -> CmdResult<Self> {
+        let tasks = runner_config
+            .tasks
+            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?
+            .into_iter()
+            .map(|task_name| bc.build(task_name))
+            .collect::<CmdResult<Vec<Task>>>()?;
+        Ok(Self {
+            tasks,
+            handles: Arc::new(Mutex::new(Some(Vec::new()))),
+        })
+    }
 }
 
 #[async_trait::async_trait]
@@ -63,24 +76,6 @@ impl Runner for Parallel {
             tasks: self.tasks.iter().map(|task| task.bunshin()).collect(),
             handles: Arc::new(Mutex::new(None)),
         }
-    }
-}
-
-impl Parallel {
-    pub fn new(
-        runner_config: crate::config::RunnerConfig,
-        bc: common::BuildContext,
-    ) -> CmdResult<Self> {
-        let tasks = runner_config
-            .tasks
-            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?
-            .into_iter()
-            .map(|task_name| bc.build(task_name))
-            .collect::<CmdResult<Vec<Task>>>()?;
-        Ok(Self {
-            tasks,
-            handles: Arc::new(Mutex::new(Some(Vec::new()))),
-        })
     }
 }
 

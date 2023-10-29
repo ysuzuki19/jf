@@ -15,6 +15,19 @@ pub struct CommandConfig {
     args: Vec<String>,
 }
 
+impl Command {
+    pub fn new(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
+        let command = runner_config
+            .command
+            .ok_or_else(|| CmdError::TaskdefMissingField("command".into(), "command".into()))?;
+        let args = runner_config.args.unwrap_or_default();
+        Ok(Self {
+            config: CommandConfig { command, args },
+            child: Arc::new(Mutex::new(None)),
+        })
+    }
+}
+
 #[derive(Clone)]
 pub struct Command {
     config: CommandConfig,
@@ -50,19 +63,6 @@ impl Runner for Command {
             config: self.config.clone(),
             child: Arc::new(Mutex::new(None)),
         }
-    }
-}
-
-impl Command {
-    pub fn new(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
-        let command = runner_config
-            .command
-            .ok_or_else(|| CmdError::TaskdefMissingField("command".into(), "command".into()))?;
-        let args = runner_config.args.unwrap_or_default();
-        Ok(Self {
-            config: CommandConfig { command, args },
-            child: Arc::new(Mutex::new(None)),
-        })
     }
 }
 

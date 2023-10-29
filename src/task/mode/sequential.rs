@@ -8,15 +8,12 @@ use std::{
 
 use tokio::{sync::Mutex, task::JoinHandle};
 
-use crate::{
-    common,
-    error::{CmdError, CmdResult},
-    task::Task,
-};
-
 use super::super::runner::Runner;
-
-type CmdHandle = JoinHandle<CmdResult<()>>;
+use crate::{
+    common::BuildContext,
+    error::{CmdError, CmdResult},
+    task::{types::CmdHandle, Task},
+};
 
 #[derive(Clone)]
 pub struct Sequential {
@@ -24,6 +21,23 @@ pub struct Sequential {
     running_task: Arc<Mutex<Option<Task>>>,
     stop_signal: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<CmdHandle>>>,
+}
+
+impl Sequential {
+    pub fn new(runner_config: crate::config::RunnerConfig, bc: BuildContext) -> CmdResult<Self> {
+        let tasks = runner_config
+            .tasks
+            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?
+            .into_iter()
+            .map(|task_name| bc.build(task_name))
+            .collect::<CmdResult<Vec<Task>>>()?;
+        Ok(Self {
+            tasks,
+            running_task: Arc::new(Mutex::new(None)),
+            stop_signal: Arc::new(AtomicBool::new(false)),
+            handle: Arc::new(Mutex::new(None)),
+        })
+    }
 }
 
 #[async_trait::async_trait]
@@ -78,26 +92,6 @@ impl Runner for Sequential {
             stop_signal: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         }
-    }
-}
-
-impl Sequential {
-    pub fn new(
-        runner_config: crate::config::RunnerConfig,
-        bc: common::BuildContext,
-    ) -> CmdResult<Self> {
-        let tasks = runner_config
-            .tasks
-            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?
-            .into_iter()
-            .map(|task_name| bc.build(task_name))
-            .collect::<CmdResult<Vec<Task>>>()?;
-        Ok(Self {
-            tasks,
-            running_task: Arc::new(Mutex::new(None)),
-            stop_signal: Arc::new(AtomicBool::new(false)),
-            handle: Arc::new(Mutex::new(None)),
-        })
     }
 }
 

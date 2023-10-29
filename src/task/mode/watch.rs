@@ -4,7 +4,7 @@ use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use tokio::sync::Mutex;
 
 use crate::{
-    common,
+    common::BuildContext,
     error::{CmdError, CmdResult},
     task::Task,
 };
@@ -16,6 +16,23 @@ pub struct Watch {
     task: Box<Task>,
     running_task: Arc<Mutex<Option<Task>>>,
     watch_list: Vec<String>,
+}
+
+impl Watch {
+    pub fn new(runner_config: crate::config::RunnerConfig, bc: BuildContext) -> CmdResult<Self> {
+        let task_name = runner_config
+            .task
+            .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "task".into()))?;
+        let task = bc.build(task_name)?;
+        let watch_list = runner_config
+            .watch_list
+            .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "watch_list".into()))?;
+        Ok(Self {
+            task: Box::new(task),
+            running_task: Arc::new(Mutex::new(None)),
+            watch_list,
+        })
+    }
 }
 
 #[async_trait::async_trait]
@@ -73,26 +90,6 @@ impl Runner for Watch {
             running_task: Arc::new(Mutex::new(None)),
             watch_list: self.watch_list.clone(),
         }
-    }
-}
-
-impl Watch {
-    pub fn new(
-        runner_config: crate::config::RunnerConfig,
-        bc: common::BuildContext,
-    ) -> CmdResult<Self> {
-        let task_name = runner_config
-            .task
-            .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "task".into()))?;
-        let task = bc.build(task_name)?;
-        let watch_list = runner_config
-            .watch_list
-            .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "watch_list".into()))?;
-        Ok(Self {
-            task: Box::new(task),
-            running_task: Arc::new(Mutex::new(None)),
-            watch_list,
-        })
     }
 }
 

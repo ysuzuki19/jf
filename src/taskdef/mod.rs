@@ -1,7 +1,10 @@
-pub mod pool;
+mod pool;
 
-use crate::common;
-use crate::error::{CmdError, CmdResult};
+use crate::{
+    common::{Agent, BuildContext},
+    error::{CmdError, CmdResult},
+};
+pub use pool::TaskdefPool;
 
 pub struct Taskdef {
     pub(super) name: String,
@@ -21,12 +24,12 @@ impl Taskdef {
         })
     }
 
-    fn visibility_guard(&self, agent: common::Agent) -> CmdResult<()> {
+    fn visibility_guard(&self, agent: Agent) -> CmdResult<()> {
         if !self.private {
             return Ok(());
         }
         match agent {
-            common::Agent::Cli => Err(CmdError::Custom(format!(
+            Agent::Cli => Err(CmdError::Custom(format!(
                 "task.{} is private\nPlease remove `private = true` if you run",
                 self.name
             ))),
@@ -34,11 +37,7 @@ impl Taskdef {
         }
     }
 
-    fn build(
-        &self,
-        bc: common::BuildContext,
-        agent: common::Agent,
-    ) -> CmdResult<crate::task::Task> {
+    fn build(&self, bc: BuildContext, agent: Agent) -> CmdResult<crate::task::Task> {
         self.visibility_guard(agent)?;
         crate::task::Task::new(self.runner_config.clone(), bc)
     }

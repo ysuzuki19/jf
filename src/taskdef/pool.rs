@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use super::Taskdef;
 use crate::{
-    common,
+    common::{Agent, BuildContext},
     error::{CmdError, CmdResult},
     task::Task,
 };
@@ -21,8 +21,8 @@ impl TaskdefPool {
         Self { map: Arc::new(map) }
     }
 
-    fn ctx(&self) -> common::BuildContext {
-        common::BuildContext::new(self.clone())
+    fn ctx(&self) -> BuildContext {
+        BuildContext::new(self.clone())
     }
 
     pub fn get(&self, task_name: String) -> CmdResult<&Taskdef> {
@@ -31,7 +31,7 @@ impl TaskdefPool {
             .ok_or(CmdError::TaskdefNotFound(task_name))
     }
 
-    pub fn build(&self, task_name: String, agent: common::Agent) -> CmdResult<Task> {
+    pub fn build(&self, task_name: String, agent: Agent) -> CmdResult<Task> {
         self.get(task_name)?.build(self.ctx(), agent)
     }
 

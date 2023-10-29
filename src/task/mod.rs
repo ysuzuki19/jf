@@ -1,8 +1,9 @@
 mod mode;
 pub mod runner;
+mod types;
 
 use crate::{
-    common,
+    common::BuildContext,
     error::{CmdError, CmdResult},
 };
 
@@ -18,10 +19,7 @@ pub enum Task {
 }
 
 impl Task {
-    pub fn new(
-        runner_config: crate::config::RunnerConfig,
-        bc: common::BuildContext,
-    ) -> CmdResult<Self> {
+    pub fn new(runner_config: crate::config::RunnerConfig, bc: BuildContext) -> CmdResult<Self> {
         let mode = runner_config.mode.clone().unwrap_or("command".to_string());
         match mode.as_str() {
             "command" => Ok(mode::Command::new(runner_config)?.into()),

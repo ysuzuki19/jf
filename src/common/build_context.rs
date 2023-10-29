@@ -1,5 +1,5 @@
 use crate::common;
-use crate::taskdef::pool::TaskdefPool;
+use crate::taskdef::TaskdefPool;
 
 #[derive(Clone)]
 pub struct BuildContext {

@@ -2,17 +2,28 @@ use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
+use super::super::runner::Runner;
 use crate::{
     error::{CmdError, CmdResult},
     task::Task,
 };
 
-use super::super::runner::Runner;
-
 #[derive(Clone)]
 pub struct Shell {
     script: String,
     child: Arc<Mutex<Option<tokio::process::Child>>>,
+}
+
+impl Shell {
+    pub fn new(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
+        let script = runner_config
+            .script
+            .ok_or_else(|| CmdError::TaskdefMissingField("shell".into(), "script".into()))?;
+        Ok(Self {
+            script,
+            child: Arc::new(Mutex::new(None)),
+        })
+    }
 }
 
 #[async_trait::async_trait]
@@ -45,18 +56,6 @@ impl Runner for Shell {
             script: self.script.clone(),
             child: Arc::new(Mutex::new(None)),
         }
-    }
-}
-
-impl Shell {
-    pub fn new(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
-        let script = runner_config
-            .script
-            .ok_or_else(|| CmdError::TaskdefMissingField("shell".into(), "script".into()))?;
-        Ok(Self {
-            script,
-            child: Arc::new(Mutex::new(None)),
-        })
     }
 }
 
