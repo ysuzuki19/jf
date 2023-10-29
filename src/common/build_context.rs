@@ -1,5 +1,8 @@
-use crate::common;
+use crate::error::CmdResult;
+use crate::task::Task;
 use crate::taskdef::TaskdefPool;
+
+use super::Agent;
 
 #[derive(Clone)]
 pub struct BuildContext {
@@ -13,7 +16,7 @@ impl BuildContext {
 }
 
 impl BuildContext {
-    pub fn build(&self, task_name: String) -> crate::error::CmdResult<crate::task::Task> {
-        self.pool.build(task_name, common::Agent::Task)
+    pub fn build(&self, task_name: String) -> CmdResult<Task> {
+        self.pool.build(task_name, Agent::Task)
     }
 }
