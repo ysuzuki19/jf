@@ -3,11 +3,11 @@ use crate::{
     config::CmdConfig,
     error::CmdResult,
     task::runner::Runner,
-    taskdef::{task_pool::TaskPool, Taskdef},
+    taskdef::{pool::TaskdefPool, Taskdef},
 };
 
 pub struct Commander {
-    pool: TaskPool,
+    pool: TaskdefPool,
 }
 
 impl Commander {
@@ -18,7 +18,7 @@ impl Commander {
             .map(|(name, task_config)| Taskdef::new(name, task_config))
             .collect::<CmdResult<Vec<_>>>()?;
         Ok(Self {
-            pool: TaskPool::new(task_vec)?,
+            pool: TaskdefPool::new(task_vec),
         })
     }
 

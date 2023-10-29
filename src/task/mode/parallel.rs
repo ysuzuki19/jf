@@ -3,6 +3,7 @@ use std::{ops::DerefMut, sync::Arc};
 use tokio::{sync::Mutex, task::JoinHandle};
 
 use crate::{
+    common,
     error::{CmdError, CmdResult},
     task::{runner::Runner, Task},
 };
@@ -68,13 +69,13 @@ impl Runner for Parallel {
 impl Parallel {
     pub fn new(
         runner_config: crate::config::RunnerConfig,
-        ctx: crate::taskdef::context::Context,
+        bc: common::BuildContext,
     ) -> CmdResult<Self> {
         let tasks = runner_config
             .tasks
             .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?
             .into_iter()
-            .map(|task_name| ctx.build(task_name))
+            .map(|task_name| bc.build(task_name))
             .collect::<CmdResult<Vec<Task>>>()?;
         Ok(Self {
             tasks,

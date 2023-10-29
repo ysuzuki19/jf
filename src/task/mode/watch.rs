@@ -4,6 +4,7 @@ use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use tokio::sync::Mutex;
 
 use crate::{
+    common,
     error::{CmdError, CmdResult},
     task::Task,
 };
@@ -78,12 +79,12 @@ impl Runner for Watch {
 impl Watch {
     pub fn new(
         runner_config: crate::config::RunnerConfig,
-        ctx: crate::taskdef::context::Context,
+        bc: common::BuildContext,
     ) -> CmdResult<Self> {
         let task_name = runner_config
             .task
             .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "task".into()))?;
-        let task = ctx.build(task_name)?;
+        let task = bc.build(task_name)?;
         let watch_list = runner_config
             .watch_list
             .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "watch_list".into()))?;

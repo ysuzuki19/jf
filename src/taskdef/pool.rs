@@ -8,21 +8,21 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct TaskPool {
+pub struct TaskdefPool {
     map: Arc<HashMap<String, Taskdef>>,
 }
 
-impl TaskPool {
-    pub fn new(task_vec: Vec<Taskdef>) -> CmdResult<Self> {
+impl TaskdefPool {
+    pub fn new(task_vec: Vec<Taskdef>) -> Self {
         let mut map = HashMap::new();
         for task in task_vec {
             map.insert(task.name.clone(), task);
         }
-        Ok(Self { map: Arc::new(map) })
+        Self { map: Arc::new(map) }
     }
 
-    fn ctx(&self) -> super::context::Context {
-        super::Context::new(self.clone())
+    fn ctx(&self) -> common::BuildContext {
+        common::BuildContext::new(self.clone())
     }
 
     pub fn get(&self, task_name: String) -> CmdResult<&Taskdef> {

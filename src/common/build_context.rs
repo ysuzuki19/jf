@@ -1,19 +1,18 @@
 use crate::common;
-
-use super::task_pool::TaskPool;
+use crate::taskdef::pool::TaskdefPool;
 
 #[derive(Clone)]
-pub struct Context {
-    pool: TaskPool,
+pub struct BuildContext {
+    pool: TaskdefPool,
 }
 
-impl Context {
-    pub fn new(pool: TaskPool) -> Self {
+impl BuildContext {
+    pub fn new(pool: TaskdefPool) -> Self {
         Self { pool }
     }
 }
 
-impl Context {
+impl BuildContext {
     pub fn build(&self, task_name: String) -> crate::error::CmdResult<crate::task::Task> {
         self.pool.build(task_name, common::Agent::Task)
     }

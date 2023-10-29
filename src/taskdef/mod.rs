@@ -1,10 +1,7 @@
-pub mod context;
-pub mod task_pool;
+pub mod pool;
 
 use crate::common;
 use crate::error::{CmdError, CmdResult};
-
-use self::context::Context;
 
 pub struct Taskdef {
     pub(super) name: String,
@@ -37,9 +34,13 @@ impl Taskdef {
         }
     }
 
-    fn build(&self, ctx: Context, agent: common::Agent) -> CmdResult<crate::task::Task> {
+    fn build(
+        &self,
+        bc: common::BuildContext,
+        agent: common::Agent,
+    ) -> CmdResult<crate::task::Task> {
         self.visibility_guard(agent)?;
-        crate::task::Task::new(self.runner_config.clone(), ctx)
+        crate::task::Task::new(self.runner_config.clone(), bc)
     }
 
     pub fn description(&self) -> String {

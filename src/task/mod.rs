@@ -1,7 +1,10 @@
 mod mode;
 pub mod runner;
 
-use crate::error::{CmdError, CmdResult};
+use crate::{
+    common,
+    error::{CmdError, CmdResult},
+};
 
 use self::runner::Runner;
 
@@ -17,15 +20,15 @@ pub enum Task {
 impl Task {
     pub fn new(
         runner_config: crate::config::RunnerConfig,
-        ctx: crate::taskdef::context::Context,
+        bc: common::BuildContext,
     ) -> CmdResult<Self> {
         let mode = runner_config.mode.clone().unwrap_or("command".to_string());
         match mode.as_str() {
             "command" => Ok(mode::Command::new(runner_config)?.into()),
             "shell" => Ok(mode::Shell::new(runner_config)?.into()),
-            "sequential" => Ok(mode::Sequential::new(runner_config, ctx)?.into()),
-            "parallel" => Ok(mode::Parallel::new(runner_config, ctx)?.into()),
-            "watch" => Ok(mode::Watch::new(runner_config, ctx)?.into()),
+            "sequential" => Ok(mode::Sequential::new(runner_config, bc)?.into()),
+            "parallel" => Ok(mode::Parallel::new(runner_config, bc)?.into()),
+            "watch" => Ok(mode::Watch::new(runner_config, bc)?.into()),
             _ => Err(CmdError::Custom(format!("Unknown mode: {}", mode))),
         }
     }
