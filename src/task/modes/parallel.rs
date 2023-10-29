@@ -1,12 +1,18 @@
 use std::{ops::DerefMut, sync::Arc};
 
+use serde::Deserialize;
 use tokio::{sync::Mutex, task::JoinHandle};
 
 use crate::{
     common::BuildContext,
-    error::{CmdError, CmdResult},
+    error::CmdResult,
     task::{runner::Runner, types::CmdHandle, Task},
 };
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Params {
+    pub tasks: Vec<String>,
+}
 
 #[derive(Clone)]
 pub struct Parallel {
@@ -15,10 +21,9 @@ pub struct Parallel {
 }
 
 impl Parallel {
-    pub fn new(runner_config: crate::config::RunnerConfig, bc: BuildContext) -> CmdResult<Self> {
-        let tasks = runner_config
+    pub fn new(params: Params, bc: BuildContext) -> CmdResult<Self> {
+        let tasks = params
             .tasks
-            .ok_or_else(|| CmdError::TaskdefMissingField("sequential".into(), "tasks".into()))?
             .into_iter()
             .map(|task_name| bc.build(task_name))
             .collect::<CmdResult<Vec<Task>>>()?;

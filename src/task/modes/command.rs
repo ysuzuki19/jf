@@ -1,44 +1,38 @@
 use std::{ops::DerefMut, sync::Arc};
 
+use serde::Deserialize;
 use tokio::sync::Mutex;
 
-use crate::{
-    error::{CmdError, CmdResult},
-    task::Task,
-};
+use crate::{error::CmdResult, task::Task};
 
 use super::super::runner::Runner;
 
-#[derive(Clone)]
-pub struct CommandConfig {
+#[derive(Debug, Clone, Deserialize)]
+pub struct Params {
     command: String,
     args: Vec<String>,
 }
 
-impl Command {
-    pub fn new(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
-        let command = runner_config
-            .command
-            .ok_or_else(|| CmdError::TaskdefMissingField("command".into(), "command".into()))?;
-        let args = runner_config.args.unwrap_or_default();
-        Ok(Self {
-            config: CommandConfig { command, args },
-            child: Arc::new(Mutex::new(None)),
-        })
-    }
-}
-
 #[derive(Clone)]
 pub struct Command {
-    config: CommandConfig,
+    params: Params,
     child: Arc<Mutex<Option<tokio::process::Child>>>,
+}
+
+impl Command {
+    pub fn new(params: Params) -> Self {
+        Self {
+            params,
+            child: Arc::new(Mutex::new(None)),
+        }
+    }
 }
 
 #[async_trait::async_trait]
 impl Runner for Command {
     async fn run(&self) -> CmdResult<()> {
-        let mut cmd = tokio::process::Command::new(self.config.command.clone());
-        cmd.args(self.config.args.clone());
+        let mut cmd = tokio::process::Command::new(self.params.command.clone());
+        cmd.args(self.params.args.clone());
         self.child.lock().await.replace(cmd.spawn()?);
         Ok(())
     }
@@ -60,7 +54,7 @@ impl Runner for Command {
 
     fn bunshin(&self) -> Self {
         Self {
-            config: self.config.clone(),
+            params: self.params.clone(),
             child: Arc::new(Mutex::new(None)),
         }
     }

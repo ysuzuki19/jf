@@ -1,11 +1,8 @@
-mod modes;
+pub mod modes;
 pub mod runner;
 mod types;
 
-use crate::{
-    common::BuildContext,
-    error::{CmdError, CmdResult},
-};
+use crate::{common::BuildContext, config::TaskConfig, error::CmdResult};
 
 use self::runner::Runner;
 
@@ -19,16 +16,14 @@ pub enum Task {
 }
 
 impl Task {
-    pub fn new(runner_config: crate::config::RunnerConfig, bc: BuildContext) -> CmdResult<Self> {
-        let mode = runner_config.mode.clone().unwrap_or("command".to_string());
-        match mode.as_str() {
-            "command" => Ok(modes::Command::new(runner_config)?.into()),
-            "shell" => Ok(modes::Shell::new(runner_config)?.into()),
-            "sequential" => Ok(modes::Sequential::new(runner_config, bc)?.into()),
-            "parallel" => Ok(modes::Parallel::new(runner_config, bc)?.into()),
-            "watch" => Ok(modes::Watch::new(runner_config, bc)?.into()),
-            _ => Err(CmdError::Custom(format!("Unknown mode: {}", mode))),
-        }
+    pub fn new(config: TaskConfig, bc: BuildContext) -> CmdResult<Self> {
+        Ok(match config {
+            TaskConfig::Command(c) => modes::Command::new(c.params).into(),
+            TaskConfig::Shell(c) => modes::Shell::new(c.params).into(),
+            TaskConfig::Sequential(c) => modes::Sequential::new(c.params, bc)?.into(),
+            TaskConfig::Parallel(c) => modes::Parallel::new(c.params, bc)?.into(),
+            TaskConfig::Watch(c) => modes::Watch::new(c.params, bc)?.into(),
+        })
     }
 }
 

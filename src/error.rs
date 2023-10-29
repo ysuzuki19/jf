@@ -31,9 +31,6 @@ pub enum CmdError {
     #[error("Taskdef(name={0}) not found")]
     TaskdefNotFound(String),
 
-    #[error("Taskdef(mode={0}) require the field: \"{1}\"")]
-    TaskdefMissingField(String, String),
-
     #[error("{0}")]
     Custom(String),
 }

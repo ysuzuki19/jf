@@ -3,30 +3,28 @@ use std::sync::Arc;
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use tokio::sync::Mutex;
 
-use crate::{
-    common::BuildContext,
-    error::{CmdError, CmdResult},
-    task::Task,
-};
+use crate::{common::BuildContext, error::CmdResult, task::Task};
 
 use super::super::runner::Runner;
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct Params {
+    pub task: String,
+    pub watch_list: Vec<String>,
+}
 
 #[derive(Clone)]
 pub struct Watch {
     task: Box<Task>,
-    running_task: Arc<Mutex<Option<Task>>>,
     watch_list: Vec<String>,
+    running_task: Arc<Mutex<Option<Task>>>,
 }
 
 impl Watch {
-    pub fn new(runner_config: crate::config::RunnerConfig, bc: BuildContext) -> CmdResult<Self> {
-        let task_name = runner_config
-            .task
-            .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "task".into()))?;
+    pub fn new(params: Params, bc: BuildContext) -> CmdResult<Self> {
+        let task_name = params.task;
         let task = bc.build(task_name)?;
-        let watch_list = runner_config
-            .watch_list
-            .ok_or_else(|| CmdError::TaskdefMissingField("watch".into(), "watch_list".into()))?;
+        let watch_list = params.watch_list;
         Ok(Self {
             task: Box::new(task),
             running_task: Arc::new(Mutex::new(None)),

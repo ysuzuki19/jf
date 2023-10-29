@@ -3,10 +3,12 @@ use std::{ops::DerefMut, sync::Arc};
 use tokio::sync::Mutex;
 
 use super::super::runner::Runner;
-use crate::{
-    error::{CmdError, CmdResult},
-    task::Task,
-};
+use crate::{error::CmdResult, task::Task};
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct Params {
+    script: String,
+}
 
 #[derive(Clone)]
 pub struct Shell {
@@ -15,14 +17,12 @@ pub struct Shell {
 }
 
 impl Shell {
-    pub fn new(runner_config: crate::config::RunnerConfig) -> CmdResult<Self> {
-        let script = runner_config
-            .script
-            .ok_or_else(|| CmdError::TaskdefMissingField("shell".into(), "script".into()))?;
-        Ok(Self {
+    pub fn new(params: Params) -> Self {
+        let script = params.script;
+        Self {
             script,
             child: Arc::new(Mutex::new(None)),
-        })
+        }
     }
 }
 
