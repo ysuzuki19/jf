@@ -1,10 +1,13 @@
 use crate::error::CmdResult;
 
 #[async_trait::async_trait]
-pub trait Runner {
-    async fn run(&self) -> CmdResult<()>;
+pub trait Runner
+where
+    Self: Sized + Clone,
+{
+    async fn run(&self) -> CmdResult<Self>;
     async fn is_finished(&self) -> CmdResult<bool>;
-    async fn wait(&self) -> CmdResult<()> {
+    async fn wait(&self) -> CmdResult<Self> {
         loop {
             if self.is_finished().await? {
                 break;
@@ -12,7 +15,7 @@ pub trait Runner {
 
             tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         }
-        Ok(())
+        Ok(self.clone())
     }
     async fn kill(self) -> CmdResult<()>;
     fn bunshin(&self) -> Self;

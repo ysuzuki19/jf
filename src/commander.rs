@@ -2,7 +2,7 @@ use crate::{
     common,
     config::CmdConfig,
     error::CmdResult,
-    task::runner::Runner,
+    task::Runner,
     taskdef::{Taskdef, TaskdefPool},
 };
 
@@ -23,9 +23,12 @@ impl Commander {
     }
 
     pub async fn run(&self, task_name: String) -> CmdResult<()> {
-        let task = self.pool.build(task_name, common::Agent::Cli)?;
-        task.run().await?;
-        task.wait().await?;
+        self.pool
+            .build(task_name, common::Agent::Cli)?
+            .run()
+            .await?
+            .wait()
+            .await?;
         Ok(())
     }
 

@@ -35,7 +35,7 @@ impl Watch {
 
 #[async_trait::async_trait]
 impl Runner for Watch {
-    async fn run(&self) -> CmdResult<()> {
+    async fn run(&self) -> CmdResult<Self> {
         let (tx, rx) = std::sync::mpsc::channel();
         let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
 
@@ -46,8 +46,7 @@ impl Runner for Watch {
         }
 
         loop {
-            let task = self.task.bunshin();
-            task.run().await?;
+            let task = self.task.bunshin().run().await?;
             self.running_task.lock().await.replace(task);
 
             loop {

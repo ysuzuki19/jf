@@ -30,11 +30,11 @@ impl Command {
 
 #[async_trait::async_trait]
 impl Runner for Command {
-    async fn run(&self) -> CmdResult<()> {
+    async fn run(&self) -> CmdResult<Self> {
         let mut cmd = tokio::process::Command::new(self.params.command.clone());
         cmd.args(self.params.args.clone());
         self.child.lock().await.replace(cmd.spawn()?);
-        Ok(())
+        Ok(self.clone())
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {

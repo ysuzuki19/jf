@@ -46,7 +46,7 @@ impl Sequential {
 
 #[async_trait::async_trait]
 impl Runner for Sequential {
-    async fn run(&self) -> CmdResult<()> {
+    async fn run(&self) -> CmdResult<Self> {
         let handle: JoinHandle<CmdResult<()>> = tokio::spawn({
             let tasks = self.tasks.clone();
             let running_task = self.running_task.clone();
@@ -66,7 +66,7 @@ impl Runner for Sequential {
             }
         });
         self.handle.lock().await.replace(handle);
-        Ok(())
+        Ok(self.clone())
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {

@@ -36,7 +36,7 @@ impl Parallel {
 
 #[async_trait::async_trait]
 impl Runner for Parallel {
-    async fn run(&self) -> CmdResult<()> {
+    async fn run(&self) -> CmdResult<Self> {
         let mut handles = Vec::new();
         for task in self.tasks.clone() {
             let handle: JoinHandle<CmdResult<()>> = tokio::spawn({
@@ -50,7 +50,7 @@ impl Runner for Parallel {
         }
         self.handles.lock().await.replace(handles);
 
-        Ok(())
+        Ok(self.clone())
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {

@@ -1,10 +1,10 @@
 pub mod modes;
-pub mod runner;
+mod runner;
 mod types;
 
 use crate::{common::BuildContext, config::TaskConfig, error::CmdResult};
 
-use self::runner::Runner;
+pub use self::runner::Runner;
 
 #[derive(Clone)]
 pub enum Task {
@@ -29,15 +29,14 @@ impl Task {
 
 #[async_trait::async_trait]
 impl Runner for Task {
-    async fn run(&self) -> CmdResult<()> {
-        match self.clone() {
-            Self::Command(command) => command.run().await?,
-            Self::Shell(shell) => shell.run().await?,
-            Self::Sequential(sequential) => sequential.run().await?,
-            Self::Parallel(parallel) => parallel.run().await?,
-            Self::Watch(watch) => watch.run().await?,
-        }
-        Ok(())
+    async fn run(&self) -> CmdResult<Self> {
+        Ok(match self.clone() {
+            Self::Command(command) => command.run().await?.into(),
+            Self::Shell(shell) => shell.run().await?.into(),
+            Self::Sequential(sequential) => sequential.run().await?.into(),
+            Self::Parallel(parallel) => parallel.run().await?.into(),
+            Self::Watch(watch) => watch.run().await?.into(),
+        })
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {

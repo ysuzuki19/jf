@@ -12,15 +12,14 @@ pub struct Params {
 
 #[derive(Clone)]
 pub struct Shell {
-    script: String,
+    params: Params,
     child: Arc<Mutex<Option<tokio::process::Child>>>,
 }
 
 impl Shell {
     pub fn new(params: Params) -> Self {
-        let script = params.script;
         Self {
-            script,
+            params,
             child: Arc::new(Mutex::new(None)),
         }
     }
@@ -28,12 +27,13 @@ impl Shell {
 
 #[async_trait::async_trait]
 impl Runner for Shell {
-    async fn run(&self) -> CmdResult<()> {
-        let mut cmd = tokio::process::Command::new("sh");
-        cmd.arg("-c").arg(self.script.clone());
-        let child = cmd.spawn()?;
+    async fn run(&self) -> CmdResult<Self> {
+        let child = tokio::process::Command::new("sh")
+            .arg("-c")
+            .arg(self.params.script.clone())
+            .spawn()?;
         self.child.lock().await.replace(child);
-        Ok(())
+        Ok(self.clone())
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {
@@ -53,7 +53,7 @@ impl Runner for Shell {
 
     fn bunshin(&self) -> Self {
         Self {
-            script: self.script.clone(),
+            params: self.params.clone(),
             child: Arc::new(Mutex::new(None)),
         }
     }
