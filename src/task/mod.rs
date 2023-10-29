@@ -1,4 +1,4 @@
-mod mode;
+mod modes;
 pub mod runner;
 mod types;
 
@@ -11,22 +11,22 @@ use self::runner::Runner;
 
 #[derive(Clone)]
 pub enum Task {
-    Command(mode::Command),
-    Shell(mode::Shell),
-    Sequential(mode::Sequential),
-    Parallel(mode::Parallel),
-    Watch(mode::Watch),
+    Command(modes::Command),
+    Shell(modes::Shell),
+    Sequential(modes::Sequential),
+    Parallel(modes::Parallel),
+    Watch(modes::Watch),
 }
 
 impl Task {
     pub fn new(runner_config: crate::config::RunnerConfig, bc: BuildContext) -> CmdResult<Self> {
         let mode = runner_config.mode.clone().unwrap_or("command".to_string());
         match mode.as_str() {
-            "command" => Ok(mode::Command::new(runner_config)?.into()),
-            "shell" => Ok(mode::Shell::new(runner_config)?.into()),
-            "sequential" => Ok(mode::Sequential::new(runner_config, bc)?.into()),
-            "parallel" => Ok(mode::Parallel::new(runner_config, bc)?.into()),
-            "watch" => Ok(mode::Watch::new(runner_config, bc)?.into()),
+            "command" => Ok(modes::Command::new(runner_config)?.into()),
+            "shell" => Ok(modes::Shell::new(runner_config)?.into()),
+            "sequential" => Ok(modes::Sequential::new(runner_config, bc)?.into()),
+            "parallel" => Ok(modes::Parallel::new(runner_config, bc)?.into()),
+            "watch" => Ok(modes::Watch::new(runner_config, bc)?.into()),
             _ => Err(CmdError::Custom(format!("Unknown mode: {}", mode))),
         }
     }
