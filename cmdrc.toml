@@ -14,7 +14,7 @@ args = ["bye"]
 mode = "shell"
 script = """
     for i in $(seq 1 10); do
-        echo 1
+        echo 1 $i
         sleep 1
     done
 """
@@ -23,7 +23,7 @@ script = """
 mode = "shell"
 script = """
     for i in $(seq 1 10); do
-        echo 2
+        echo 2 $i
         sleep 1
     done
 """
@@ -32,7 +32,7 @@ script = """
 mode = "shell"
 script = """
     for i in $(seq 1 10); do
-        echo 3
+        echo 3 $i
         sleep 1
     done
 """
