@@ -1,13 +1,12 @@
 use std::{ops::DerefMut, sync::Arc};
 
-use serde::Deserialize;
 use tokio::sync::Mutex;
 
 use crate::{error::CmdResult, task::Task};
 
 use super::super::runner::Runner;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Params {
     command: String,
     args: Vec<String>,

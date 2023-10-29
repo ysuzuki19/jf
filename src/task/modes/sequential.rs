@@ -6,7 +6,7 @@ use std::{
     },
 };
 
-use tokio::{sync::Mutex, task::JoinHandle};
+use tokio::sync::Mutex;
 
 use super::super::runner::Runner;
 use crate::{
@@ -47,7 +47,7 @@ impl Sequential {
 #[async_trait::async_trait]
 impl Runner for Sequential {
     async fn run(&self) -> CmdResult<Self> {
-        let handle: JoinHandle<CmdResult<()>> = tokio::spawn({
+        let handle: CmdHandle = tokio::spawn({
             let tasks = self.tasks.clone();
             let running_task = self.running_task.clone();
             let stop_signal = self.stop_signal.clone();

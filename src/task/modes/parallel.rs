@@ -1,7 +1,6 @@
 use std::{ops::DerefMut, sync::Arc};
 
-use serde::Deserialize;
-use tokio::{sync::Mutex, task::JoinHandle};
+use tokio::sync::Mutex;
 
 use crate::{
     common::BuildContext,
@@ -9,7 +8,7 @@ use crate::{
     task::{runner::Runner, types::CmdHandle, Task},
 };
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Params {
     pub tasks: Vec<String>,
 }
@@ -39,7 +38,7 @@ impl Runner for Parallel {
     async fn run(&self) -> CmdResult<Self> {
         let mut handles = Vec::new();
         for task in self.tasks.clone() {
-            let handle: JoinHandle<CmdResult<()>> = tokio::spawn({
+            let handle: CmdHandle = tokio::spawn({
                 async move {
                     task.run().await?;
                     task.wait().await?;

@@ -3,9 +3,8 @@ use std::sync::Arc;
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use tokio::sync::Mutex;
 
-use crate::{common::BuildContext, error::CmdResult, task::Task};
-
 use super::super::runner::Runner;
+use crate::{common::BuildContext, error::CmdResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Params {
