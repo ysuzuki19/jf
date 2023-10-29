@@ -1,11 +1,11 @@
-use error::CmdResult;
-
 mod commander;
 mod common;
 mod config;
 mod error;
 mod task;
 mod taskdef;
+
+use error::CmdResult;
 
 async fn cli() -> CmdResult<()> {
     let config_file = "cmdrc.toml";

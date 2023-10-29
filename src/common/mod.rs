@@ -1,5 +1,3 @@
-#[derive(Clone)]
-pub enum Agent {
-    Cli,
-    Task,
-}
+mod agent;
+
+pub use agent::Agent;

@@ -1,6 +1,6 @@
 use crate::common;
 
-use super::taskdefs::TaskPool;
+use super::task_pool::TaskPool;
 
 #[derive(Clone)]
 pub struct Context {

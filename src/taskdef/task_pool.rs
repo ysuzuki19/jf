@@ -1,12 +1,11 @@
 use std::{collections::HashMap, sync::Arc};
 
+use super::Taskdef;
 use crate::{
     common,
     error::{CmdError, CmdResult},
     task::Task,
 };
-
-use super::Taskdef;
 
 #[derive(Clone)]
 pub struct TaskPool {

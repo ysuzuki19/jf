@@ -3,7 +3,7 @@ use crate::{
     config::CmdConfig,
     error::CmdResult,
     task::runner::Runner,
-    taskdef::{taskdefs::TaskPool, Taskdef},
+    taskdef::{task_pool::TaskPool, Taskdef},
 };
 
 pub struct Commander {
