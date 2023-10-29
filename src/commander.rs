@@ -1,10 +1,4 @@
-use crate::{
-    common,
-    config::CmdConfig,
-    error::CmdResult,
-    task::Runner,
-    taskdef::{Taskdef, TaskdefPool},
-};
+use crate::{common, config::CmdConfig, error::CmdResult, task::Runner, taskdef::TaskdefPool};
 
 pub struct Commander {
     pool: TaskdefPool,
@@ -15,8 +9,8 @@ impl Commander {
         let task_vec = config
             .tasks
             .into_iter()
-            .map(Taskdef::try_from)
-            .collect::<CmdResult<Vec<_>>>()?;
+            .map(TryFrom::try_from)
+            .collect::<CmdResult<_>>()?;
         Ok(Self {
             pool: TaskdefPool::new(task_vec),
         })

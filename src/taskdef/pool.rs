@@ -13,10 +13,10 @@ pub struct TaskdefPool {
 }
 
 impl TaskdefPool {
-    pub fn new(task_vec: Vec<Taskdef>) -> Self {
+    pub fn new(taskdef_vec: Vec<Taskdef>) -> Self {
         let mut map = HashMap::new();
-        for task in task_vec {
-            map.insert(task.name.clone(), task);
+        for taskdef in taskdef_vec {
+            map.insert(taskdef.name(), taskdef);
         }
         Self { map: Arc::new(map) }
     }

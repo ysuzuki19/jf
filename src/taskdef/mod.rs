@@ -3,18 +3,20 @@ mod pool;
 pub use self::pool::TaskdefPool;
 use crate::{
     common::{Agent, BuildContext},
+    config::TaskConfig,
     error::{CmdError, CmdResult},
+    task::Task,
 };
 
 pub struct Taskdef {
-    pub(super) name: String,
+    name: String,
     private: bool,
     description: String,
-    task_config: crate::config::TaskConfig,
+    task_config: TaskConfig,
 }
 
 impl Taskdef {
-    pub fn new(name: String, task_config: crate::config::TaskConfig) -> CmdResult<Self> {
+    pub fn new(name: String, task_config: TaskConfig) -> CmdResult<Self> {
         Ok(Self {
             name,
             private: task_config.private(),
@@ -36,9 +38,13 @@ impl Taskdef {
         }
     }
 
-    fn build(&self, bc: BuildContext, agent: Agent) -> CmdResult<crate::task::Task> {
+    fn build(&self, bc: BuildContext, agent: Agent) -> CmdResult<Task> {
         self.visibility_guard(agent)?;
-        crate::task::Task::new(self.task_config.clone(), bc)
+        Task::new(self.task_config.clone(), bc)
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
     }
 
     pub fn description(&self) -> String {
@@ -46,10 +52,10 @@ impl Taskdef {
     }
 }
 
-impl TryFrom<(String, crate::config::TaskConfig)> for Taskdef {
+impl TryFrom<(String, TaskConfig)> for Taskdef {
     type Error = CmdError;
 
-    fn try_from(value: (String, crate::config::TaskConfig)) -> Result<Self, Self::Error> {
+    fn try_from(value: (String, TaskConfig)) -> Result<Self, Self::Error> {
         Self::new(value.0, value.1)
     }
 }
