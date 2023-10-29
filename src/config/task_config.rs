@@ -92,31 +92,32 @@ impl<'de> Deserialize<'de> for TaskConfig {
     where
         D: serde::Deserializer<'de>,
     {
+        // temp value to deserialize into TaskConfig by `mode`
         let value = serde_json::Value::deserialize(deserializer)?;
 
-        if let Some(mode) = value.get("mode").and_then(|m| m.as_str()) {
-            match mode {
-                "command" => Ok(TaskConfig::Command(
-                    Command::deserialize(value).expect("Failed to deserialize Command"),
-                )),
-                "shell" => Ok(TaskConfig::Shell(
-                    Shell::deserialize(value).expect("Failed to deserialize Shell"),
-                )),
-                "parallel" => Ok(TaskConfig::Parallel(
-                    Parallel::deserialize(value).expect("Failed to deserialize Parallel"),
-                )),
-                "sequential" => Ok(TaskConfig::Sequential(
-                    Sequential::deserialize(value).expect("Failed to deserialize Sequential"),
-                )),
-                "watch" => Ok(TaskConfig::Watch(
-                    Watch::deserialize(value).expect("Failed to deserialize Watch"),
-                )),
-                _ => Err(serde::de::Error::custom("Unknown mode")),
-            }
-        } else {
-            Ok(TaskConfig::Command(
-                Command::deserialize(value).expect("Failed to deserialize Command"),
-            ))
+        // match `mode` value if it exists
+        // otherwise default to `command`
+        match value
+            .get("mode")
+            .and_then(|m| m.as_str())
+            .unwrap_or("command")
+        {
+            "command" => Ok(TaskConfig::Command(
+                Command::deserialize(value).map_err(serde::de::Error::custom)?,
+            )),
+            "shell" => Ok(TaskConfig::Shell(
+                Shell::deserialize(value).map_err(serde::de::Error::custom)?,
+            )),
+            "parallel" => Ok(TaskConfig::Parallel(
+                Parallel::deserialize(value).map_err(serde::de::Error::custom)?,
+            )),
+            "sequential" => Ok(TaskConfig::Sequential(
+                Sequential::deserialize(value).map_err(serde::de::Error::custom)?,
+            )),
+            "watch" => Ok(TaskConfig::Watch(
+                Watch::deserialize(value).map_err(serde::de::Error::custom)?,
+            )),
+            m => Err(serde::de::Error::custom(format!("Unknown mode: {m}"))),
         }
     }
 }
