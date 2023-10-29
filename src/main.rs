@@ -21,10 +21,11 @@ async fn cli() -> CmdResult<()> {
     // commander.run("greet-watch").await?;
     // commander.run("incrementing".into()).await?;
     // commander.run("incrementing-watch".into()).await?;
+    commander.run("sequential-echos-watch".into()).await?;
     // commander.run("incrementing-sequential".into()).await?;
-    commander
-        .run("incrementing-sequential-watch".into())
-        .await?;
+    // commander
+    //     .run("incrementing-sequential-watch".into())
+    //     .await?;
 
     Ok(())
 }

@@ -10,6 +10,33 @@ args = ["hello"]
 command = "echo"
 args = ["bye"]
 
+[task.loop_1]
+mode = "shell"
+script = """
+    for i in $(seq 1 10); do
+        echo 1
+        sleep 1
+    done
+"""
+
+[task.loop_2]
+mode = "shell"
+script = """
+    for i in $(seq 1 10); do
+        echo 2
+        sleep 1
+    done
+"""
+
+[task.loop_3]
+mode = "shell"
+script = """
+    for i in $(seq 1 10); do
+        echo 3
+        sleep 1
+    done
+"""
+
 [task.incrementing]
 mode = "shell"
 script = """
@@ -22,6 +49,15 @@ script = """
 [task.incrementing-sequential]
 mode = "sequential"
 tasks = ["incrementing", "incrementing", "incrementing"]
+
+[task.sequential-echos]
+mode = "sequential"
+tasks = ["loop_1", "loop_2", "loop_3"]
+
+[task.sequential-echos-watch]
+mode = "watch"
+task = "sequential-echos"
+watch_list = ["src/**/*.rs"]
 
 [task.incrementing-sequential-watch]
 mode = "watch"
