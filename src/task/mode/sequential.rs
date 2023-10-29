@@ -21,7 +21,6 @@ type CmdHandle = JoinHandle<CmdResult<()>>;
 pub struct Sequential {
     tasks: Vec<Task>,
     running_task: Arc<Mutex<Option<Task>>>,
-    is_running: Arc<AtomicBool>,
     stop_signal: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<CmdHandle>>>,
 }
@@ -29,35 +28,25 @@ pub struct Sequential {
 #[async_trait::async_trait]
 impl Runner for Sequential {
     async fn run(&self) -> CmdResult<()> {
-        self.stop_signal.store(false, Ordering::Relaxed);
+        let handle: JoinHandle<CmdResult<()>> = tokio::spawn({
+            let tasks = self.tasks.clone();
+            let running_task = self.running_task.clone();
+            let stop_signal = self.stop_signal.clone();
 
-        if self
-            .is_running
-            .compare_exchange(false, true, Ordering::Relaxed, Ordering::Relaxed)
-            .is_ok()
-        {
-            let handle: JoinHandle<CmdResult<()>> = tokio::spawn({
-                let tasks = self.tasks.clone();
-                let running_task = self.running_task.clone();
-                let stop_signal = self.stop_signal.clone();
-
-                async move {
-                    println!("Start to run sequential tasks");
-                    for task in tasks {
-                        if stop_signal.load(Ordering::Relaxed) {
-                            println!("Stop signal received");
-                            break;
-                        }
-                        println!("Run next sequential task");
-                        task.run().await?;
-                        running_task.lock().await.replace(task.clone());
-                        task.wait().await?;
+            async move {
+                for task in tasks {
+                    if stop_signal.load(Ordering::Relaxed) {
+                        break;
                     }
-                    Ok(())
+                    task.run().await?;
+                    running_task.lock().await.replace(task.clone());
+                    task.wait().await?;
                 }
-            });
-            self.handle.lock().await.replace(handle);
-        }
+                running_task.lock().await.take();
+                Ok(())
+            }
+        });
+        self.handle.lock().await.replace(handle);
         Ok(())
     }
 
@@ -69,18 +58,25 @@ impl Runner for Sequential {
         }
     }
 
-    async fn kill(&self) -> CmdResult<()> {
+    async fn kill(self) -> CmdResult<()> {
         self.stop_signal.store(true, Ordering::Relaxed);
-        if self
-            .is_running
-            .compare_exchange(true, false, Ordering::Relaxed, Ordering::Relaxed)
-            .is_ok()
-        {
-            if let Some(running_task) = self.running_task.lock().await.deref_mut() {
-                let _ = running_task.kill().await;
-            }
+
+        if let Some(running_task) = self.running_task.lock().await.take() {
+            running_task.kill().await?;
+        }
+        if let Some(handle) = self.handle.lock().await.deref_mut() {
+            handle.abort();
         }
         Ok(())
+    }
+
+    fn bunshin(&self) -> Self {
+        Self {
+            tasks: self.tasks.iter().map(|task| task.bunshin()).collect(),
+            running_task: Arc::new(Mutex::new(None)),
+            stop_signal: Arc::new(AtomicBool::new(false)),
+            handle: Arc::new(Mutex::new(None)),
+        }
     }
 }
 
@@ -98,7 +94,6 @@ impl Sequential {
         Ok(Self {
             tasks,
             running_task: Arc::new(Mutex::new(None)),
-            is_running: Arc::new(AtomicBool::new(false)),
             stop_signal: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         })

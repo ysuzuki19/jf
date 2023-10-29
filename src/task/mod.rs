@@ -60,7 +60,7 @@ impl Runner for Task {
         }
     }
 
-    async fn kill(&self) -> CmdResult<()> {
+    async fn kill(self) -> CmdResult<()> {
         match self.clone() {
             Self::Command(command) => command.kill().await?,
             Self::Shell(shell) => shell.kill().await?,
@@ -69,5 +69,15 @@ impl Runner for Task {
             Self::Watch(watch) => watch.kill().await?,
         }
         Ok(())
+    }
+
+    fn bunshin(&self) -> Self {
+        match self.clone() {
+            Self::Command(command) => command.bunshin().into(),
+            Self::Shell(shell) => shell.bunshin().into(),
+            Self::Sequential(sequential) => sequential.bunshin().into(),
+            Self::Parallel(parallel) => parallel.bunshin().into(),
+            Self::Watch(watch) => watch.bunshin().into(),
+        }
     }
 }

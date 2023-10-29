@@ -12,10 +12,9 @@ use super::super::runner::Runner;
 
 #[derive(Clone)]
 pub struct Watch {
-    // pub task: Arc<Mutex<Task>>,
-    pub task: Box<Task>,
-    pub running_task: Arc<Mutex<Option<Box<Task>>>>,
-    pub watch_list: Vec<String>,
+    task: Box<Task>,
+    running_task: Arc<Mutex<Option<Task>>>,
+    watch_list: Vec<String>,
 }
 
 #[async_trait::async_trait]
@@ -31,10 +30,9 @@ impl Runner for Watch {
         }
 
         loop {
-            let task = self.task.clone();
+            let task = self.task.bunshin();
             task.run().await?;
             self.running_task.lock().await.replace(task);
-            // self.running_task.lock().await.run().await?;
 
             loop {
                 match rx.recv()??.kind {
@@ -52,10 +50,7 @@ impl Runner for Watch {
             }
 
             if let Some(running_task) = self.running_task.lock().await.take() {
-                println!("running_task is Some");
                 running_task.kill().await?;
-            } else {
-                println!("running_task is None");
             }
         }
     }
@@ -64,12 +59,19 @@ impl Runner for Watch {
         Ok(false)
     }
 
-    async fn kill(&self) -> CmdResult<()> {
+    async fn kill(self) -> CmdResult<()> {
         if let Some(running_task) = self.running_task.lock().await.take() {
             running_task.kill().await?;
         }
         Ok(())
-        // self.running_task.lock().await.kill().await
+    }
+
+    fn bunshin(&self) -> Self {
+        Self {
+            task: Box::new(self.task.bunshin()),
+            running_task: Arc::new(Mutex::new(None)),
+            watch_list: self.watch_list.clone(),
+        }
     }
 }
 

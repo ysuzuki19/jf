@@ -11,7 +11,7 @@ use super::super::runner::Runner;
 
 #[derive(Clone)]
 pub struct Shell {
-    pub script: String,
+    script: String,
     child: Arc<Mutex<Option<tokio::process::Child>>>,
 }
 
@@ -33,11 +33,18 @@ impl Runner for Shell {
         }
     }
 
-    async fn kill(&self) -> CmdResult<()> {
+    async fn kill(self) -> CmdResult<()> {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
             child.kill().await?;
         }
         Ok(())
+    }
+
+    fn bunshin(&self) -> Self {
+        Self {
+            script: self.script.clone(),
+            child: Arc::new(Mutex::new(None)),
+        }
     }
 }
 

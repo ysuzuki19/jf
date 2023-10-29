@@ -4,17 +4,15 @@ use tokio::{sync::Mutex, task::JoinHandle};
 
 use crate::{
     error::{CmdError, CmdResult},
-    task::Task,
+    task::{runner::Runner, Task},
 };
-
-use super::super::runner::Runner;
 
 type CmdHandle = JoinHandle<CmdResult<()>>;
 
 #[derive(Clone)]
 pub struct Parallel {
-    pub tasks: Vec<Task>,
-    pub handles: Arc<Mutex<Option<Vec<CmdHandle>>>>,
+    tasks: Vec<Task>,
+    handles: Arc<Mutex<Option<Vec<CmdHandle>>>>,
 }
 
 #[async_trait::async_trait]
@@ -50,13 +48,20 @@ impl Runner for Parallel {
         }
     }
 
-    async fn kill(&self) -> CmdResult<()> {
+    async fn kill(self) -> CmdResult<()> {
         if let Some(handles) = self.handles.lock().await.deref_mut() {
             for handle in handles {
                 handle.abort();
             }
         }
         Ok(())
+    }
+
+    fn bunshin(&self) -> Self {
+        Self {
+            tasks: self.tasks.iter().map(|task| task.bunshin()).collect(),
+            handles: Arc::new(Mutex::new(None)),
+        }
     }
 }
 

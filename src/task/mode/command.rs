@@ -11,8 +11,8 @@ use super::super::runner::Runner;
 
 #[derive(Clone)]
 pub struct CommandConfig {
-    pub command: String,
-    pub args: Vec<String>,
+    command: String,
+    args: Vec<String>,
 }
 
 #[derive(Clone)]
@@ -24,15 +24,9 @@ pub struct Command {
 #[async_trait::async_trait]
 impl Runner for Command {
     async fn run(&self) -> CmdResult<()> {
-        println!(
-            "Run Command\"{}\" with Args({:?})",
-            self.config.command.clone(),
-            self.config.args.clone()
-        );
         let mut cmd = tokio::process::Command::new(self.config.command.clone());
         cmd.args(self.config.args.clone());
-        let child = cmd.spawn()?;
-        self.child.lock().await.replace(child);
+        self.child.lock().await.replace(cmd.spawn()?);
         Ok(())
     }
 
@@ -44,11 +38,18 @@ impl Runner for Command {
         }
     }
 
-    async fn kill(&self) -> CmdResult<()> {
+    async fn kill(self) -> CmdResult<()> {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
             child.kill().await?;
         }
         Ok(())
+    }
+
+    fn bunshin(&self) -> Self {
+        Self {
+            config: self.config.clone(),
+            child: Arc::new(Mutex::new(None)),
+        }
     }
 }
 
