@@ -6,12 +6,6 @@ use crate::error::{CmdError, CmdResult};
 use self::runner::Runner;
 
 #[derive(Clone)]
-pub enum Agent {
-    Cli,
-    Task,
-}
-
-#[derive(Clone)]
 pub enum Task {
     Command(mode::Command),
     Shell(mode::Shell),

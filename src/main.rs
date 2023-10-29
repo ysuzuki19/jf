@@ -1,6 +1,7 @@
 use error::CmdResult;
 
 mod commander;
+mod common;
 mod config;
 mod error;
 mod task;

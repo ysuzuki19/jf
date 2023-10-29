@@ -1,12 +1,13 @@
 use crate::{
+    common,
     config::CmdConfig,
     error::CmdResult,
     task::runner::Runner,
-    taskdef::{taskdefs::Taskdefs, Taskdef},
+    taskdef::{taskdefs::TaskPool, Taskdef},
 };
 
 pub struct Commander {
-    task_defs: Taskdefs,
+    pool: TaskPool,
 }
 
 impl Commander {
@@ -17,18 +18,18 @@ impl Commander {
             .map(|(name, task_config)| Taskdef::new(name, task_config))
             .collect::<CmdResult<Vec<_>>>()?;
         Ok(Self {
-            task_defs: Taskdefs::new(task_vec)?,
+            pool: TaskPool::new(task_vec)?,
         })
     }
 
     pub async fn run(&self, task_name: String) -> CmdResult<()> {
-        let task = self.task_defs.build(task_name, crate::task::Agent::Cli)?;
+        let task = self.pool.build(task_name, common::Agent::Cli)?;
         task.run().await?;
         task.wait().await?;
         Ok(())
     }
 
     pub fn description(&self, task_name: String) -> CmdResult<String> {
-        self.task_defs.description(task_name)
+        self.pool.description(task_name)
     }
 }
