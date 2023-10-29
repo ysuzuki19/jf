@@ -45,3 +45,11 @@ impl Taskdef {
         self.description.clone()
     }
 }
+
+impl TryFrom<(String, crate::config::TaskConfig)> for Taskdef {
+    type Error = CmdError;
+
+    fn try_from(value: (String, crate::config::TaskConfig)) -> Result<Self, Self::Error> {
+        Self::new(value.0, value.1)
+    }
+}

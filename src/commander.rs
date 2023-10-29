@@ -15,7 +15,7 @@ impl Commander {
         let task_vec = config
             .tasks
             .into_iter()
-            .map(|(name, task_config)| Taskdef::new(name, task_config))
+            .map(Taskdef::try_from)
             .collect::<CmdResult<Vec<_>>>()?;
         Ok(Self {
             pool: TaskdefPool::new(task_vec),
@@ -28,8 +28,9 @@ impl Commander {
             .run()
             .await?
             .wait()
-            .await?;
-        Ok(())
+            .await?
+            .kill()
+            .await
     }
 
     pub fn description(&self, task_name: String) -> CmdResult<String> {

@@ -14,15 +14,15 @@ async fn cli() -> CmdResult<()> {
 
     let commander = commander::Commander::new(config)?;
     println!("greet: {}", commander.description("greet".into())?);
-    // commander.run("sleep".into()).await?;
-    // commander.run("echo_hello".into()).await?;
-    // commander.run("greet".into()).await?;
-    // commander.run("greet-slow".into()).await?;
+    commander.run("sleep".into()).await?;
+    commander.run("echo_hello".into()).await?;
+    commander.run("greet".into()).await?;
+    commander.run("greet-slow".into()).await?;
     // commander.run("greet-parallel".into()).await?;
     // commander.run("greet-watch").await?;
-    // commander.run("incrementing".into()).await?;
+    commander.run("incrementing".into()).await?;
     // commander.run("incrementing-watch".into()).await?;
-    commander.run("sequential-echos-watch".into()).await?;
+    // commander.run("sequential-echos-watch".into()).await?;
     // commander.run("incrementing-sequential".into()).await?;
     // commander.run("run".into()).await?;
     // commander.run("live-run".into()).await?;

@@ -45,7 +45,12 @@ impl Runner for Command {
 
     async fn kill(self) -> CmdResult<()> {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
-            child.kill().await?;
+            if let Err(e) = child.kill().await {
+                match e.kind() {
+                    std::io::ErrorKind::InvalidInput => {}
+                    _ => return Err(e.into()),
+                }
+            }
         }
         Ok(())
     }
