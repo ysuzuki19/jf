@@ -2,7 +2,13 @@ use super::taskdefs::Taskdefs;
 
 #[derive(Clone)]
 pub struct Context {
-    pub(super) task_defs: Taskdefs,
+    task_defs: Taskdefs,
+}
+
+impl Context {
+    pub fn new(task_defs: Taskdefs) -> Self {
+        Self { task_defs }
+    }
 }
 
 impl Context {

@@ -24,9 +24,7 @@ impl Taskdefs {
     }
 
     fn ctx(&self) -> super::context::Context {
-        super::context::Context {
-            task_defs: self.clone(),
-        }
+        super::Context::new(self.clone())
     }
 
     pub fn get(&self, task_name: String) -> CmdResult<&Taskdef> {
