@@ -4,16 +4,9 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct CmdConfig {
-    // #[serde(rename = "pub")]
-    // public: Public,
     #[serde(rename = "task")]
     pub tasks: HashMap<String, TaskConfig>,
 }
-
-// #[derive(Debug, Deserialize)]
-// pub struct Public {
-//     pub tasks: HashMap<String, String>,
-// }
 
 #[derive(Debug, Deserialize)]
 pub struct TaskConfig {
