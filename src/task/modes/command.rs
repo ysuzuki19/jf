@@ -2,9 +2,8 @@ use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
-use crate::{error::CmdResult, task::Task};
-
 use super::super::runner::Runner;
+use crate::{error::CmdResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Params {

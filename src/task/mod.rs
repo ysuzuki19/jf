@@ -2,9 +2,8 @@ pub mod modes;
 mod runner;
 mod types;
 
-use crate::{common::BuildContext, config::TaskConfig, error::CmdResult};
-
 pub use self::runner::Runner;
+use crate::{common::BuildContext, config::TaskConfig, error::CmdResult};
 
 #[derive(Clone)]
 pub enum Task {

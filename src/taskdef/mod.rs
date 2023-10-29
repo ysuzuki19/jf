@@ -1,10 +1,10 @@
 mod pool;
 
+pub use self::pool::TaskdefPool;
 use crate::{
     common::{Agent, BuildContext},
     error::{CmdError, CmdResult},
 };
-pub use pool::TaskdefPool;
 
 pub struct Taskdef {
     pub(super) name: String,

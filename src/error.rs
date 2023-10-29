@@ -1,8 +1,6 @@
-use thiserror::Error;
-
 pub type CmdResult<T> = Result<T, CmdError>;
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum CmdError {
     #[error("IO error occurred: {0}")]
     IoError(#[from] std::io::Error),
