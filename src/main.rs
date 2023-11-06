@@ -20,10 +20,10 @@ async fn cli() -> CmdResult<()> {
     commander.run("greet-slow".into()).await?;
     // commander.run("greet-parallel".into()).await?;
     // commander.run("greet-watch").await?;
-    commander.run("incrementing".into()).await?;
-    // commander.run("incrementing-watch".into()).await?;
+    commander.run("incl10".into()).await?;
+    // commander.run("incl10-watch".into()).await?;
     // commander.run("sequential-echos-watch".into()).await?;
-    // commander.run("incrementing-sequential".into()).await?;
+    // commander.run("incl10-sequential".into()).await?;
     // commander.run("run".into()).await?;
     // commander.run("live-run".into()).await?;
 

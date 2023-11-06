@@ -46,7 +46,7 @@ script = """
     done
 """
 
-[task.incrementing]
+[task.incl10]
 mode = "shell"
 script = """
     for i in $(seq 1 10); do
@@ -55,9 +55,9 @@ script = """
     done
 """
 
-[task.incrementing-sequential]
+[task.incl10-sequential]
 mode = "sequential"
-tasks = ["incrementing", "incrementing", "incrementing"]
+tasks = ["incl10", "incl10", "incl10"]
 
 [task.sequential-echos]
 mode = "sequential"
@@ -68,9 +68,9 @@ mode = "watch"
 task = "sequential-echos"
 watch_list = ["src/**/*.rs"]
 
-[task.incrementing-sequential-watch]
+[task.incl10-sequential-watch]
 mode = "watch"
-task = "incrementing-sequential"
+task = "incl10-sequential"
 watch_list = ["src/**/*.rs"]
 
 [task.greet]
@@ -86,7 +86,7 @@ tasks = ["echo_hello", "sleep", "echo_bye"]
 mode = "parallel"
 tasks = ["greet-slow", "greet"]
 
-[task.incrementing-watch]
+[task.incl10-watch]
 mode = "watch"
-task = "incrementing"
+task = "incl10"
 watch_list = ["src/**/*.rs"]
