@@ -86,6 +86,15 @@ tasks = ["echo_hello", "sleep", "echo_bye"]
 mode = "parallel"
 tasks = ["greet-slow", "greet"]
 
+[task.incl10-parallel]
+mode = "parallel"
+tasks = ["incl10", "incl10"]
+
+[task.incl10-parallel-watch]
+mode = "watch"
+task = "incl10-parallel"
+watch_list = ["src/**/*.rs"]
+
 [task.incl10-watch]
 mode = "watch"
 task = "incl10"
