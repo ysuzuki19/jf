@@ -1,4 +1,10 @@
-use std::{ops::DerefMut, sync::Arc};
+use std::{
+    ops::DerefMut,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+};
 
 use tokio::sync::Mutex;
 
@@ -17,6 +23,7 @@ pub struct Params {
 pub struct Parallel {
     tasks: Vec<Task>,
     handles: Arc<Mutex<Option<Vec<CmdHandle>>>>,
+    stop_signal: Arc<AtomicBool>,
 }
 
 impl Parallel {
@@ -29,6 +36,7 @@ impl Parallel {
         Ok(Self {
             tasks,
             handles: Arc::new(Mutex::new(Some(Vec::new()))),
+            stop_signal: Arc::new(AtomicBool::new(false)),
         })
     }
 }
@@ -39,9 +47,21 @@ impl Runner for Parallel {
         let mut handles = Vec::new();
         for task in self.tasks.clone() {
             let handle: CmdHandle = tokio::spawn({
+                let stop_signal = self.stop_signal.clone();
                 async move {
                     task.run().await?;
-                    task.wait().await?;
+                    loop {
+                        if stop_signal.load(Ordering::SeqCst) {
+                            task.kill().await?;
+                            break;
+                        }
+
+                        if task.is_finished().await? {
+                            break;
+                        }
+
+                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                    }
                     Ok(())
                 }
             });
@@ -54,22 +74,21 @@ impl Runner for Parallel {
 
     async fn is_finished(&self) -> CmdResult<bool> {
         if let Some(handles) = self.clone().handles.lock().await.deref_mut() {
-            let mut is_finished = true;
-            for handle in handles.iter() {
-                if !handle.is_finished() {
-                    is_finished = false;
-                }
+            if handles.iter().all(|h| h.is_finished()) {
+                Ok(true)
+            } else {
+                Ok(false)
             }
-            Ok(is_finished)
         } else {
             Ok(true)
         }
     }
 
     async fn kill(self) -> CmdResult<()> {
+        self.stop_signal.store(true, Ordering::SeqCst);
         if let Some(handles) = self.handles.lock().await.deref_mut() {
             for handle in handles {
-                handle.abort();
+                let _ = handle.await?;
             }
         }
         Ok(())
@@ -79,6 +98,7 @@ impl Runner for Parallel {
         Self {
             tasks: self.tasks.iter().map(|task| task.bunshin()).collect(),
             handles: Arc::new(Mutex::new(None)),
+            stop_signal: Arc::new(AtomicBool::new(false)),
         }
     }
 }

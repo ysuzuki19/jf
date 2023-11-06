@@ -21,13 +21,11 @@ pub struct Watch {
 
 impl Watch {
     pub fn new(params: Params, bc: BuildContext) -> CmdResult<Self> {
-        let task_name = params.task;
-        let task = bc.build(task_name)?;
-        let watch_list = params.watch_list;
+        let task = bc.build(params.task)?;
         Ok(Self {
             task: Box::new(task),
             running_task: Arc::new(Mutex::new(None)),
-            watch_list,
+            watch_list: params.watch_list,
         })
     }
 }
@@ -50,13 +48,9 @@ impl Runner for Watch {
 
             loop {
                 match rx.recv()??.kind {
-                    notify::EventKind::Modify(_) => {
-                        break;
-                    }
-                    notify::EventKind::Create(_) => {
-                        break;
-                    }
-                    notify::EventKind::Remove(_) => {
+                    notify::EventKind::Modify(_)
+                    | notify::EventKind::Create(_)
+                    | notify::EventKind::Remove(_) => {
                         break;
                     }
                     _ => {}
