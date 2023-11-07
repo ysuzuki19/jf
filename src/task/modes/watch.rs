@@ -1,7 +1,9 @@
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
-use tokio::sync::Mutex;
 
 use super::super::runner::Runner;
 use crate::{common::BuildContext, error::CmdResult, task::Task};
@@ -16,7 +18,7 @@ pub struct Params {
 pub struct Watch {
     task: Box<Task>,
     watch_list: Vec<String>,
-    running_task: Arc<Mutex<Option<Task>>>,
+    is_cancelled: Arc<AtomicBool>,
 }
 
 impl Watch {
@@ -24,8 +26,8 @@ impl Watch {
         let task = bc.build(params.task)?;
         Ok(Self {
             task: Box::new(task),
-            running_task: Arc::new(Mutex::new(None)),
             watch_list: params.watch_list,
+            is_cancelled: Arc::new(AtomicBool::new(false)),
         })
     }
 }
@@ -43,8 +45,7 @@ impl Runner for Watch {
         }
 
         loop {
-            let task = self.task.bunshin().run().await?;
-            self.running_task.lock().await.replace(task);
+            let running_task = self.task.bunshin().run().await?;
 
             loop {
                 match rx.recv()??.kind {
@@ -57,10 +58,12 @@ impl Runner for Watch {
                 }
             }
 
-            if let Some(running_task) = self.running_task.lock().await.take() {
-                running_task.cancel().await?;
+            running_task.cancel().await?;
+            if self.is_cancelled.load(Ordering::Relaxed) {
+                break;
             }
         }
+        Ok(self.clone())
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {
@@ -68,17 +71,15 @@ impl Runner for Watch {
     }
 
     async fn cancel(&self) -> CmdResult<()> {
-        if let Some(running_task) = self.running_task.lock().await.take() {
-            running_task.cancel().await?;
-        }
+        self.is_cancelled.store(true, Ordering::Relaxed);
         Ok(())
     }
 
     fn bunshin(&self) -> Self {
         Self {
             task: Box::new(self.task.bunshin()),
-            running_task: Arc::new(Mutex::new(None)),
             watch_list: self.watch_list.clone(),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
         }
     }
 }

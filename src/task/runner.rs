@@ -12,18 +12,24 @@ where
 {
     async fn run(&self) -> CmdResult<Self>;
     async fn is_finished(&self) -> CmdResult<bool>;
-    async fn wait(&self) -> CmdResult<Self> {
+    async fn cancel(&self) -> CmdResult<()>;
+    fn bunshin(&self) -> Self;
+
+    async fn sleep() {
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    }
+    async fn wait(&self) -> CmdResult<()> {
         loop {
             if self.is_finished().await? {
                 break;
             }
 
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            Self::sleep().await;
         }
-        Ok(self.clone())
+        Ok(())
     }
 
-    async fn wait_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> CmdResult<Self> {
+    async fn wait_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> CmdResult<()> {
         loop {
             if self.is_finished().await? {
                 break;
@@ -34,11 +40,8 @@ where
                 break;
             }
 
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            Self::sleep().await;
         }
-        Ok(self.clone())
+        Ok(())
     }
-
-    async fn cancel(&self) -> CmdResult<()>;
-    fn bunshin(&self) -> Self;
 }

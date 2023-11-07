@@ -13,7 +13,8 @@ async fn cli() -> CmdResult<()> {
     let config: config::CmdConfig = toml::from_str(&config_contents)?;
 
     let commander = commander::Commander::new(config)?;
-    let task_name = "incl10-parallel-watch".to_string();
+    // let task_name = "incl10-parallel-watch".to_string();
+    let task_name = "sequential-echos-watch".to_string();
     commander.description(task_name.clone())?;
     commander.run(task_name).await?;
 

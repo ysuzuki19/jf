@@ -22,8 +22,6 @@ impl Commander {
             .run()
             .await?
             .wait()
-            .await?
-            .cancel()
             .await
     }
 

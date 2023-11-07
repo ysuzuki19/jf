@@ -23,7 +23,6 @@ pub struct Params {
 #[derive(Clone)]
 pub struct Sequential {
     tasks: Vec<Task>,
-    running_task: Arc<Mutex<Option<Task>>>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<CmdHandle>>>,
 }
@@ -37,7 +36,6 @@ impl Sequential {
             .collect::<CmdResult<Vec<Task>>>()?;
         Ok(Self {
             tasks,
-            running_task: Arc::new(Mutex::new(None)),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         })
@@ -49,19 +47,17 @@ impl Runner for Sequential {
     async fn run(&self) -> CmdResult<Self> {
         let handle: CmdHandle = tokio::spawn({
             let tasks = self.tasks.clone();
-            let running_task = self.running_task.clone();
             let is_cancelled = self.is_cancelled.clone();
 
             async move {
                 for task in tasks {
                     if is_cancelled.load(Ordering::Relaxed) {
-                        break;
+                        task.cancel().await?;
+                        continue;
                     }
                     task.run().await?;
-                    running_task.lock().await.replace(task.clone());
-                    task.wait().await?;
+                    task.wait_with_cancel(is_cancelled.clone()).await?;
                 }
-                running_task.lock().await.take();
                 Ok(())
             }
         });
@@ -79,20 +75,12 @@ impl Runner for Sequential {
 
     async fn cancel(&self) -> CmdResult<()> {
         self.is_cancelled.store(true, Ordering::Relaxed);
-
-        if let Some(running_task) = self.running_task.lock().await.take() {
-            running_task.cancel().await?;
-        }
-        if let Some(handle) = self.handle.lock().await.deref_mut() {
-            handle.abort();
-        }
         Ok(())
     }
 
     fn bunshin(&self) -> Self {
         Self {
             tasks: self.tasks.iter().map(|task| task.bunshin()).collect(),
-            running_task: Arc::new(Mutex::new(None)),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         }

@@ -50,18 +50,7 @@ impl Runner for Parallel {
                 let is_cancelled = self.is_cancelled.clone();
                 async move {
                     task.run().await?;
-                    loop {
-                        if is_cancelled.load(Ordering::SeqCst) {
-                            task.cancel().await?;
-                            break;
-                        }
-
-                        if task.is_finished().await? {
-                            break;
-                        }
-
-                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-                    }
+                    task.wait_with_cancel(is_cancelled).await?;
                     Ok(())
                 }
             });
