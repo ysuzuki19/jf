@@ -23,7 +23,7 @@ impl Commander {
             .await?
             .wait()
             .await?
-            .kill()
+            .cancel()
             .await
     }
 

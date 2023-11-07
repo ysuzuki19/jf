@@ -48,13 +48,13 @@ impl Runner for Task {
         }
     }
 
-    async fn kill(self) -> CmdResult<()> {
+    async fn cancel(&self) -> CmdResult<()> {
         match self.clone() {
-            Self::Command(command) => command.kill().await?,
-            Self::Parallel(parallel) => parallel.kill().await?,
-            Self::Sequential(sequential) => sequential.kill().await?,
-            Self::Shell(shell) => shell.kill().await?,
-            Self::Watch(watch) => watch.kill().await?,
+            Self::Command(command) => command.cancel().await?,
+            Self::Parallel(parallel) => parallel.cancel().await?,
+            Self::Sequential(sequential) => sequential.cancel().await?,
+            Self::Shell(shell) => shell.cancel().await?,
+            Self::Watch(watch) => watch.cancel().await?,
         }
         Ok(())
     }

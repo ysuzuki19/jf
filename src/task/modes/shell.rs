@@ -44,7 +44,7 @@ impl Runner for Shell {
         }
     }
 
-    async fn kill(self) -> CmdResult<()> {
+    async fn cancel(&self) -> CmdResult<()> {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
             if let Err(e) = child.kill().await {
                 match e.kind() {

@@ -58,7 +58,7 @@ impl Runner for Watch {
             }
 
             if let Some(running_task) = self.running_task.lock().await.take() {
-                running_task.kill().await?;
+                running_task.cancel().await?;
             }
         }
     }
@@ -67,9 +67,9 @@ impl Runner for Watch {
         Ok(false)
     }
 
-    async fn kill(self) -> CmdResult<()> {
+    async fn cancel(&self) -> CmdResult<()> {
         if let Some(running_task) = self.running_task.lock().await.take() {
-            running_task.kill().await?;
+            running_task.cancel().await?;
         }
         Ok(())
     }

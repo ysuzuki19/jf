@@ -23,7 +23,7 @@ pub struct Params {
 pub struct Parallel {
     tasks: Vec<Task>,
     handles: Arc<Mutex<Option<Vec<CmdHandle>>>>,
-    stop_signal: Arc<AtomicBool>,
+    is_cancelled: Arc<AtomicBool>,
 }
 
 impl Parallel {
@@ -36,7 +36,7 @@ impl Parallel {
         Ok(Self {
             tasks,
             handles: Arc::new(Mutex::new(Some(Vec::new()))),
-            stop_signal: Arc::new(AtomicBool::new(false)),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
         })
     }
 }
@@ -47,12 +47,12 @@ impl Runner for Parallel {
         let mut handles = Vec::new();
         for task in self.tasks.clone() {
             let handle: CmdHandle = tokio::spawn({
-                let stop_signal = self.stop_signal.clone();
+                let is_cancelled = self.is_cancelled.clone();
                 async move {
                     task.run().await?;
                     loop {
-                        if stop_signal.load(Ordering::SeqCst) {
-                            task.kill().await?;
+                        if is_cancelled.load(Ordering::SeqCst) {
+                            task.cancel().await?;
                             break;
                         }
 
@@ -84,8 +84,8 @@ impl Runner for Parallel {
         }
     }
 
-    async fn kill(self) -> CmdResult<()> {
-        self.stop_signal.store(true, Ordering::SeqCst);
+    async fn cancel(&self) -> CmdResult<()> {
+        self.is_cancelled.store(true, Ordering::SeqCst);
         if let Some(handles) = self.handles.lock().await.deref_mut() {
             for handle in handles {
                 let _ = handle.await?;
@@ -98,7 +98,7 @@ impl Runner for Parallel {
         Self {
             tasks: self.tasks.iter().map(|task| task.bunshin()).collect(),
             handles: Arc::new(Mutex::new(None)),
-            stop_signal: Arc::new(AtomicBool::new(false)),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
         }
     }
 }
