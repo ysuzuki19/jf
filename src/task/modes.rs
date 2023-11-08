@@ -15,3 +15,8 @@ pub use parallel::Params as ParallelParams;
 pub use sequential::Params as SequentialParams;
 pub use shell::Params as ShellParams;
 pub use watch::Params as WatchParams;
+
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+pub(super) use mock::Mock;
