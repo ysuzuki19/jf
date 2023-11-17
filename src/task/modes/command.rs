@@ -6,19 +6,19 @@ use super::super::runner::Runner;
 use crate::{error::CmdResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct Params {
+pub struct CommandParams {
     pub command: String,
     pub args: Vec<String>,
 }
 
 #[derive(Clone)]
 pub struct Command {
-    params: Params,
+    params: CommandParams,
     child: Arc<Mutex<Option<tokio::process::Child>>>,
 }
 
 impl Command {
-    pub fn new(params: Params) -> Self {
+    pub fn new(params: CommandParams) -> Self {
         Self {
             params,
             child: Arc::new(Mutex::new(None)),

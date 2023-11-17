@@ -2,18 +2,18 @@ use super::super::runner::Runner;
 use crate::{error::CmdResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct Params {
+pub struct ShellParams {
     script: String,
 }
 
 #[derive(Clone)]
 pub struct Shell {
-    params: Params,
+    params: ShellParams,
     command: super::Command,
 }
 
 impl Shell {
-    pub fn new(params: Params) -> Self {
+    pub fn new(params: ShellParams) -> Self {
         let command = super::Command::new(super::CommandParams {
             command: "sh".to_string(),
             args: vec!["-c".to_string(), params.script.clone()],

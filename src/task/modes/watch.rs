@@ -9,7 +9,7 @@ use super::super::runner::Runner;
 use crate::{common::BuildContext, error::CmdResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct Params {
+pub struct WatchParams {
     pub task: String,
     pub watch_list: Vec<String>,
 }
@@ -22,7 +22,7 @@ pub struct Watch {
 }
 
 impl Watch {
-    pub fn new(params: Params, bc: BuildContext) -> CmdResult<Self> {
+    pub fn new(params: WatchParams, bc: BuildContext) -> CmdResult<Self> {
         let task = bc.build(params.task)?;
         Ok(Self {
             task: Box::new(task),

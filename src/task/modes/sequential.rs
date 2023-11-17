@@ -16,7 +16,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct Params {
+pub struct SequentialParams {
     pub tasks: Vec<String>,
 }
 
@@ -28,7 +28,7 @@ pub struct Sequential {
 }
 
 impl Sequential {
-    pub fn new(params: Params, bc: BuildContext) -> CmdResult<Self> {
+    pub fn new(params: SequentialParams, bc: BuildContext) -> CmdResult<Self> {
         let tasks = params
             .tasks
             .into_iter()

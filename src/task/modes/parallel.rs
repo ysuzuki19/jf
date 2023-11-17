@@ -15,7 +15,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct Params {
+pub struct ParallelParams {
     pub tasks: Vec<String>,
 }
 
@@ -27,7 +27,7 @@ pub struct Parallel {
 }
 
 impl Parallel {
-    pub fn new(params: Params, bc: BuildContext) -> CmdResult<Self> {
+    pub fn new(params: ParallelParams, bc: BuildContext) -> CmdResult<Self> {
         let tasks = params
             .tasks
             .into_iter()

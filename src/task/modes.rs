@@ -10,11 +10,11 @@ pub(super) use sequential::Sequential;
 pub(super) use shell::Shell;
 pub(super) use watch::Watch;
 
-pub use command::Params as CommandParams;
-pub use parallel::Params as ParallelParams;
-pub use sequential::Params as SequentialParams;
-pub use shell::Params as ShellParams;
-pub use watch::Params as WatchParams;
+pub use command::CommandParams;
+pub use parallel::ParallelParams;
+pub use sequential::SequentialParams;
+pub use shell::ShellParams;
+pub use watch::WatchParams;
 
 #[cfg(test)]
 mod mock;
