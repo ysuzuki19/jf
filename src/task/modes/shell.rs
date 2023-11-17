@@ -1,7 +1,3 @@
-use std::{ops::DerefMut, sync::Arc};
-
-use tokio::sync::Mutex;
-
 use super::super::runner::Runner;
 use crate::{error::CmdResult, task::Task};
 
@@ -13,53 +9,40 @@ pub struct Params {
 #[derive(Clone)]
 pub struct Shell {
     params: Params,
-    child: Arc<Mutex<Option<tokio::process::Child>>>,
+    command: super::Command,
 }
 
 impl Shell {
     pub fn new(params: Params) -> Self {
-        Self {
-            params,
-            child: Arc::new(Mutex::new(None)),
-        }
+        let command = super::Command::new(super::CommandParams {
+            command: "sh".to_string(),
+            args: vec!["-c".to_string(), params.script.clone()],
+        });
+        Self { params, command }
     }
 }
 
 #[async_trait::async_trait]
 impl Runner for Shell {
     async fn run(&self) -> CmdResult<Self> {
-        let child = tokio::process::Command::new("sh")
-            .arg("-c")
-            .arg(self.params.script.clone())
-            .spawn()?;
-        self.child.lock().await.replace(child);
+        self.command.run().await?;
         Ok(self.clone())
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {
-        if let Some(ref mut child) = self.child.lock().await.deref_mut() {
-            Ok(child.try_wait()?.is_some())
-        } else {
-            Ok(true)
-        }
+        self.command.is_finished().await
     }
 
     async fn cancel(&self) -> CmdResult<()> {
-        if let Some(ref mut child) = self.child.lock().await.deref_mut() {
-            if let Err(e) = child.kill().await {
-                match e.kind() {
-                    std::io::ErrorKind::InvalidInput => {}
-                    _ => return Err(e.into()),
-                }
-            }
-        }
+        self.command.cancel().await?;
         Ok(())
     }
 
     fn bunshin(&self) -> Self {
+        let command = self.command.bunshin();
         Self {
             params: self.params.clone(),
-            child: Arc::new(Mutex::new(None)),
+            command,
         }
     }
 }

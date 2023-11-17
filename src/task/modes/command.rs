@@ -7,8 +7,8 @@ use crate::{error::CmdResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct Params {
-    command: String,
-    args: Vec<String>,
+    pub command: String,
+    pub args: Vec<String>,
 }
 
 #[derive(Clone)]
