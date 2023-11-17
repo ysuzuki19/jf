@@ -32,49 +32,49 @@ impl Task {
 impl Runner for Task {
     async fn run(&self) -> CmdResult<Self> {
         Ok(match self {
-            Self::Command(command) => command.run().await?.into(),
-            Self::Parallel(parallel) => parallel.run().await?.into(),
-            Self::Sequential(sequential) => sequential.run().await?.into(),
-            Self::Shell(shell) => shell.run().await?.into(),
-            Self::Watch(watch) => watch.run().await?.into(),
+            Self::Command(t) => t.run().await?.into(),
+            Self::Parallel(t) => t.run().await?.into(),
+            Self::Sequential(t) => t.run().await?.into(),
+            Self::Shell(t) => t.run().await?.into(),
+            Self::Watch(t) => t.run().await?.into(),
             #[cfg(test)]
-            Self::Mock(mock) => mock.run().await?.into(),
+            Self::Mock(t) => t.run().await?.into(),
         })
     }
 
     async fn is_finished(&self) -> CmdResult<bool> {
         match self {
-            Self::Command(command) => command.is_finished().await,
-            Self::Parallel(parallel) => parallel.is_finished().await,
-            Self::Sequential(sequential) => sequential.is_finished().await,
-            Self::Shell(shell) => shell.is_finished().await,
-            Self::Watch(watch) => watch.is_finished().await,
+            Self::Command(t) => t.is_finished().await,
+            Self::Parallel(t) => t.is_finished().await,
+            Self::Sequential(t) => t.is_finished().await,
+            Self::Shell(t) => t.is_finished().await,
+            Self::Watch(t) => t.is_finished().await,
             #[cfg(test)]
-            Self::Mock(mock) => mock.is_finished().await,
+            Self::Mock(t) => t.is_finished().await,
         }
     }
 
     async fn cancel(&self) -> CmdResult<()> {
         match self {
-            Self::Command(command) => command.cancel().await,
-            Self::Parallel(parallel) => parallel.cancel().await,
-            Self::Sequential(sequential) => sequential.cancel().await,
-            Self::Shell(shell) => shell.cancel().await,
-            Self::Watch(watch) => watch.cancel().await,
+            Self::Command(t) => t.cancel().await,
+            Self::Parallel(t) => t.cancel().await,
+            Self::Sequential(t) => t.cancel().await,
+            Self::Shell(t) => t.cancel().await,
+            Self::Watch(t) => t.cancel().await,
             #[cfg(test)]
-            Self::Mock(mock) => mock.cancel().await,
+            Self::Mock(t) => t.cancel().await,
         }
     }
 
     fn bunshin(&self) -> Self {
         match self {
-            Self::Command(command) => command.bunshin().into(),
-            Self::Parallel(parallel) => parallel.bunshin().into(),
-            Self::Sequential(sequential) => sequential.bunshin().into(),
-            Self::Shell(shell) => shell.bunshin().into(),
-            Self::Watch(watch) => watch.bunshin().into(),
+            Self::Command(t) => Self::Command(t.bunshin()),
+            Self::Parallel(t) => Self::Parallel(t.bunshin()),
+            Self::Sequential(t) => Self::Sequential(t.bunshin()),
+            Self::Shell(t) => Self::Shell(t.bunshin()),
+            Self::Watch(t) => Self::Watch(t.bunshin()),
             #[cfg(test)]
-            Self::Mock(mock) => mock.bunshin().into(),
+            Self::Mock(t) => Self::Mock(t.bunshin()),
         }
     }
 }
