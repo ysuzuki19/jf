@@ -68,3 +68,54 @@ impl From<Command> for Task {
         Task::Command(value)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn run_without_blocking() -> CmdResult<()> {
+        let command = Command::new(CommandParams {
+            command: "sleep".to_string(),
+            args: vec!["1".to_string()],
+        });
+        command.run().await?;
+        assert!(!command.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn wait() -> CmdResult<()> {
+        let command = Command::new(CommandParams {
+            command: "sleep".to_string(),
+            args: vec!["1".to_string()],
+        });
+        command.run().await?;
+        command.wait().await?;
+        assert!(command.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn cancel() -> CmdResult<()> {
+        let command = Command::new(CommandParams {
+            command: "sleep".to_string(),
+            args: vec!["1".to_string()],
+        });
+        command.run().await?.cancel().await?;
+        assert!(command.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn bunshin() -> CmdResult<()> {
+        let command = Command::new(CommandParams {
+            command: "sleep".to_string(),
+            args: vec!["1".to_string()],
+        })
+        .bunshin();
+        command.run().await?.cancel().await?;
+        assert!(command.is_finished().await?);
+        Ok(())
+    }
+}
