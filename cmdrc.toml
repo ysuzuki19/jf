@@ -1,6 +1,7 @@
 [task.run]
 command = "cargo"
 args = ["run"]
+description = "run the project"
 
 [task.live-run]
 mode = "watch"
