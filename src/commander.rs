@@ -1,11 +1,11 @@
-use crate::{common, config::CmdConfig, error::CmdResult, task::Runner, taskdef::TaskdefPool};
+use crate::{cfg::CmdCfg, common, error::CmdResult, task::Runner, taskdef::TaskdefPool};
 
 pub struct Commander {
     pool: TaskdefPool,
 }
 
 impl Commander {
-    pub fn new(config: CmdConfig) -> CmdResult<Self> {
+    pub fn new(config: CmdCfg) -> CmdResult<Self> {
         let task_vec = config
             .tasks
             .into_iter()

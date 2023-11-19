@@ -2,8 +2,8 @@ mod pool;
 
 pub use self::pool::TaskdefPool;
 use crate::{
+    cfg::TaskCfg,
     common::{Agent, BuildContext},
-    config::TaskConfig,
     error::{CmdError, CmdResult},
     task::Task,
 };
@@ -12,11 +12,11 @@ pub struct Taskdef {
     name: String,
     private: bool,
     description: String,
-    task_config: TaskConfig,
+    task_config: TaskCfg,
 }
 
 impl Taskdef {
-    pub fn new(name: String, task_config: TaskConfig) -> CmdResult<Self> {
+    pub fn new(name: String, task_config: TaskCfg) -> CmdResult<Self> {
         Ok(Self {
             name,
             private: task_config.private(),
@@ -52,10 +52,10 @@ impl Taskdef {
     }
 }
 
-impl TryFrom<(String, TaskConfig)> for Taskdef {
+impl TryFrom<(String, TaskCfg)> for Taskdef {
     type Error = CmdError;
 
-    fn try_from(value: (String, TaskConfig)) -> Result<Self, Self::Error> {
+    fn try_from(value: (String, TaskCfg)) -> Result<Self, Self::Error> {
         Self::new(value.0, value.1)
     }
 }

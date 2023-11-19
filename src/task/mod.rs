@@ -3,7 +3,7 @@ mod runner;
 mod types;
 
 pub use self::runner::Runner;
-use crate::{common::BuildContext, config::TaskConfig, error::CmdResult};
+use crate::{cfg::TaskCfg, common::BuildContext, error::CmdResult};
 
 #[derive(Clone)]
 pub enum Task {
@@ -17,13 +17,13 @@ pub enum Task {
 }
 
 impl Task {
-    pub fn new(config: TaskConfig, bc: BuildContext) -> CmdResult<Self> {
+    pub fn new(config: TaskCfg, bc: BuildContext) -> CmdResult<Self> {
         Ok(match config {
-            TaskConfig::Command(c) => modes::Command::new(c.params).into(),
-            TaskConfig::Parallel(c) => modes::Parallel::new(c.params, bc)?.into(),
-            TaskConfig::Sequential(c) => modes::Sequential::new(c.params, bc)?.into(),
-            TaskConfig::Shell(c) => modes::Shell::new(c.params).into(),
-            TaskConfig::Watch(c) => modes::Watch::new(c.params, bc)?.into(),
+            TaskCfg::Command(c) => modes::Command::new(c.params).into(),
+            TaskCfg::Parallel(c) => modes::Parallel::new(c.params, bc)?.into(),
+            TaskCfg::Sequential(c) => modes::Sequential::new(c.params, bc)?.into(),
+            TaskCfg::Shell(c) => modes::Shell::new(c.params).into(),
+            TaskCfg::Watch(c) => modes::Watch::new(c.params, bc)?.into(),
         })
     }
 }

@@ -1,6 +1,6 @@
+mod cfg;
 mod commander;
 mod common;
-mod config;
 mod error;
 mod task;
 mod taskdef;
@@ -32,7 +32,7 @@ enum SubCommand {
 async fn cli(args: Args) -> CmdResult<()> {
     let config_file = "cmdrc.toml";
     let config_contents = std::fs::read_to_string(config_file)?;
-    let config: config::CmdConfig = toml::from_str(&config_contents)?;
+    let config: cfg::CmdCfg = toml::from_str(&config_contents)?;
 
     let commander = commander::Commander::new(config)?;
     // // let task_name = "incl10-parallel-watch".to_string();

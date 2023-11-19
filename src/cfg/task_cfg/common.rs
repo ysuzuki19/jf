@@ -1,14 +1,14 @@
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct CommonConfig {
+pub struct CommonCfg {
     #[serde(default)]
     private: bool,
     #[serde(default)]
     description: String,
 }
 
-impl CommonConfig {
+impl CommonCfg {
     pub fn private(&self) -> bool {
         self.private
     }
