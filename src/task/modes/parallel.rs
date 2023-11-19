@@ -9,9 +9,9 @@ use std::{
 use tokio::sync::Mutex;
 
 use crate::{
-    common::BuildContext,
     error::CmdResult,
     task::{runner::Runner, types::CmdHandle, Task},
+    taskdef::{Agent, TaskdefPool},
 };
 
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -27,11 +27,11 @@ pub struct Parallel {
 }
 
 impl Parallel {
-    pub fn new(params: ParallelParams, bc: BuildContext) -> CmdResult<Self> {
+    pub fn new(params: ParallelParams, pool: TaskdefPool) -> CmdResult<Self> {
         let tasks = params
             .tasks
             .into_iter()
-            .map(|task_name| bc.build(task_name))
+            .map(|task_name| pool.build(task_name, Agent::Task))
             .collect::<CmdResult<Vec<Task>>>()?;
         Ok(Self {
             tasks,

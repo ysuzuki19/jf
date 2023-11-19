@@ -6,7 +6,11 @@ use std::sync::{
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 
 use super::super::runner::Runner;
-use crate::{common::BuildContext, error::CmdResult, task::Task};
+use crate::{
+    error::CmdResult,
+    task::Task,
+    taskdef::{Agent, TaskdefPool},
+};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct WatchParams {
@@ -22,8 +26,8 @@ pub struct Watch {
 }
 
 impl Watch {
-    pub fn new(params: WatchParams, bc: BuildContext) -> CmdResult<Self> {
-        let task = bc.build(params.task)?;
+    pub fn new(params: WatchParams, pool: TaskdefPool) -> CmdResult<Self> {
+        let task = pool.build(params.task, Agent::Task)?;
         Ok(Self {
             task: Box::new(task),
             watch_list: params.watch_list,

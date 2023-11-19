@@ -1,4 +1,9 @@
-use crate::{cfg::CmdCfg, common, error::CmdResult, task::Runner, taskdef::TaskdefPool};
+use crate::{
+    cfg::CmdCfg,
+    error::CmdResult,
+    task::Runner,
+    taskdef::{Agent, TaskdefPool},
+};
 
 pub struct Commander {
     pool: TaskdefPool,
@@ -18,7 +23,7 @@ impl Commander {
 
     pub async fn run(&self, task_name: String) -> CmdResult<()> {
         self.pool
-            .build(task_name, common::Agent::Cli)?
+            .build(task_name, Agent::Cli)?
             .run()
             .await?
             .wait()

@@ -3,7 +3,7 @@ mod runner;
 mod types;
 
 pub use self::runner::Runner;
-use crate::{cfg::TaskCfg, common::BuildContext, error::CmdResult};
+use crate::{cfg::TaskCfg, error::CmdResult, taskdef::TaskdefPool};
 
 #[derive(Clone)]
 pub enum Task {
@@ -17,13 +17,13 @@ pub enum Task {
 }
 
 impl Task {
-    pub fn new(task_cfg: TaskCfg, bc: BuildContext) -> CmdResult<Self> {
+    pub fn new(task_cfg: TaskCfg, pool: TaskdefPool) -> CmdResult<Self> {
         Ok(match task_cfg {
             TaskCfg::Command(c) => modes::Command::new(c.params).into(),
-            TaskCfg::Parallel(c) => modes::Parallel::new(c.params, bc)?.into(),
-            TaskCfg::Sequential(c) => modes::Sequential::new(c.params, bc)?.into(),
+            TaskCfg::Parallel(c) => modes::Parallel::new(c.params, pool)?.into(),
+            TaskCfg::Sequential(c) => modes::Sequential::new(c.params, pool)?.into(),
             TaskCfg::Shell(c) => modes::Shell::new(c.params).into(),
-            TaskCfg::Watch(c) => modes::Watch::new(c.params, bc)?.into(),
+            TaskCfg::Watch(c) => modes::Watch::new(c.params, pool)?.into(),
         })
     }
 }

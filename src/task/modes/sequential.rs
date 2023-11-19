@@ -10,9 +10,9 @@ use tokio::sync::Mutex;
 
 use super::super::runner::Runner;
 use crate::{
-    common::BuildContext,
     error::CmdResult,
     task::{types::CmdHandle, Task},
+    taskdef::{Agent, TaskdefPool},
 };
 
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -28,11 +28,11 @@ pub struct Sequential {
 }
 
 impl Sequential {
-    pub fn new(params: SequentialParams, bc: BuildContext) -> CmdResult<Self> {
+    pub fn new(params: SequentialParams, pool: TaskdefPool) -> CmdResult<Self> {
         let tasks = params
             .tasks
             .into_iter()
-            .map(|task_name| bc.build(task_name))
+            .map(|task_name| pool.build(task_name, Agent::Task))
             .collect::<CmdResult<Vec<Task>>>()?;
         Ok(Self {
             tasks,

@@ -1,9 +1,10 @@
+mod agent;
 mod pool;
 
+pub use self::agent::Agent;
 pub use self::pool::TaskdefPool;
 use crate::{
     cfg::TaskCfg,
-    common::{Agent, BuildContext},
     error::{CmdError, CmdResult},
     task::Task,
 };
@@ -38,9 +39,9 @@ impl Taskdef {
         }
     }
 
-    fn build(&self, bc: BuildContext, agent: Agent) -> CmdResult<Task> {
+    fn build(&self, pool: TaskdefPool, agent: Agent) -> CmdResult<Task> {
         self.visibility_guard(agent)?;
-        Task::new(self.task_cfg.clone(), bc)
+        Task::new(self.task_cfg.clone(), pool)
     }
 
     fn name(&self) -> String {
