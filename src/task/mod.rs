@@ -17,8 +17,8 @@ pub enum Task {
 }
 
 impl Task {
-    pub fn new(config: TaskCfg, bc: BuildContext) -> CmdResult<Self> {
-        Ok(match config {
+    pub fn new(task_cfg: TaskCfg, bc: BuildContext) -> CmdResult<Self> {
+        Ok(match task_cfg {
             TaskCfg::Command(c) => modes::Command::new(c.params).into(),
             TaskCfg::Parallel(c) => modes::Parallel::new(c.params, bc)?.into(),
             TaskCfg::Sequential(c) => modes::Sequential::new(c.params, bc)?.into(),

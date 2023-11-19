@@ -22,10 +22,10 @@ impl TaskdefPool {
     }
 
     fn ctx(&self) -> BuildContext {
-        BuildContext::new(self.clone())
+        BuildContext::from(self.clone())
     }
 
-    pub fn get(&self, task_name: String) -> CmdResult<&Taskdef> {
+    fn get(&self, task_name: String) -> CmdResult<&Taskdef> {
         self.map
             .get(&task_name)
             .ok_or(CmdError::TaskdefNotFound(task_name))

@@ -12,16 +12,16 @@ pub struct Taskdef {
     name: String,
     private: bool,
     description: String,
-    task_config: TaskCfg,
+    task_cfg: TaskCfg,
 }
 
 impl Taskdef {
-    pub fn new(name: String, task_config: TaskCfg) -> CmdResult<Self> {
+    pub fn new(name: String, task_cfg: TaskCfg) -> CmdResult<Self> {
         Ok(Self {
             name,
-            private: task_config.private(),
-            description: task_config.description(),
-            task_config,
+            private: task_cfg.private(),
+            description: task_cfg.description(),
+            task_cfg,
         })
     }
 
@@ -40,7 +40,7 @@ impl Taskdef {
 
     fn build(&self, bc: BuildContext, agent: Agent) -> CmdResult<Task> {
         self.visibility_guard(agent)?;
-        Task::new(self.task_config.clone(), bc)
+        Task::new(self.task_cfg.clone(), bc)
     }
 
     fn name(&self) -> String {

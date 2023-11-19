@@ -10,13 +10,13 @@ pub struct BuildContext {
 }
 
 impl BuildContext {
-    pub fn new(pool: TaskdefPool) -> Self {
-        Self { pool }
+    pub fn build(&self, task_name: String) -> CmdResult<Task> {
+        self.pool.build(task_name, Agent::Task)
     }
 }
 
-impl BuildContext {
-    pub fn build(&self, task_name: String) -> CmdResult<Task> {
-        self.pool.build(task_name, Agent::Task)
+impl From<TaskdefPool> for BuildContext {
+    fn from(pool: TaskdefPool) -> Self {
+        Self { pool }
     }
 }

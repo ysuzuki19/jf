@@ -5,8 +5,8 @@ pub struct Commander {
 }
 
 impl Commander {
-    pub fn new(config: CmdCfg) -> CmdResult<Self> {
-        let task_vec = config
+    pub fn new(cmd_cfg: CmdCfg) -> CmdResult<Self> {
+        let task_vec = cmd_cfg
             .tasks
             .into_iter()
             .map(TryFrom::try_from)

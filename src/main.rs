@@ -30,11 +30,11 @@ enum SubCommand {
 }
 
 async fn cli(args: Args) -> CmdResult<()> {
-    let config_file = "cmdrc.toml";
-    let config_contents = std::fs::read_to_string(config_file)?;
-    let config: cfg::CmdCfg = toml::from_str(&config_contents)?;
+    let cfg_file = "cmdrc.toml";
+    let cfg_contents = std::fs::read_to_string(cfg_file)?;
+    let cmd_cfg: cfg::CmdCfg = toml::from_str(&cfg_contents)?;
 
-    let commander = commander::Commander::new(config)?;
+    let commander = commander::Commander::new(cmd_cfg)?;
     // // let task_name = "incl10-parallel-watch".to_string();
     // let task_name = "sequential-echos-watch".to_string();
     // commander.description(task_name.clone())?;
