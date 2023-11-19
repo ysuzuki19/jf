@@ -1,4 +1,7 @@
-use super::TaskConfig;
+use super::{
+    modes::{CommandConfig, ParallelConfig, SequentialConfig, ShellConfig, WatchConfig},
+    TaskConfig,
+};
 
 impl<'de> serde::Deserialize<'de> for TaskConfig {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -15,20 +18,20 @@ impl<'de> serde::Deserialize<'de> for TaskConfig {
             .and_then(|m| m.as_str())
             .unwrap_or("command")
         {
-            "command" => Ok(TaskConfig::Command(
-                super::modes::Command::deserialize(value).map_err(serde::de::Error::custom)?,
+            "command" => Ok(Self::Command(
+                CommandConfig::deserialize(value).map_err(serde::de::Error::custom)?,
             )),
-            "parallel" => Ok(TaskConfig::Parallel(
-                super::modes::Parallel::deserialize(value).map_err(serde::de::Error::custom)?,
+            "parallel" => Ok(Self::Parallel(
+                ParallelConfig::deserialize(value).map_err(serde::de::Error::custom)?,
             )),
-            "sequential" => Ok(TaskConfig::Sequential(
-                super::modes::Sequential::deserialize(value).map_err(serde::de::Error::custom)?,
+            "sequential" => Ok(Self::Sequential(
+                SequentialConfig::deserialize(value).map_err(serde::de::Error::custom)?,
             )),
-            "shell" => Ok(TaskConfig::Shell(
-                super::modes::Shell::deserialize(value).map_err(serde::de::Error::custom)?,
+            "shell" => Ok(Self::Shell(
+                ShellConfig::deserialize(value).map_err(serde::de::Error::custom)?,
             )),
-            "watch" => Ok(TaskConfig::Watch(
-                super::modes::Watch::deserialize(value).map_err(serde::de::Error::custom)?,
+            "watch" => Ok(Self::Watch(
+                WatchConfig::deserialize(value).map_err(serde::de::Error::custom)?,
             )),
             m => Err(serde::de::Error::custom(format!("Unknown mode: {m}"))),
         }

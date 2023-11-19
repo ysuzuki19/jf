@@ -1,43 +1,43 @@
 use serde::Deserialize;
 
-use super::CommonConfig;
+use super::common::CommonConfig;
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct Command {
+pub struct CommandConfig {
+    #[serde(flatten)]
+    pub common: CommonConfig,
     #[serde(flatten)]
     pub params: crate::task::modes::CommandParams,
-    #[serde(flatten)]
-    pub common: CommonConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct Parallel {
+pub struct ParallelConfig {
+    #[serde(flatten)]
+    pub common: CommonConfig,
     #[serde(flatten)]
     pub params: crate::task::modes::ParallelParams,
-    #[serde(flatten)]
-    pub common: CommonConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct Sequential {
+pub struct SequentialConfig {
+    #[serde(flatten)]
+    pub common: CommonConfig,
     #[serde(flatten)]
     pub params: crate::task::modes::SequentialParams,
-    #[serde(flatten)]
-    pub common: CommonConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct Shell {
+pub struct ShellConfig {
+    #[serde(flatten)]
+    pub common: CommonConfig,
     #[serde(flatten)]
     pub params: crate::task::modes::ShellParams,
-    #[serde(flatten)]
-    pub common: CommonConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct Watch {
-    #[serde(flatten)]
-    pub params: crate::task::modes::WatchParams,
+pub struct WatchConfig {
     #[serde(flatten)]
     pub common: CommonConfig,
+    #[serde(flatten)]
+    pub params: crate::task::modes::WatchParams,
 }
