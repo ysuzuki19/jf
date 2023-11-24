@@ -3,7 +3,7 @@ use crate::{error::CmdResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct ShellParams {
-    script: String,
+    pub script: String,
 }
 
 #[derive(Clone)]
