@@ -1,4 +1,4 @@
-name: Rust Build example app
+name: Rust Format, Lint, Build, Test
 
 on:
   push:
