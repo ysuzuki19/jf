@@ -22,6 +22,6 @@ impl std::io::Write for CompletionScript {
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
-        todo!()
+        Ok(())
     }
 }
