@@ -35,6 +35,8 @@ impl Commander {
     }
 
     pub fn list(&self) -> Vec<String> {
-        self.pool.list()
+        let mut task_names = self.pool.list();
+        task_names.sort();
+        task_names
     }
 }

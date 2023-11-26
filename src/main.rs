@@ -67,11 +67,9 @@ async fn cli(args: Args) -> CmdResult<()> {
                 println!("{}", commander.description(task_name)?);
             }
             SubCommand::List => {
-                let mut task_names = commander.list();
-                task_names.sort();
-                task_names.iter().for_each(|task_name| {
+                for task_name in commander.list() {
                     println!("{}", task_name);
-                });
+                }
             }
         }
     }
