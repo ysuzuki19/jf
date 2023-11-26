@@ -26,6 +26,10 @@ impl TaskdefPool {
             .ok_or(CmdError::TaskdefNotFound(task_name))
     }
 
+    pub fn list(&self) -> Vec<String> {
+        self.map.keys().cloned().collect()
+    }
+
     pub fn build(&self, task_name: String, agent: Agent) -> CmdResult<Task> {
         self.get(task_name)?.build(self.clone(), agent)
     }

@@ -33,4 +33,8 @@ impl Commander {
     pub fn description(&self, task_name: String) -> CmdResult<String> {
         self.pool.description(task_name)
     }
+
+    pub fn list(&self) -> Vec<String> {
+        self.pool.list()
+    }
 }

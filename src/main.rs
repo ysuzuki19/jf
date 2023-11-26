@@ -1,5 +1,6 @@
 mod cfg;
 mod commander;
+mod completion_script;
 mod error;
 mod task;
 mod taskdef;
@@ -7,6 +8,8 @@ mod taskdef;
 use clap::Parser;
 
 use error::CmdResult;
+
+use crate::completion_script::CompletionScript;
 
 #[derive(Parser, Debug)]
 #[command(author = "ysuzuki19", version, about, long_about = None)]
@@ -18,14 +21,19 @@ struct Args {
 
 #[derive(Parser, Debug, Clone)]
 enum SubCommand {
-    // Completion {
-    //     shell: Shell,
-    // },
+    Completion {
+        shell: clap_complete::Shell,
+    },
     #[command(about = "Run a task")]
-    Run { task_name: String },
-
+    Run {
+        task_name: String,
+    },
     #[command(about = "Description a task")]
-    Description { task_name: String },
+    Description {
+        task_name: String,
+    },
+    #[command(about = "List tasks")]
+    List,
 }
 
 async fn cli(args: Args) -> CmdResult<()> {
@@ -41,16 +49,29 @@ async fn cli(args: Args) -> CmdResult<()> {
 
     if let Some(sub_command) = args.sub_command {
         match sub_command {
-            // SubCommand::Completion { shell } => {
-            //     let mut cmd = Args::command();
-            //     let bin_name = cmd.get_name().to_owned();
-            //     clap_complete::generate(shell, &mut cmd, bin_name, &mut std::io::stdout());
-            // }
+            SubCommand::Completion { shell } => {
+                let mut cmd = <Args as clap::CommandFactory>::command();
+                let bin_name = cmd.get_name().to_owned();
+                let mut completion_script = CompletionScript::new();
+
+                clap_complete::generate(shell, &mut cmd, bin_name, &mut completion_script);
+
+                completion_script.apply_dynamic_completion_for_taskname();
+
+                println!("{}", completion_script.script());
+            }
             SubCommand::Run { task_name } => {
                 commander.run(task_name).await?;
             }
             SubCommand::Description { task_name } => {
                 println!("{}", commander.description(task_name)?);
+            }
+            SubCommand::List => {
+                let mut task_names = commander.list();
+                task_names.sort();
+                task_names.iter().for_each(|task_name| {
+                    println!("{}", task_name);
+                });
             }
         }
     }
