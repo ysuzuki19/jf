@@ -10,8 +10,6 @@ use clap::Parser;
 use commander::Commander;
 use error::CmdResult;
 
-use crate::completion_script::CompletionScript;
-
 #[derive(Parser, Debug)]
 #[command(author = "ysuzuki19", version, about, long_about = None)]
 #[command(disable_help_flag = true)]
@@ -25,17 +23,12 @@ struct Args {
 
 #[derive(Parser, Debug, Clone)]
 enum SubCommand {
-    Completion {
-        shell: clap_complete::Shell,
-    },
+    #[command(about = "Generate completion script")]
+    Completion { shell: clap_complete::Shell },
     #[command(about = "Run a task")]
-    Run {
-        task_name: String,
-    },
+    Run { task_name: String },
     #[command(about = "Description a task")]
-    Description {
-        task_name: String,
-    },
+    Description { task_name: String },
     #[command(about = "List tasks")]
     List,
 }
@@ -57,15 +50,7 @@ impl Cli {
         if let Some(sub_command) = self.args.sub_command {
             match sub_command {
                 SubCommand::Completion { shell } => {
-                    let mut cmd = <Args as clap::CommandFactory>::command();
-                    let bin_name = cmd.get_name().to_owned();
-                    let mut completion_script = CompletionScript::new();
-
-                    clap_complete::generate(shell, &mut cmd, bin_name, &mut completion_script);
-
-                    completion_script.apply_dynamic_completion_for_taskname();
-
-                    println!("{}", completion_script.script());
+                    println!("{}", completion_script::generate(shell))
                 }
                 SubCommand::Run { task_name } => {
                     self.commander.run(task_name).await?;
