@@ -40,47 +40,60 @@ enum SubCommand {
     List,
 }
 
-impl SubCommand {
-    pub async fn process(self, commander: Commander) -> CmdResult<Option<String>> {
-        match self {
-            SubCommand::Completion { shell } => {
-                let mut cmd = <Args as clap::CommandFactory>::command();
-                let bin_name = cmd.get_name().to_owned();
-                let mut completion_script = CompletionScript::new();
-
-                clap_complete::generate(shell, &mut cmd, bin_name, &mut completion_script);
-
-                completion_script.apply_dynamic_completion_for_taskname();
-
-                Ok(Some(completion_script.script()))
-            }
-            SubCommand::Run { task_name } => {
-                commander.run(task_name).await?;
-                Ok(None)
-            }
-            SubCommand::Description { task_name } => Ok(Some(commander.description(task_name)?)),
-            SubCommand::List => Ok(Some(commander.list().join("\n"))),
-        }
-    }
+struct Cli {
+    args: Args,
+    commander: Commander,
 }
 
-async fn cli() -> CmdResult<()> {
-    let cfg = cfg::Cfg::load()?;
-    let commander = commander::Commander::new(cfg)?;
-
-    let args = Args::parse();
-    if let Some(sub_command) = args.sub_command {
-        if let Some(output) = sub_command.process(commander).await? {
-            println!("{}", output);
-        }
+impl Cli {
+    pub fn load() -> CmdResult<Self> {
+        let args = Args::parse();
+        let cfg = cfg::Cfg::load()?;
+        let commander = commander::Commander::new(cfg)?;
+        Ok(Self { args, commander })
     }
-    Ok(())
+
+    pub async fn run(self) -> CmdResult<()> {
+        if let Some(sub_command) = self.args.sub_command {
+            match sub_command {
+                SubCommand::Completion { shell } => {
+                    let mut cmd = <Args as clap::CommandFactory>::command();
+                    let bin_name = cmd.get_name().to_owned();
+                    let mut completion_script = CompletionScript::new();
+
+                    clap_complete::generate(shell, &mut cmd, bin_name, &mut completion_script);
+
+                    completion_script.apply_dynamic_completion_for_taskname();
+
+                    println!("{}", completion_script.script());
+                }
+                SubCommand::Run { task_name } => {
+                    self.commander.run(task_name).await?;
+                }
+                SubCommand::Description { task_name } => {
+                    println!("{}", self.commander.description(task_name)?);
+                }
+                SubCommand::List => {
+                    println!("{}", self.commander.list().join("\n"));
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 #[tokio::main]
 async fn main() {
-    if let Err(e) = cli().await {
-        eprintln!("Error: {}", e);
-        std::process::exit(1);
+    match Cli::load() {
+        Ok(cli) => {
+            if let Err(e) = cli.run().await {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Err(e) => {
+            eprintln!("Invalid Args or Config: {}", e);
+            std::process::exit(1);
+        }
     }
 }
