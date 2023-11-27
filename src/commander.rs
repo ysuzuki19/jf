@@ -1,5 +1,5 @@
 use crate::{
-    cfg::CmdCfg,
+    cfg::Cfg,
     error::CmdResult,
     task::Runner,
     taskdef::{Agent, TaskdefPool},
@@ -10,8 +10,8 @@ pub struct Commander {
 }
 
 impl Commander {
-    pub fn new(cmd_cfg: CmdCfg) -> CmdResult<Self> {
-        let task_vec = cmd_cfg
+    pub fn new(cfg: Cfg) -> CmdResult<Self> {
+        let task_vec = cfg
             .tasks
             .into_iter()
             .map(TryFrom::try_from)

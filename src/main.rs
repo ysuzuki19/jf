@@ -7,6 +7,7 @@ mod taskdef;
 
 use clap::Parser;
 
+use commander::Commander;
 use error::CmdResult;
 
 use crate::completion_script::CompletionScript;
@@ -17,6 +18,9 @@ use crate::completion_script::CompletionScript;
 struct Args {
     #[command(subcommand)]
     sub_command: Option<SubCommand>,
+
+    #[arg(long)]
+    verbose: bool,
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -36,19 +40,9 @@ enum SubCommand {
     List,
 }
 
-async fn cli(args: Args) -> CmdResult<()> {
-    let cfg_file = "cmdrc.toml";
-    let cfg_contents = std::fs::read_to_string(cfg_file)?;
-    let cmd_cfg: cfg::CmdCfg = toml::from_str(&cfg_contents)?;
-
-    let commander = commander::Commander::new(cmd_cfg)?;
-    // // let task_name = "incl10-parallel-watch".to_string();
-    // let task_name = "sequential-echos-watch".to_string();
-    // commander.description(task_name.clone())?;
-    // commander.run(task_name).await?;
-
-    if let Some(sub_command) = args.sub_command {
-        match sub_command {
+impl SubCommand {
+    pub async fn process(self, commander: Commander) -> CmdResult<Option<String>> {
+        match self {
             SubCommand::Completion { shell } => {
                 let mut cmd = <Args as clap::CommandFactory>::command();
                 let bin_name = cmd.get_name().to_owned();
@@ -58,19 +52,26 @@ async fn cli(args: Args) -> CmdResult<()> {
 
                 completion_script.apply_dynamic_completion_for_taskname();
 
-                println!("{}", completion_script.script());
+                Ok(Some(completion_script.script()))
             }
             SubCommand::Run { task_name } => {
                 commander.run(task_name).await?;
+                Ok(None)
             }
-            SubCommand::Description { task_name } => {
-                println!("{}", commander.description(task_name)?);
-            }
-            SubCommand::List => {
-                for task_name in commander.list() {
-                    println!("{}", task_name);
-                }
-            }
+            SubCommand::Description { task_name } => Ok(Some(commander.description(task_name)?)),
+            SubCommand::List => Ok(Some(commander.list().join("\n"))),
+        }
+    }
+}
+
+async fn cli() -> CmdResult<()> {
+    let cfg = cfg::Cfg::load()?;
+    let commander = commander::Commander::new(cfg)?;
+
+    let args = Args::parse();
+    if let Some(sub_command) = args.sub_command {
+        if let Some(output) = sub_command.process(commander).await? {
+            println!("{}", output);
         }
     }
     Ok(())
@@ -78,13 +79,8 @@ async fn cli(args: Args) -> CmdResult<()> {
 
 #[tokio::main]
 async fn main() {
-    let args = Args::parse();
-
-    match cli(args).await {
-        Ok(_) => {}
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
-        }
+    if let Err(e) = cli().await {
+        eprintln!("Error: {}", e);
+        std::process::exit(1);
     }
 }
