@@ -23,37 +23,37 @@ args = ["bye"]
 [task.loop_1]
 mode = "shell"
 script = """
-    for i in $(seq 1 10); do
-        echo 1 $i
-        sleep 1
-    done
+for i in $(seq 1 10); do
+    echo 1 $i
+    sleep 1
+done
 """
 
 [task.loop_2]
 mode = "shell"
 script = """
-    for i in $(seq 1 10); do
-        echo 2 $i
-        sleep 1
-    done
+for i in $(seq 1 10); do
+    echo 2 $i
+    sleep 1
+done
 """
 
 [task.loop_3]
 mode = "shell"
 script = """
-    for i in $(seq 1 10); do
-        echo 3 $i
-        sleep 1
-    done
+for i in $(seq 1 10); do
+    echo 3 $i
+    sleep 1
+done
 """
 
 [task.incl10]
 mode = "shell"
 script = """
-    for i in $(seq 1 10); do
-        echo $i
-        sleep 1
-    done
+for i in $(seq 1 10); do
+    echo $i
+    sleep 1
+done
 """
 
 [task.incl10-sequential]
