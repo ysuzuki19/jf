@@ -7,14 +7,15 @@ impl WritableString {
         Self(String::new())
     }
 
-    pub fn string(&self) -> String {
-        self.0.clone()
+    pub fn string(self) -> String {
+        self.0
     }
 }
 
 impl std::io::Write for WritableString {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        let s = std::str::from_utf8(buf).unwrap();
+        let s = std::str::from_utf8(buf)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
         self.0.push_str(s);
         Ok(s.len())
     }
