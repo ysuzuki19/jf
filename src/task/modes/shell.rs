@@ -4,6 +4,7 @@ use crate::{error::CmdResult, task::Task};
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct ShellParams {
     pub script: String,
+    pub args: Option<Vec<String>>,
 }
 
 #[derive(Clone)]
@@ -14,9 +15,11 @@ pub struct Shell {
 
 impl Shell {
     pub fn new(params: ShellParams) -> Self {
+        let mut args = params.args.clone().unwrap_or_default();
+        args.extend(vec!["-c".to_string(), params.script.clone()]);
         let command = super::Command::new(super::CommandParams {
             command: "sh".to_string(),
-            args: vec!["-c".to_string(), params.script.clone()],
+            args,
         });
         Self { params, command }
     }
