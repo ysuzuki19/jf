@@ -26,8 +26,8 @@ pub enum JfError {
     #[error("GlobPatternError occurred: {0}")]
     GlobPatternError(#[from] glob::PatternError),
 
-    #[error("Taskdef(name={0}) not found")]
-    TaskdefNotFound(String),
+    #[error("Jobdef(name={0}) not found")]
+    JobdefNotFound(String),
 
     #[error("{0}")]
     Custom(String),

@@ -3,7 +3,7 @@ use std::{ops::DerefMut, sync::Arc};
 use tokio::sync::Mutex;
 
 use super::super::runner::Runner;
-use crate::{error::JfResult, task::Task};
+use crate::{error::JfResult, job::Job};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct CommandParams {
@@ -63,9 +63,9 @@ impl Runner for Command {
     }
 }
 
-impl From<Command> for Task {
+impl From<Command> for Job {
     fn from(value: Command) -> Self {
-        Task::Command(value)
+        Job::Command(value)
     }
 }
 

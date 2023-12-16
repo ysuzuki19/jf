@@ -1,9 +1,9 @@
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct ParallelCfg {
+pub struct WatchCfg {
     #[serde(flatten)]
     pub common: super::super::common::CommonCfg,
     #[serde(flatten)]
-    pub params: crate::task::modes::ParallelParams,
+    pub params: crate::job::modes::WatchParams,
 }
 
 #[cfg(test)]
@@ -14,17 +14,19 @@ mod tests {
 
     #[test]
     fn deserialize() -> JfResult<()> {
-        let cfg: ParallelCfg = toml::from_str(
+        let cfg: WatchCfg = toml::from_str(
             r#"
 private = false
-description = "test"
-tasks = ["test-task1", "test-task2"]
+description = "test2"
+job = "test-job"
+watch_list = ["test1", "./src/**/*.rs"]
             "#,
         )?;
 
         assert!(!cfg.common.private());
-        assert_eq!(cfg.common.description(), "test");
-        assert_eq!(cfg.params.tasks, vec!["test-task1", "test-task2"]);
+        assert_eq!(cfg.common.description(), "test2");
+        assert_eq!(cfg.params.job, "test-job");
+        assert_eq!(cfg.params.watch_list, vec!["test1", "./src/**/*.rs"]);
         Ok(())
     }
 }

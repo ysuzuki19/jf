@@ -1,9 +1,9 @@
 #[derive(Debug, Clone, serde::Deserialize)]
-pub struct SequentialCfg {
+pub struct ShellCfg {
     #[serde(flatten)]
     pub common: super::super::common::CommonCfg,
     #[serde(flatten)]
-    pub params: crate::task::modes::SequentialParams,
+    pub params: crate::job::modes::ShellParams,
 }
 
 #[cfg(test)]
@@ -14,17 +14,20 @@ mod tests {
 
     #[test]
     fn deserialize() -> JfResult<()> {
-        let cfg: SequentialCfg = toml::from_str(
+        let cfg: ShellCfg = toml::from_str(
             r#"
 private = false
 description = "test-desc"
-tasks = ["test"]
+script = """
+test1
+test2
+"""
             "#,
         )?;
 
         assert!(!cfg.common.private());
         assert_eq!(cfg.common.description(), "test-desc");
-        assert_eq!(cfg.params.tasks, vec!["test"]);
+        assert_eq!(cfg.params.script, "test1\ntest2\n");
         Ok(())
     }
 }

@@ -3,10 +3,10 @@ mod runner;
 mod types;
 
 pub use self::runner::Runner;
-use crate::{cfg::TaskCfg, error::JfResult, taskdef::TaskdefPool};
+use crate::{cfg::JobCfg, error::JfResult, jobdef::JobdefPool};
 
 #[derive(Clone)]
-pub enum Task {
+pub enum Job {
     Command(modes::Command),
     Parallel(modes::Parallel),
     Sequential(modes::Sequential),
@@ -16,20 +16,20 @@ pub enum Task {
     Mock(modes::Mock),
 }
 
-impl Task {
-    pub fn new(task_cfg: TaskCfg, pool: TaskdefPool) -> JfResult<Self> {
-        Ok(match task_cfg {
-            TaskCfg::Command(c) => modes::Command::new(c.params).into(),
-            TaskCfg::Parallel(c) => modes::Parallel::new(c.params, pool)?.into(),
-            TaskCfg::Sequential(c) => modes::Sequential::new(c.params, pool)?.into(),
-            TaskCfg::Shell(c) => modes::Shell::new(c.params).into(),
-            TaskCfg::Watch(c) => modes::Watch::new(c.params, pool)?.into(),
+impl Job {
+    pub fn new(job_cfg: JobCfg, pool: JobdefPool) -> JfResult<Self> {
+        Ok(match job_cfg {
+            JobCfg::Command(c) => modes::Command::new(c.params).into(),
+            JobCfg::Parallel(c) => modes::Parallel::new(c.params, pool)?.into(),
+            JobCfg::Sequential(c) => modes::Sequential::new(c.params, pool)?.into(),
+            JobCfg::Shell(c) => modes::Shell::new(c.params).into(),
+            JobCfg::Watch(c) => modes::Watch::new(c.params, pool)?.into(),
         })
     }
 }
 
 #[async_trait::async_trait]
-impl Runner for Task {
+impl Runner for Job {
     async fn run(&self) -> JfResult<Self> {
         Ok(match self {
             Self::Command(t) => t.run().await?.into(),

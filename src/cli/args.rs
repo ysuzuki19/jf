@@ -15,10 +15,10 @@ pub struct Args {
 pub enum SubCommand {
     #[command(about = "Generate completion script")]
     Completion { shell: clap_complete::Shell },
-    #[command(about = "Run a task")]
-    Run { task_name: String },
-    #[command(about = "Description a task")]
-    Description { task_name: String },
-    #[command(about = "List tasks")]
+    #[command(about = "Run a job")]
+    Run { job_name: String },
+    #[command(about = "Description a job")]
+    Description { job_name: String },
+    #[command(about = "List jobs")]
     List,
 }

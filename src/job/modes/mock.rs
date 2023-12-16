@@ -3,8 +3,8 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::{atomic::Ordering, Arc};
 
 use crate::error::JfResult;
-use crate::task::Runner;
-use crate::task::Task;
+use crate::job::Job;
+use crate::job::Runner;
 
 static MOCK_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -86,9 +86,9 @@ impl Runner for Mock {
     }
 }
 
-impl From<Mock> for Task {
+impl From<Mock> for Job {
     fn from(value: Mock) -> Self {
-        Task::Mock(value)
+        Job::Mock(value)
     }
 }
 

@@ -1,26 +1,26 @@
-[task.run]
+[job.run]
 command = "cargo"
 args = ["run"]
 description = "run the project"
 
-[task.live-run]
+[job.live-run]
 mode = "watch"
-task = "run"
+job = "run"
 watch_list = ["src/**/*.rs"]
 
-[task.sleep]
+[job.sleep]
 command = "sleep"
 args = ["2"]
 
-[task.echo_hello]
+[job.echo_hello]
 command = "echo"
 args = ["hello"]
 
-[task.echo_bye]
+[job.echo_bye]
 command = "echo"
 args = ["bye"]
 
-[task.loop_1]
+[job.loop_1]
 mode = "shell"
 script = """
 for i in $(seq 1 10); do
@@ -29,7 +29,7 @@ for i in $(seq 1 10); do
 done
 """
 
-[task.loop_2]
+[job.loop_2]
 mode = "shell"
 script = """
 for i in $(seq 1 10); do
@@ -38,7 +38,7 @@ for i in $(seq 1 10); do
 done
 """
 
-[task.loop_3]
+[job.loop_3]
 mode = "shell"
 script = """
 for i in $(seq 1 10); do
@@ -47,7 +47,7 @@ for i in $(seq 1 10); do
 done
 """
 
-[task.incl10]
+[job.incl10]
 mode = "shell"
 script = """
 for i in $(seq 1 10); do
@@ -56,47 +56,47 @@ for i in $(seq 1 10); do
 done
 """
 
-[task.incl10-sequential]
+[job.incl10-sequential]
 mode = "sequential"
-tasks = ["incl10", "incl10", "incl10"]
+jobs = ["incl10", "incl10", "incl10"]
 
-[task.sequential-echos]
+[job.sequential-echos]
 mode = "sequential"
-tasks = ["loop_1", "loop_2", "loop_3"]
+jobs = ["loop_1", "loop_2", "loop_3"]
 
-[task.sequential-echos-watch]
+[job.sequential-echos-watch]
 mode = "watch"
-task = "sequential-echos"
+job = "sequential-echos"
 watch_list = ["src/**/*.rs"]
 
-[task.incl10-sequential-watch]
+[job.incl10-sequential-watch]
 mode = "watch"
-task = "incl10-sequential"
+job = "incl10-sequential"
 watch_list = ["src/**/*.rs"]
 
-[task.greet]
+[job.greet]
 mode = "sequential"
-tasks = ["echo_hello", "echo_bye"]
+jobs = ["echo_hello", "echo_bye"]
 description = "greet to you `hello` and `bye`"
 
-[task.greet-slow]
+[job.greet-slow]
 mode = "sequential"
-tasks = ["echo_hello", "sleep", "echo_bye"]
+jobs = ["echo_hello", "sleep", "echo_bye"]
 
-[task.greet-parallel]
+[job.greet-parallel]
 mode = "parallel"
-tasks = ["greet-slow", "greet"]
+jobs = ["greet-slow", "greet"]
 
-[task.incl10-parallel]
+[job.incl10-parallel]
 mode = "parallel"
-tasks = ["incl10", "incl10"]
+jobs = ["incl10", "incl10"]
 
-[task.incl10-parallel-watch]
+[job.incl10-parallel-watch]
 mode = "watch"
-task = "incl10-parallel"
+job = "incl10-parallel"
 watch_list = ["src/**/*.rs"]
 
-[task.incl10-watch]
+[job.incl10-watch]
 mode = "watch"
-task = "incl10"
+job = "incl10"
 watch_list = ["src/**/*.rs"]

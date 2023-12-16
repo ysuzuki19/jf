@@ -1,4 +1,4 @@
-mod task_cfg;
+mod job_cfg;
 
 use std::collections::HashMap;
 
@@ -6,12 +6,12 @@ use serde::Deserialize;
 
 use crate::error::JfResult;
 
-pub use self::task_cfg::TaskCfg;
+pub use self::job_cfg::JobCfg;
 
 #[derive(Debug, Deserialize)]
 pub struct Cfg {
-    #[serde(rename = "task")]
-    pub tasks: HashMap<String, TaskCfg>,
+    #[serde(rename = "job")]
+    pub jobs: HashMap<String, JobCfg>,
 }
 
 impl Cfg {

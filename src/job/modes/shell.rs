@@ -1,5 +1,5 @@
 use super::super::runner::Runner;
-use crate::{error::JfResult, task::Task};
+use crate::{error::JfResult, job::Job};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct ShellParams {
@@ -50,8 +50,8 @@ impl Runner for Shell {
     }
 }
 
-impl From<Shell> for Task {
+impl From<Shell> for Job {
     fn from(value: Shell) -> Self {
-        Task::Shell(value)
+        Job::Shell(value)
     }
 }

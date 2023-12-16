@@ -1,14 +1,14 @@
 use super::{
     modes::{CommandCfg, ParallelCfg, SequentialCfg, ShellCfg, WatchCfg},
-    TaskCfg,
+    JobCfg,
 };
 
-impl<'de> serde::Deserialize<'de> for TaskCfg {
+impl<'de> serde::Deserialize<'de> for JobCfg {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        // temp value to deserialize into TaskCfg by `mode`
+        // temp value to deserialize into JobCfg by `mode`
         let value = serde_json::Value::deserialize(deserializer)?;
 
         // match `mode` value if it exists

@@ -11,31 +11,31 @@ use tokio::sync::Mutex;
 use super::super::runner::Runner;
 use crate::{
     error::JfResult,
-    task::{types::JfHandle, Task},
-    taskdef::{Agent, TaskdefPool},
+    job::{types::JfHandle, Job},
+    jobdef::{Agent, JobdefPool},
 };
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct SequentialParams {
-    pub tasks: Vec<String>,
+    pub jobs: Vec<String>,
 }
 
 #[derive(Clone)]
 pub struct Sequential {
-    tasks: Vec<Task>,
+    jobs: Vec<Job>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<JfHandle>>>,
 }
 
 impl Sequential {
-    pub fn new(params: SequentialParams, pool: TaskdefPool) -> JfResult<Self> {
-        let tasks = params
-            .tasks
+    pub fn new(params: SequentialParams, pool: JobdefPool) -> JfResult<Self> {
+        let jobs = params
+            .jobs
             .into_iter()
-            .map(|task_name| pool.build(task_name, Agent::Task))
-            .collect::<JfResult<Vec<Task>>>()?;
+            .map(|job_name| pool.build(job_name, Agent::Job))
+            .collect::<JfResult<Vec<Job>>>()?;
         Ok(Self {
-            tasks,
+            jobs,
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         })
@@ -46,17 +46,17 @@ impl Sequential {
 impl Runner for Sequential {
     async fn run(&self) -> JfResult<Self> {
         let handle: JfHandle = tokio::spawn({
-            let tasks = self.tasks.clone();
+            let jobs = self.jobs.clone();
             let is_cancelled = self.is_cancelled.clone();
 
             async move {
-                for task in tasks {
+                for job in jobs {
                     if is_cancelled.load(Ordering::Relaxed) {
-                        task.cancel().await?;
+                        job.cancel().await?;
                         continue;
                     }
-                    task.run().await?;
-                    task.wait_with_cancel(is_cancelled.clone()).await?;
+                    job.run().await?;
+                    job.wait_with_cancel(is_cancelled.clone()).await?;
                 }
                 Ok(())
             }
@@ -80,15 +80,15 @@ impl Runner for Sequential {
 
     fn bunshin(&self) -> Self {
         Self {
-            tasks: self.tasks.iter().map(|task| task.bunshin()).collect(),
+            jobs: self.jobs.iter().map(|job| job.bunshin()).collect(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         }
     }
 }
 
-impl From<Sequential> for Task {
+impl From<Sequential> for Job {
     fn from(value: Sequential) -> Self {
-        Task::Sequential(value)
+        Job::Sequential(value)
     }
 }

@@ -10,31 +10,31 @@ use tokio::sync::Mutex;
 
 use crate::{
     error::JfResult,
-    task::{runner::Runner, types::JfHandle, Task},
-    taskdef::{Agent, TaskdefPool},
+    job::{runner::Runner, types::JfHandle, Job},
+    jobdef::{Agent, JobdefPool},
 };
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct ParallelParams {
-    pub tasks: Vec<String>,
+    pub jobs: Vec<String>,
 }
 
 #[derive(Clone)]
 pub struct Parallel {
-    tasks: Vec<Task>,
+    jobs: Vec<Job>,
     handles: Arc<Mutex<Option<Vec<JfHandle>>>>,
     is_cancelled: Arc<AtomicBool>,
 }
 
 impl Parallel {
-    pub fn new(params: ParallelParams, pool: TaskdefPool) -> JfResult<Self> {
-        let tasks = params
-            .tasks
+    pub fn new(params: ParallelParams, pool: JobdefPool) -> JfResult<Self> {
+        let jobs = params
+            .jobs
             .into_iter()
-            .map(|task_name| pool.build(task_name, Agent::Task))
-            .collect::<JfResult<Vec<Task>>>()?;
+            .map(|job_name| pool.build(job_name, Agent::Job))
+            .collect::<JfResult<Vec<Job>>>()?;
         Ok(Self {
-            tasks,
+            jobs,
             handles: Arc::new(Mutex::new(Some(Vec::new()))),
             is_cancelled: Arc::new(AtomicBool::new(false)),
         })
@@ -45,12 +45,12 @@ impl Parallel {
 impl Runner for Parallel {
     async fn run(&self) -> JfResult<Self> {
         let mut handles = Vec::new();
-        for task in self.tasks.clone() {
+        for job in self.jobs.clone() {
             let handle: JfHandle = tokio::spawn({
                 let is_cancelled = self.is_cancelled.clone();
                 async move {
-                    task.run().await?;
-                    task.wait_with_cancel(is_cancelled).await?;
+                    job.run().await?;
+                    job.wait_with_cancel(is_cancelled).await?;
                     Ok(())
                 }
             });
@@ -85,15 +85,15 @@ impl Runner for Parallel {
 
     fn bunshin(&self) -> Self {
         Self {
-            tasks: self.tasks.iter().map(|task| task.bunshin()).collect(),
+            jobs: self.jobs.iter().map(|job| job.bunshin()).collect(),
             handles: Arc::new(Mutex::new(None)),
             is_cancelled: Arc::new(AtomicBool::new(false)),
         }
     }
 }
 
-impl From<Parallel> for Task {
+impl From<Parallel> for Job {
     fn from(value: Parallel) -> Self {
-        Task::Parallel(value)
+        Job::Parallel(value)
     }
 }

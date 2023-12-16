@@ -30,11 +30,11 @@ impl Cli {
                 SubCommand::Completion { shell } => {
                     println!("{}", completion_script::generate(shell))
                 }
-                SubCommand::Run { task_name } => {
-                    self.commander.run(task_name).await?;
+                SubCommand::Run { job_name } => {
+                    self.commander.run(job_name).await?;
                 }
-                SubCommand::Description { task_name } => {
-                    println!("{}", self.commander.description(task_name)?);
+                SubCommand::Description { job_name } => {
+                    println!("{}", self.commander.description(job_name)?);
                 }
                 SubCommand::List => {
                     println!("{}", self.commander.list().join("\n"));

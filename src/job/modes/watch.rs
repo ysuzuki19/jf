@@ -8,28 +8,28 @@ use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 use super::super::runner::Runner;
 use crate::{
     error::JfResult,
-    task::Task,
-    taskdef::{Agent, TaskdefPool},
+    job::Job,
+    jobdef::{Agent, JobdefPool},
 };
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct WatchParams {
-    pub task: String,
+    pub job: String,
     pub watch_list: Vec<String>,
 }
 
 #[derive(Clone)]
 pub struct Watch {
-    task: Box<Task>,
+    job: Box<Job>,
     watch_list: Vec<String>,
     is_cancelled: Arc<AtomicBool>,
 }
 
 impl Watch {
-    pub fn new(params: WatchParams, pool: TaskdefPool) -> JfResult<Self> {
-        let task = pool.build(params.task, Agent::Task)?;
+    pub fn new(params: WatchParams, pool: JobdefPool) -> JfResult<Self> {
+        let job = pool.build(params.job, Agent::Job)?;
         Ok(Self {
-            task: Box::new(task),
+            job: Box::new(job),
             watch_list: params.watch_list,
             is_cancelled: Arc::new(AtomicBool::new(false)),
         })
@@ -49,7 +49,7 @@ impl Runner for Watch {
         }
 
         loop {
-            let running_task = self.task.bunshin().run().await?;
+            let running_job = self.job.bunshin().run().await?;
 
             loop {
                 match rx.recv()??.kind {
@@ -62,7 +62,7 @@ impl Runner for Watch {
                 }
             }
 
-            running_task.cancel().await?;
+            running_job.cancel().await?;
             if self.is_cancelled.load(Ordering::Relaxed) {
                 break;
             }
@@ -81,15 +81,15 @@ impl Runner for Watch {
 
     fn bunshin(&self) -> Self {
         Self {
-            task: Box::new(self.task.bunshin()),
+            job: Box::new(self.job.bunshin()),
             watch_list: self.watch_list.clone(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
         }
     }
 }
 
-impl From<Watch> for Task {
+impl From<Watch> for Job {
     fn from(value: Watch) -> Self {
-        Task::Watch(value)
+        Job::Watch(value)
     }
 }

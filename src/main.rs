@@ -1,8 +1,8 @@
 mod cfg;
 mod cli;
 mod error;
-mod task;
-mod taskdef;
+mod job;
+mod jobdef;
 
 #[tokio::main]
 async fn main() {
