@@ -8,6 +8,7 @@ use crate::{error::JfResult, job::Job};
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct CommandParams {
     pub command: String,
+    #[serde(default)]
     pub args: Vec<String>,
 }
 
