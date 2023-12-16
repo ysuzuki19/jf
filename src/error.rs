@@ -1,7 +1,7 @@
-pub type CmdResult<T> = Result<T, CmdError>;
+pub type JfResult<T> = Result<T, JfError>;
 
 #[derive(Debug, thiserror::Error)]
-pub enum CmdError {
+pub enum JfError {
     #[error("IO error occurred: {0}")]
     IoError(#[from] std::io::Error),
 

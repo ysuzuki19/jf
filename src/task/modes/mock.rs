@@ -2,7 +2,7 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicUsize;
 use std::sync::{atomic::Ordering, Arc};
 
-use crate::error::CmdResult;
+use crate::error::JfResult;
 use crate::task::Runner;
 use crate::task::Task;
 
@@ -50,7 +50,7 @@ impl Mock {
 
 #[async_trait::async_trait]
 impl Runner for Mock {
-    async fn run(&self) -> CmdResult<Self> {
+    async fn run(&self) -> JfResult<Self> {
         self.is_running.store(true, Ordering::Relaxed);
         tokio::spawn({
             let each_sleep_time = self.each_sleep_time;
@@ -72,11 +72,11 @@ impl Runner for Mock {
         Ok(self.clone())
     }
 
-    async fn is_finished(&self) -> CmdResult<bool> {
+    async fn is_finished(&self) -> JfResult<bool> {
         Ok(self.is_finished.load(Ordering::Relaxed))
     }
 
-    async fn cancel(&self) -> CmdResult<()> {
+    async fn cancel(&self) -> JfResult<()> {
         self.is_cancelled.store(true, Ordering::Relaxed);
         Ok(())
     }

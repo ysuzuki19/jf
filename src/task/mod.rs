@@ -3,7 +3,7 @@ mod runner;
 mod types;
 
 pub use self::runner::Runner;
-use crate::{cfg::TaskCfg, error::CmdResult, taskdef::TaskdefPool};
+use crate::{cfg::TaskCfg, error::JfResult, taskdef::TaskdefPool};
 
 #[derive(Clone)]
 pub enum Task {
@@ -17,7 +17,7 @@ pub enum Task {
 }
 
 impl Task {
-    pub fn new(task_cfg: TaskCfg, pool: TaskdefPool) -> CmdResult<Self> {
+    pub fn new(task_cfg: TaskCfg, pool: TaskdefPool) -> JfResult<Self> {
         Ok(match task_cfg {
             TaskCfg::Command(c) => modes::Command::new(c.params).into(),
             TaskCfg::Parallel(c) => modes::Parallel::new(c.params, pool)?.into(),
@@ -30,7 +30,7 @@ impl Task {
 
 #[async_trait::async_trait]
 impl Runner for Task {
-    async fn run(&self) -> CmdResult<Self> {
+    async fn run(&self) -> JfResult<Self> {
         Ok(match self {
             Self::Command(t) => t.run().await?.into(),
             Self::Parallel(t) => t.run().await?.into(),
@@ -42,7 +42,7 @@ impl Runner for Task {
         })
     }
 
-    async fn is_finished(&self) -> CmdResult<bool> {
+    async fn is_finished(&self) -> JfResult<bool> {
         match self {
             Self::Command(t) => t.is_finished().await,
             Self::Parallel(t) => t.is_finished().await,
@@ -54,7 +54,7 @@ impl Runner for Task {
         }
     }
 
-    async fn cancel(&self) -> CmdResult<()> {
+    async fn cancel(&self) -> JfResult<()> {
         match self {
             Self::Command(t) => t.cancel().await,
             Self::Parallel(t) => t.cancel().await,

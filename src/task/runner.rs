@@ -3,22 +3,22 @@ use std::sync::{
     Arc,
 };
 
-use crate::error::CmdResult;
+use crate::error::JfResult;
 
 #[async_trait::async_trait]
 pub trait Runner
 where
     Self: Sized + Clone,
 {
-    async fn run(&self) -> CmdResult<Self>;
-    async fn is_finished(&self) -> CmdResult<bool>;
-    async fn cancel(&self) -> CmdResult<()>;
+    async fn run(&self) -> JfResult<Self>;
+    async fn is_finished(&self) -> JfResult<bool>;
+    async fn cancel(&self) -> JfResult<()>;
     fn bunshin(&self) -> Self;
 
     async fn sleep() {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
     }
-    async fn wait(&self) -> CmdResult<()> {
+    async fn wait(&self) -> JfResult<()> {
         loop {
             if self.is_finished().await? {
                 break;
@@ -29,7 +29,7 @@ where
         Ok(())
     }
 
-    async fn wait_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> CmdResult<()> {
+    async fn wait_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> JfResult<()> {
         loop {
             if self.is_finished().await? {
                 break;

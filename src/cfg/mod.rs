@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use serde::Deserialize;
 
-use crate::error::CmdResult;
+use crate::error::JfResult;
 
 pub use self::task_cfg::TaskCfg;
 
@@ -15,8 +15,8 @@ pub struct Cfg {
 }
 
 impl Cfg {
-    pub fn load() -> CmdResult<Self> {
-        let cfg_content = std::fs::read_to_string("cmdrc.toml")?;
+    pub fn load() -> JfResult<Self> {
+        let cfg_content = std::fs::read_to_string("jfrc.toml")?;
         Ok(toml::from_str(&cfg_content)?)
     }
 }

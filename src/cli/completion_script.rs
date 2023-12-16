@@ -29,12 +29,12 @@ pub fn generate<G>(shell: G) -> String
 where
     G: clap_complete::Generator,
 {
-    let mut cmd = <Args as clap::CommandFactory>::command();
-    let bin_name = cmd.get_name().to_owned();
+    let mut jf = <Args as clap::CommandFactory>::command();
+    let bin_name = jf.get_name().to_owned();
 
     let mut out = WritableString::new();
 
-    clap_complete::generate(shell, &mut cmd, bin_name, &mut out);
+    clap_complete::generate(shell, &mut jf, bin_name, &mut out);
 
-    out.string().replace("\"<TASK_NAME>\"", "$(cmd list)")
+    out.string().replace("\"<TASK_NAME>\"", "$(jf list)")
 }

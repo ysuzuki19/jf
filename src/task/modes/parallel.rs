@@ -9,8 +9,8 @@ use std::{
 use tokio::sync::Mutex;
 
 use crate::{
-    error::CmdResult,
-    task::{runner::Runner, types::CmdHandle, Task},
+    error::JfResult,
+    task::{runner::Runner, types::JfHandle, Task},
     taskdef::{Agent, TaskdefPool},
 };
 
@@ -22,17 +22,17 @@ pub struct ParallelParams {
 #[derive(Clone)]
 pub struct Parallel {
     tasks: Vec<Task>,
-    handles: Arc<Mutex<Option<Vec<CmdHandle>>>>,
+    handles: Arc<Mutex<Option<Vec<JfHandle>>>>,
     is_cancelled: Arc<AtomicBool>,
 }
 
 impl Parallel {
-    pub fn new(params: ParallelParams, pool: TaskdefPool) -> CmdResult<Self> {
+    pub fn new(params: ParallelParams, pool: TaskdefPool) -> JfResult<Self> {
         let tasks = params
             .tasks
             .into_iter()
             .map(|task_name| pool.build(task_name, Agent::Task))
-            .collect::<CmdResult<Vec<Task>>>()?;
+            .collect::<JfResult<Vec<Task>>>()?;
         Ok(Self {
             tasks,
             handles: Arc::new(Mutex::new(Some(Vec::new()))),
@@ -43,10 +43,10 @@ impl Parallel {
 
 #[async_trait::async_trait]
 impl Runner for Parallel {
-    async fn run(&self) -> CmdResult<Self> {
+    async fn run(&self) -> JfResult<Self> {
         let mut handles = Vec::new();
         for task in self.tasks.clone() {
-            let handle: CmdHandle = tokio::spawn({
+            let handle: JfHandle = tokio::spawn({
                 let is_cancelled = self.is_cancelled.clone();
                 async move {
                     task.run().await?;
@@ -61,7 +61,7 @@ impl Runner for Parallel {
         Ok(self.clone())
     }
 
-    async fn is_finished(&self) -> CmdResult<bool> {
+    async fn is_finished(&self) -> JfResult<bool> {
         if let Some(handles) = self.clone().handles.lock().await.deref_mut() {
             if handles.iter().all(|h| h.is_finished()) {
                 Ok(true)
@@ -73,7 +73,7 @@ impl Runner for Parallel {
         }
     }
 
-    async fn cancel(&self) -> CmdResult<()> {
+    async fn cancel(&self) -> JfResult<()> {
         self.is_cancelled.store(true, Ordering::SeqCst);
         if let Some(handles) = self.handles.lock().await.deref_mut() {
             for handle in handles {

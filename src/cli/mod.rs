@@ -4,7 +4,7 @@ mod completion_script;
 
 use clap::Parser;
 
-use crate::{cfg, error::CmdResult};
+use crate::{cfg, error::JfResult};
 
 use self::{
     args::{Args, SubCommand},
@@ -17,14 +17,14 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub fn load() -> CmdResult<Self> {
+    pub fn load() -> JfResult<Self> {
         let args = Args::parse();
         let cfg = cfg::Cfg::load()?;
         let commander = commander::Commander::new(cfg)?;
         Ok(Self { args, commander })
     }
 
-    pub async fn run(self) -> CmdResult<()> {
+    pub async fn run(self) -> JfResult<()> {
         if let Some(sub_command) = self.args.sub_command {
             match sub_command {
                 SubCommand::Completion { shell } => {

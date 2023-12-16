@@ -8,12 +8,12 @@ pub struct CommandCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::error::CmdResult;
+    use crate::error::JfResult;
 
     use super::*;
 
     #[test]
-    fn deserialize() -> CmdResult<()> {
+    fn deserialize() -> JfResult<()> {
         let cfg: CommandCfg = toml::from_str(
             r#"
 private = true

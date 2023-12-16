@@ -191,23 +191,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "702fc72eb24e5a1e48ce58027a675bc24edd52096d5397d4aea7c6dd9eca0bd1"
 
 [[package]]
-name = "cmd"
-version = "0.1.0"
-dependencies = [
- "async-recursion",
- "async-trait",
- "clap",
- "clap_complete",
- "glob",
- "notify",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "toml",
-]
-
-[[package]]
 name = "colorchoice"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -324,6 +307,23 @@ name = "itoa"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af150ab688ff2122fcef229be89cb50dd66af9e01a4ff320cc137eecc9bacc38"
+
+[[package]]
+name = "jf"
+version = "0.1.0"
+dependencies = [
+ "async-recursion",
+ "async-trait",
+ "clap",
+ "clap_complete",
+ "glob",
+ "notify",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "toml",
+]
 
 [[package]]
 name = "kqueue"

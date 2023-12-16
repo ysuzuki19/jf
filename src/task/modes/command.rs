@@ -3,7 +3,7 @@ use std::{ops::DerefMut, sync::Arc};
 use tokio::sync::Mutex;
 
 use super::super::runner::Runner;
-use crate::{error::CmdResult, task::Task};
+use crate::{error::JfResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct CommandParams {
@@ -28,14 +28,14 @@ impl Command {
 
 #[async_trait::async_trait]
 impl Runner for Command {
-    async fn run(&self) -> CmdResult<Self> {
-        let mut cmd = tokio::process::Command::new(self.params.command.clone());
-        cmd.args(self.params.args.clone());
-        self.child.lock().await.replace(cmd.spawn()?);
+    async fn run(&self) -> JfResult<Self> {
+        let mut jf = tokio::process::Command::new(self.params.command.clone());
+        jf.args(self.params.args.clone());
+        self.child.lock().await.replace(jf.spawn()?);
         Ok(self.clone())
     }
 
-    async fn is_finished(&self) -> CmdResult<bool> {
+    async fn is_finished(&self) -> JfResult<bool> {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
             Ok(child.try_wait()?.is_some())
         } else {
@@ -43,7 +43,7 @@ impl Runner for Command {
         }
     }
 
-    async fn cancel(&self) -> CmdResult<()> {
+    async fn cancel(&self) -> JfResult<()> {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
             if let Err(e) = child.kill().await {
                 match e.kind() {
@@ -74,7 +74,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn run_without_blocking() -> CmdResult<()> {
+    async fn run_without_blocking() -> JfResult<()> {
         let command = Command::new(CommandParams {
             command: "sleep".to_string(),
             args: vec!["1".to_string()],
@@ -85,7 +85,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn wait() -> CmdResult<()> {
+    async fn wait() -> JfResult<()> {
         let command = Command::new(CommandParams {
             command: "sleep".to_string(),
             args: vec!["1".to_string()],
@@ -97,7 +97,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn cancel() -> CmdResult<()> {
+    async fn cancel() -> JfResult<()> {
         let command = Command::new(CommandParams {
             command: "sleep".to_string(),
             args: vec!["1".to_string()],
@@ -108,7 +108,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn bunshin() -> CmdResult<()> {
+    async fn bunshin() -> JfResult<()> {
         let command = Command::new(CommandParams {
             command: "sleep".to_string(),
             args: vec!["1".to_string()],

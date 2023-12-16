@@ -8,12 +8,12 @@ pub struct SequentialCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::error::CmdResult;
+    use crate::error::JfResult;
 
     use super::*;
 
     #[test]
-    fn deserialize() -> CmdResult<()> {
+    fn deserialize() -> JfResult<()> {
         let cfg: SequentialCfg = toml::from_str(
             r#"
 private = false

@@ -10,8 +10,8 @@ use tokio::sync::Mutex;
 
 use super::super::runner::Runner;
 use crate::{
-    error::CmdResult,
-    task::{types::CmdHandle, Task},
+    error::JfResult,
+    task::{types::JfHandle, Task},
     taskdef::{Agent, TaskdefPool},
 };
 
@@ -24,16 +24,16 @@ pub struct SequentialParams {
 pub struct Sequential {
     tasks: Vec<Task>,
     is_cancelled: Arc<AtomicBool>,
-    handle: Arc<Mutex<Option<CmdHandle>>>,
+    handle: Arc<Mutex<Option<JfHandle>>>,
 }
 
 impl Sequential {
-    pub fn new(params: SequentialParams, pool: TaskdefPool) -> CmdResult<Self> {
+    pub fn new(params: SequentialParams, pool: TaskdefPool) -> JfResult<Self> {
         let tasks = params
             .tasks
             .into_iter()
             .map(|task_name| pool.build(task_name, Agent::Task))
-            .collect::<CmdResult<Vec<Task>>>()?;
+            .collect::<JfResult<Vec<Task>>>()?;
         Ok(Self {
             tasks,
             is_cancelled: Arc::new(AtomicBool::new(false)),
@@ -44,8 +44,8 @@ impl Sequential {
 
 #[async_trait::async_trait]
 impl Runner for Sequential {
-    async fn run(&self) -> CmdResult<Self> {
-        let handle: CmdHandle = tokio::spawn({
+    async fn run(&self) -> JfResult<Self> {
+        let handle: JfHandle = tokio::spawn({
             let tasks = self.tasks.clone();
             let is_cancelled = self.is_cancelled.clone();
 
@@ -65,7 +65,7 @@ impl Runner for Sequential {
         Ok(self.clone())
     }
 
-    async fn is_finished(&self) -> CmdResult<bool> {
+    async fn is_finished(&self) -> JfResult<bool> {
         if let Some(handle) = self.clone().handle.lock().await.deref_mut() {
             Ok(handle.is_finished())
         } else {
@@ -73,7 +73,7 @@ impl Runner for Sequential {
         }
     }
 
-    async fn cancel(&self) -> CmdResult<()> {
+    async fn cancel(&self) -> JfResult<()> {
         self.is_cancelled.store(true, Ordering::Relaxed);
         Ok(())
     }

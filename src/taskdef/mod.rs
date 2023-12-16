@@ -5,7 +5,7 @@ pub use self::agent::Agent;
 pub use self::pool::TaskdefPool;
 use crate::{
     cfg::TaskCfg,
-    error::{CmdError, CmdResult},
+    error::{JfError, JfResult},
     task::Task,
 };
 
@@ -17,7 +17,7 @@ pub struct Taskdef {
 }
 
 impl Taskdef {
-    pub fn new(name: String, task_cfg: TaskCfg) -> CmdResult<Self> {
+    pub fn new(name: String, task_cfg: TaskCfg) -> JfResult<Self> {
         Ok(Self {
             name,
             private: task_cfg.private(),
@@ -26,12 +26,12 @@ impl Taskdef {
         })
     }
 
-    fn visibility_guard(&self, agent: Agent) -> CmdResult<()> {
+    fn visibility_guard(&self, agent: Agent) -> JfResult<()> {
         if !self.private {
             return Ok(());
         }
         match agent {
-            Agent::Cli => Err(CmdError::Custom(format!(
+            Agent::Cli => Err(JfError::Custom(format!(
                 "task.{} is private\nPlease remove `private = true` if you run",
                 self.name
             ))),
@@ -39,7 +39,7 @@ impl Taskdef {
         }
     }
 
-    fn build(&self, pool: TaskdefPool, agent: Agent) -> CmdResult<Task> {
+    fn build(&self, pool: TaskdefPool, agent: Agent) -> JfResult<Task> {
         self.visibility_guard(agent)?;
         Task::new(self.task_cfg.clone(), pool)
     }
@@ -54,7 +54,7 @@ impl Taskdef {
 }
 
 impl TryFrom<(String, TaskCfg)> for Taskdef {
-    type Error = CmdError;
+    type Error = JfError;
 
     fn try_from(value: (String, TaskCfg)) -> Result<Self, Self::Error> {
         Self::new(value.0, value.1)

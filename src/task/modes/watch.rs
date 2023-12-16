@@ -7,7 +7,7 @@ use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 
 use super::super::runner::Runner;
 use crate::{
-    error::CmdResult,
+    error::JfResult,
     task::Task,
     taskdef::{Agent, TaskdefPool},
 };
@@ -26,7 +26,7 @@ pub struct Watch {
 }
 
 impl Watch {
-    pub fn new(params: WatchParams, pool: TaskdefPool) -> CmdResult<Self> {
+    pub fn new(params: WatchParams, pool: TaskdefPool) -> JfResult<Self> {
         let task = pool.build(params.task, Agent::Task)?;
         Ok(Self {
             task: Box::new(task),
@@ -38,7 +38,7 @@ impl Watch {
 
 #[async_trait::async_trait]
 impl Runner for Watch {
-    async fn run(&self) -> CmdResult<Self> {
+    async fn run(&self) -> JfResult<Self> {
         let (tx, rx) = std::sync::mpsc::channel();
         let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
 
@@ -70,11 +70,11 @@ impl Runner for Watch {
         Ok(self.clone())
     }
 
-    async fn is_finished(&self) -> CmdResult<bool> {
+    async fn is_finished(&self) -> JfResult<bool> {
         Ok(false)
     }
 
-    async fn cancel(&self) -> CmdResult<()> {
+    async fn cancel(&self) -> JfResult<()> {
         self.is_cancelled.store(true, Ordering::Relaxed);
         Ok(())
     }

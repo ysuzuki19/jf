@@ -1,5 +1,5 @@
 use super::super::runner::Runner;
-use crate::{error::CmdResult, task::Task};
+use crate::{error::JfResult, task::Task};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct ShellParams {
@@ -27,16 +27,16 @@ impl Shell {
 
 #[async_trait::async_trait]
 impl Runner for Shell {
-    async fn run(&self) -> CmdResult<Self> {
+    async fn run(&self) -> JfResult<Self> {
         self.command.run().await?;
         Ok(self.clone())
     }
 
-    async fn is_finished(&self) -> CmdResult<bool> {
+    async fn is_finished(&self) -> JfResult<bool> {
         self.command.is_finished().await
     }
 
-    async fn cancel(&self) -> CmdResult<()> {
+    async fn cancel(&self) -> JfResult<()> {
         self.command.cancel().await?;
         Ok(())
     }
