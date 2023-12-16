@@ -1,0 +1,102 @@
+[job.run]
+command = "cargo"
+args = ["run"]
+description = "run the project"
+
+[job.live-run]
+mode = "watch"
+job = "run"
+watch_list = ["src/**/*.rs"]
+
+[job.sleep]
+command = "sleep"
+args = ["2"]
+
+[job.echo_hello]
+command = "echo"
+args = ["hello"]
+
+[job.echo_bye]
+command = "echo"
+args = ["bye"]
+
+[job.loop_1]
+mode = "shell"
+script = """
+for i in $(seq 1 10); do
+    echo 1 $i
+    sleep 1
+done
+"""
+
+[job.loop_2]
+mode = "shell"
+script = """
+for i in $(seq 1 10); do
+    echo 2 $i
+    sleep 1
+done
+"""
+
+[job.loop_3]
+mode = "shell"
+script = """
+for i in $(seq 1 10); do
+    echo 3 $i
+    sleep 1
+done
+"""
+
+[job.incl10]
+mode = "shell"
+script = """
+for i in $(seq 1 10); do
+    echo $i
+    sleep 1
+done
+"""
+
+[job.incl10-sequential]
+mode = "sequential"
+jobs = ["incl10", "incl10", "incl10"]
+
+[job.sequential-echos]
+mode = "sequential"
+jobs = ["loop_1", "loop_2", "loop_3"]
+
+[job.sequential-echos-watch]
+mode = "watch"
+job = "sequential-echos"
+watch_list = ["src/**/*.rs"]
+
+[job.incl10-sequential-watch]
+mode = "watch"
+job = "incl10-sequential"
+watch_list = ["src/**/*.rs"]
+
+[job.greet]
+mode = "sequential"
+jobs = ["echo_hello", "echo_bye"]
+description = "greet to you `hello` and `bye`"
+
+[job.greet-slow]
+mode = "sequential"
+jobs = ["echo_hello", "sleep", "echo_bye"]
+
+[job.greet-parallel]
+mode = "parallel"
+jobs = ["greet-slow", "greet"]
+
+[job.incl10-parallel]
+mode = "parallel"
+jobs = ["incl10", "incl10"]
+
+[job.incl10-parallel-watch]
+mode = "watch"
+job = "incl10-parallel"
+watch_list = ["src/**/*.rs"]
+
+[job.incl10-watch]
+mode = "watch"
+job = "incl10"
+watch_list = ["src/**/*.rs"]
