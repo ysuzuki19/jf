@@ -6,9 +6,11 @@ impl WritableString {
     pub fn new() -> Self {
         Self(String::new())
     }
+}
 
-    pub fn string(self) -> String {
-        self.0
+impl ToString for WritableString {
+    fn to_string(&self) -> String {
+        self.0.clone()
     }
 }
 
@@ -29,12 +31,12 @@ pub fn generate<G>(shell: G) -> String
 where
     G: clap_complete::Generator,
 {
-    let mut jf = <Args as clap::CommandFactory>::command();
-    let bin_name = jf.get_name().to_owned();
+    let mut cmd = <Args as clap::CommandFactory>::command();
+    let bin_name = cmd.get_name().to_owned();
 
-    let mut out = WritableString::new();
+    let mut buf = WritableString::new();
 
-    clap_complete::generate(shell, &mut jf, bin_name, &mut out);
+    clap_complete::generate(shell, &mut cmd, bin_name, &mut buf);
 
-    out.string().replace("\"<TASK_NAME>\"", "$(jf list)")
+    buf.to_string().replace("\"<JOB_NAME>\"", "$(jf list)")
 }
