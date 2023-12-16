@@ -37,3 +37,106 @@ impl<'de> serde::Deserialize<'de> for JobCfg {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::error::JfResult;
+
+    use super::*;
+
+    #[test]
+    fn default() -> JfResult<()> {
+        let cfg: JobCfg = toml::from_str(
+            r#"
+            command = "echo"
+            "#,
+        )?;
+
+        if let JobCfg::Command(_) = cfg {
+            Ok(())
+        } else {
+            panic!("expected JobCfg::Command");
+        }
+    }
+
+    #[test]
+    fn command() -> JfResult<()> {
+        let cfg: JobCfg = toml::from_str(
+            r#"
+            mode = "command"
+            command = "echo"
+            "#,
+        )?;
+
+        if let JobCfg::Command(_) = cfg {
+            Ok(())
+        } else {
+            panic!("expected JobCfg::Command");
+        }
+    }
+
+    #[test]
+    fn parallel() -> JfResult<()> {
+        let cfg: JobCfg = toml::from_str(
+            r#"
+            mode = "parallel"
+            jobs = ["test", "test2"]
+            "#,
+        )?;
+
+        if let JobCfg::Parallel(_) = cfg {
+            Ok(())
+        } else {
+            panic!("expected JobCfg::Parallel");
+        }
+    }
+
+    #[test]
+    fn sequential() -> JfResult<()> {
+        let cfg: JobCfg = toml::from_str(
+            r#"
+            mode = "sequential"
+            jobs = ["test", "test2"]
+            "#,
+        )?;
+
+        if let JobCfg::Sequential(_) = cfg {
+            Ok(())
+        } else {
+            panic!("expected JobCfg::Sequential");
+        }
+    }
+
+    #[test]
+    fn shell() -> JfResult<()> {
+        let cfg: JobCfg = toml::from_str(
+            r#"
+            mode = "shell"
+            script = "echo hello"
+            "#,
+        )?;
+
+        if let JobCfg::Shell(_) = cfg {
+            Ok(())
+        } else {
+            panic!("expected JobCfg::Shell");
+        }
+    }
+
+    #[test]
+    fn watch() -> JfResult<()> {
+        let cfg: JobCfg = toml::from_str(
+            r#"
+            mode = "watch"
+            job = "test"
+            watch_list = ["test", "test2"]
+            "#,
+        )?;
+
+        if let JobCfg::Watch(_) = cfg {
+            Ok(())
+        } else {
+            panic!("expected JobCfg::Watch");
+        }
+    }
+}
