@@ -6,22 +6,16 @@ use clap::Parser;
 
 use crate::{cfg, error::JfResult};
 
-use self::{
-    args::{Args, SubCommand},
-    commander::Commander,
-};
+use self::args::{Args, SubCommand};
 
 pub struct Cli {
     args: Args,
-    commander: Commander,
 }
 
 impl Cli {
     pub fn load() -> JfResult<Self> {
         let args = Args::parse();
-        let cfg = cfg::Cfg::load()?;
-        let commander = commander::Commander::new(cfg)?;
-        Ok(Self { args, commander })
+        Ok(Self { args })
     }
 
     pub async fn run(self) -> JfResult<()> {
@@ -30,14 +24,21 @@ impl Cli {
                 SubCommand::Completion { shell } => {
                     println!("{}", completion_script::generate(shell))
                 }
-                SubCommand::Run { job_name } => {
-                    self.commander.run(job_name).await?;
-                }
-                SubCommand::Description { job_name } => {
-                    println!("{}", self.commander.description(job_name)?);
-                }
-                SubCommand::List => {
-                    println!("{}", self.commander.list().join("\n"));
+                _ => {
+                    let cfg = cfg::Cfg::load()?;
+                    let cmdr = commander::Commander::new(cfg)?;
+                    match sub_command {
+                        SubCommand::Run { job_name } => {
+                            cmdr.run(job_name).await?;
+                        }
+                        SubCommand::Description { job_name } => {
+                            println!("{}", cmdr.description(job_name)?);
+                        }
+                        SubCommand::List => {
+                            println!("{}", cmdr.list().join("\n"));
+                        }
+                        _ => {}
+                    }
                 }
             }
         }
