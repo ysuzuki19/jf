@@ -32,3 +32,7 @@ args = ["build"]
 [job.test-build]
 mode = "parallel"
 jobs = ["test", "build"]
+
+[job.install]
+command = "cargo"
+args = ["install", "--path", "."]
