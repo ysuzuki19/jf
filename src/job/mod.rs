@@ -3,7 +3,7 @@ mod runner;
 mod types;
 
 pub use self::runner::Runner;
-use crate::{cfg::JobCfg, error::JfResult, jobdef::JobdefPool};
+use crate::{cfg::job_cfg::JobCfg, error::JfResult, jobdef::JobdefPool};
 
 #[derive(Clone)]
 pub enum Job {

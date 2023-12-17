@@ -1,6 +1,9 @@
 mod common;
 mod deserialize;
 mod modes;
+mod visibility;
+
+pub use self::visibility::Visibility;
 
 #[derive(Debug, Clone)]
 pub enum JobCfg {
@@ -12,13 +15,13 @@ pub enum JobCfg {
 }
 
 impl JobCfg {
-    pub fn private(&self) -> bool {
+    pub fn visibility(&self) -> &Visibility {
         match self {
-            JobCfg::Command(c) => c.common.private(),
-            JobCfg::Parallel(p) => p.common.private(),
-            JobCfg::Sequential(s) => s.common.private(),
-            JobCfg::Shell(s) => s.common.private(),
-            JobCfg::Watch(w) => w.common.private(),
+            JobCfg::Command(c) => c.common.visibility(),
+            JobCfg::Parallel(p) => p.common.visibility(),
+            JobCfg::Sequential(s) => s.common.visibility(),
+            JobCfg::Shell(s) => s.common.visibility(),
+            JobCfg::Watch(w) => w.common.visibility(),
         }
     }
 

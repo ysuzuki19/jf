@@ -4,14 +4,14 @@ mod pool;
 pub use self::agent::Agent;
 pub use self::pool::JobdefPool;
 use crate::{
-    cfg::JobCfg,
+    cfg::job_cfg::{JobCfg, Visibility},
     error::{JfError, JfResult},
     job::Job,
 };
 
 pub struct Jobdef {
     name: String,
-    private: bool,
+    visibility: Visibility,
     description: String,
     job_cfg: JobCfg,
 }
@@ -20,14 +20,14 @@ impl Jobdef {
     pub fn new(name: String, job_cfg: JobCfg) -> JfResult<Self> {
         Ok(Self {
             name,
-            private: job_cfg.private(),
+            visibility: job_cfg.visibility().clone(),
             description: job_cfg.description(),
             job_cfg,
         })
     }
 
     fn visibility_guard(&self, agent: Agent) -> JfResult<()> {
-        if !self.private {
+        if self.visibility.is_public() {
             return Ok(());
         }
         match agent {

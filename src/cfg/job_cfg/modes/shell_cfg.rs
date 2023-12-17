@@ -16,8 +16,6 @@ mod tests {
     fn deserialize() -> JfResult<()> {
         let cfg: ShellCfg = toml::from_str(
             r#"
-private = false
-description = "test-desc"
 script = """
 test1
 test2
@@ -25,8 +23,6 @@ test2
             "#,
         )?;
 
-        assert!(!cfg.common.private());
-        assert_eq!(cfg.common.description(), "test-desc");
         assert_eq!(cfg.params.script, "test1\ntest2\n");
         Ok(())
     }

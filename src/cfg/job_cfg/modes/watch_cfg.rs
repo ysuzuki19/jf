@@ -16,15 +16,11 @@ mod tests {
     fn deserialize() -> JfResult<()> {
         let cfg: WatchCfg = toml::from_str(
             r#"
-private = false
-description = "test2"
 job = "test-job"
 watch_list = ["test1", "./src/**/*.rs"]
             "#,
         )?;
 
-        assert!(!cfg.common.private());
-        assert_eq!(cfg.common.description(), "test2");
         assert_eq!(cfg.params.job, "test-job");
         assert_eq!(cfg.params.watch_list, vec!["test1", "./src/**/*.rs"]);
         Ok(())

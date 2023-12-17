@@ -16,14 +16,10 @@ mod tests {
     fn deserialize() -> JfResult<()> {
         let cfg: SequentialCfg = toml::from_str(
             r#"
-private = false
-description = "test-desc"
 jobs = ["test"]
             "#,
         )?;
 
-        assert!(!cfg.common.private());
-        assert_eq!(cfg.common.description(), "test-desc");
         assert_eq!(cfg.params.jobs, vec!["test"]);
         Ok(())
     }

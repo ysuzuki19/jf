@@ -16,14 +16,10 @@ mod tests {
     fn deserialize() -> JfResult<()> {
         let cfg: ParallelCfg = toml::from_str(
             r#"
-private = false
-description = "test"
 jobs = ["test-job1", "test-job2"]
             "#,
         )?;
 
-        assert!(!cfg.common.private());
-        assert_eq!(cfg.common.description(), "test");
         assert_eq!(cfg.params.jobs, vec!["test-job1", "test-job2"]);
         Ok(())
     }

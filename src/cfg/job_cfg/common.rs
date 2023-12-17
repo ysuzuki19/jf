@@ -1,16 +1,18 @@
 use serde::Deserialize;
 
+use super::Visibility;
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct CommonCfg {
     #[serde(default)]
-    private: bool,
+    visibility: Visibility,
     #[serde(default)]
     description: String,
 }
 
 impl CommonCfg {
-    pub fn private(&self) -> bool {
-        self.private
+    pub fn visibility(&self) -> &Visibility {
+        &self.visibility
     }
 
     pub fn description(&self) -> String {
@@ -25,31 +27,39 @@ mod tests {
     use super::*;
 
     #[test]
-    fn deserialize() -> JfResult<()> {
+    fn deserialize_default() -> JfResult<()> {
+        let cfg: CommonCfg = toml::from_str("")?;
+
+        assert!(cfg.visibility().is_public());
+        assert_eq!(cfg.description, "");
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize_private() -> JfResult<()> {
         let cfg: CommonCfg = toml::from_str(
             r#"
-            private = true
+            visibility = "private"
             description = "test"
             "#,
         )?;
 
-        assert!(cfg.private);
+        assert!(cfg.visibility().is_private());
         assert_eq!(cfg.description, "test");
+        Ok(())
+    }
 
+    #[test]
+    fn deserialize_public() -> JfResult<()> {
         let cfg: CommonCfg = toml::from_str(
             r#"
-            private = false
+            visibility = "public"
             description = "test2"
             "#,
         )?;
 
-        assert!(!cfg.private);
+        assert!(cfg.visibility().is_public());
         assert_eq!(cfg.description, "test2");
-
-        let cfg: CommonCfg = toml::from_str(r#""#)?;
-
-        assert!(!cfg.private);
-        assert_eq!(cfg.description, "");
         Ok(())
     }
 }

@@ -16,28 +16,21 @@ mod tests {
     fn deserialize() -> JfResult<()> {
         let cfg: CommandCfg = toml::from_str(
             r#"
-private = true
-description = "test-desc"
 command = "test"
 args = ["test1", "test2"]
             "#,
         )?;
 
-        assert!(cfg.common.private());
-        assert_eq!(cfg.common.description(), "test-desc");
         assert_eq!(cfg.params.command, "test");
         assert_eq!(cfg.params.args, vec!["test1", "test2"]);
 
         let cfg: CommandCfg = toml::from_str(
             r#"
-private = true
 description = "test-desc"
 command = "test"
             "#,
         )?;
 
-        assert!(cfg.common.private());
-        assert_eq!(cfg.common.description(), "test-desc");
         assert_eq!(cfg.params.command, "test");
         assert_eq!(cfg.params.args, Vec::<String>::new());
         Ok(())
