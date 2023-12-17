@@ -30,7 +30,7 @@ impl Commander {
             .await
     }
 
-    pub fn description(&self, job_name: String) -> JfResult<String> {
+    pub fn description(&self, job_name: String) -> JfResult<&String> {
         self.pool.description(job_name)
     }
 

@@ -15,7 +15,7 @@ impl JobdefPool {
     pub fn new(jobdef_vec: Vec<Jobdef>) -> Self {
         let mut map = HashMap::new();
         for jobdef in jobdef_vec {
-            map.insert(jobdef.name(), jobdef);
+            map.insert(jobdef.name().to_owned(), jobdef);
         }
         Self { map: Arc::new(map) }
     }
@@ -34,7 +34,7 @@ impl JobdefPool {
         self.get(job_name)?.build(self.clone(), agent)
     }
 
-    pub fn description(&self, job_name: String) -> JfResult<String> {
+    pub fn description(&self, job_name: String) -> JfResult<&String> {
         Ok(self.get(job_name)?.description())
     }
 }

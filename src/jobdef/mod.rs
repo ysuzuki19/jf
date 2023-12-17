@@ -44,12 +44,12 @@ impl Jobdef {
         Job::new(self.job_cfg.clone(), pool)
     }
 
-    fn name(&self) -> String {
-        self.name.clone()
+    fn name(&self) -> &String {
+        &self.name
     }
 
-    pub fn description(&self) -> String {
-        self.description.clone()
+    pub fn description(&self) -> &String {
+        &self.description
     }
 }
 
