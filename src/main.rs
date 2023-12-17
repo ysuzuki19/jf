@@ -9,7 +9,7 @@ async fn main() {
     match cli::Cli::load() {
         Ok(cli) => {
             if let Err(e) = cli.run().await {
-                eprintln!("Error: {}", e);
+                eprintln!("\nError: {}", e);
                 std::process::exit(1);
             }
         }
