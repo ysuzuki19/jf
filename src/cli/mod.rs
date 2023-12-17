@@ -35,12 +35,14 @@ impl Cli {
                             println!("{}", cmdr.description(job_name)?);
                         }
                         SubCommand::List => {
-                            println!("{}", cmdr.list().join("\n"));
+                            println!("{}", cmdr.list().join(" "));
                         }
-                        _ => {}
+                        _ => unreachable!(),
                     }
                 }
             }
+        } else {
+            <Args as clap::CommandFactory>::command().print_help()?;
         }
         Ok(())
     }
