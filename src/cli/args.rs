@@ -14,6 +14,9 @@ pub struct Args {
 
     #[arg(long)]
     verbose: bool,
+
+    #[arg(short, long)]
+    pub cfg: Option<String>,
 }
 
 #[derive(Parser, Debug, Clone)]

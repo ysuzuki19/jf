@@ -20,4 +20,10 @@ impl Cfg {
             .map_err(|_| JfError::Custom(DEFAULT_CFG.to_string()))?;
         Ok(toml::from_str(&cfg_content)?)
     }
+
+    pub fn load_with_path(path: &str) -> JfResult<Self> {
+        let cfg_content =
+            std::fs::read_to_string(path).map_err(|_| JfError::Custom(path.to_string()))?;
+        Ok(toml::from_str(&cfg_content)?)
+    }
 }
