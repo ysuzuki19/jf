@@ -1,0 +1,34 @@
+[meta]
+version = "0.1.0"
+
+[job.run]
+command = "cargo"
+args = ["run"]
+description = "run the project"
+
+[job.live-run]
+mode = "watch"
+job = "run"
+watch_list = ["src/**", "Cargo.toml"]
+
+[job.test]
+command = "cargo"
+args = ["test"]
+description = "run the tests"
+
+[job.live-test]
+mode = "watch"
+job = "test"
+watch_list = ["src/**", "Cargo.toml"]
+
+[job.test-run]
+mode = "sequential"
+jobs = ["test", "run"]
+
+[job.build]
+command = "cargo"
+args = ["build"]
+
+[job.test-build]
+mode = "parallel"
+jobs = ["test", "build"]

@@ -14,7 +14,7 @@ pub struct Cfg {
 
 impl Cfg {
     pub fn load() -> JfResult<Self> {
-        let cfg_content = std::fs::read_to_string("jfrc.toml")?;
+        let cfg_content = std::fs::read_to_string("jf.toml")?;
         Ok(toml::from_str(&cfg_content)?)
     }
 }
