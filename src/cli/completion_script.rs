@@ -38,5 +38,6 @@ where
 
     clap_complete::generate(shell, &mut cmd, bin_name, &mut buf);
 
+    // For bash dynamic completion
     buf.to_string().replace("\"<JOB_NAME>\"", "$(jf list)")
 }
