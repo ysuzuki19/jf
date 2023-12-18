@@ -8,8 +8,11 @@ mod jobdef;
 async fn main() {
     match cli::Cli::load() {
         Ok(cli) => {
+            let error_log_enabled = cli.error_log_enabled();
             if let Err(e) = cli.run().await {
-                eprintln!("\nError: {}", e);
+                if error_log_enabled {
+                    eprintln!("Error: {}", e);
+                }
                 std::process::exit(1);
             }
         }

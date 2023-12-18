@@ -6,7 +6,7 @@ use clap::Parser;
 
 use crate::{cfg, error::JfResult};
 
-use self::args::{Args, SubCommand};
+pub use self::args::{Args, SubCommand};
 
 pub struct Cli {
     args: Args,
@@ -16,6 +16,10 @@ impl Cli {
     pub fn load() -> JfResult<Self> {
         let args = Args::parse();
         Ok(Self { args })
+    }
+
+    pub fn error_log_enabled(&self) -> bool {
+        !matches!(self.args.sub_command, Some(SubCommand::List))
     }
 
     pub async fn run(self) -> JfResult<()> {
