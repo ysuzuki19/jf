@@ -58,14 +58,12 @@ args = ["test"]               # required; command arguments
 ### shell
 
 ```toml
-[job.loop_1]
-mode = "shell"            # required;
+[job.hello_world]
+mode = "shell" # required;
 script = """
-for i in $(seq 1 10); do
-    echo $i
-    sleep 1
-done
-"""                       # required; shell script to run
+echo Hello
+echo World
+"""            # required; shell script to run
 ```
 
 ### parallel
