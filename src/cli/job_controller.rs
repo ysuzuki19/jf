@@ -5,11 +5,11 @@ use crate::{
     jobdef::{Agent, JobdefPool},
 };
 
-pub struct Commander {
+pub struct JobController {
     pool: JobdefPool,
 }
 
-impl Commander {
+impl JobController {
     pub fn new(cfg: Cfg) -> JfResult<Self> {
         let job_vec = cfg
             .jobs

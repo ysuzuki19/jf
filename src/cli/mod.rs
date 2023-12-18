@@ -1,6 +1,6 @@
 mod args;
-mod commander;
 mod completion_script;
+mod job_controller;
 
 use clap::Parser;
 
@@ -30,16 +30,16 @@ impl Cli {
                 }
                 _ => {
                     let cfg = cfg::Cfg::load(self.args.cfg)?;
-                    let cmdr = commander::Commander::new(cfg)?;
+                    let jc = job_controller::JobController::new(cfg)?;
                     match sub_command {
                         SubCommand::Run { job_name } => {
-                            cmdr.run(job_name).await?;
+                            jc.run(job_name).await?;
                         }
                         SubCommand::Description { job_name } => {
-                            println!("{}", cmdr.description(job_name)?);
+                            println!("{}", jc.description(job_name)?)
                         }
                         SubCommand::List => {
-                            println!("{}", cmdr.list().join(" "));
+                            println!("{}", jc.list().join(" "));
                         }
                         _ => unreachable!(),
                     }
