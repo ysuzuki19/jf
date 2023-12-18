@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use serde::Deserialize;
 
-use crate::error::{JfError, JfResult};
+use crate::error::JfResult;
 
 #[derive(Debug, Deserialize)]
 pub struct Cfg {
@@ -23,14 +23,12 @@ impl Cfg {
     }
 
     pub fn load_default() -> JfResult<Self> {
-        let cfg_content = std::fs::read_to_string(DEFAULT_CFG)
-            .map_err(|_| JfError::Custom(DEFAULT_CFG.to_string()))?;
-        Ok(toml::from_str(&cfg_content)?)
+        let content = std::fs::read_to_string(DEFAULT_CFG)?;
+        Ok(toml::from_str(&content)?)
     }
 
     pub fn load_with_path(path: &str) -> JfResult<Self> {
-        let cfg_content =
-            std::fs::read_to_string(path).map_err(|_| JfError::Custom(path.to_string()))?;
-        Ok(toml::from_str(&cfg_content)?)
+        let content = std::fs::read_to_string(path)?;
+        Ok(toml::from_str(&content)?)
     }
 }
