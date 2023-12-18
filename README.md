@@ -17,17 +17,28 @@ Furthermore, `jf` offers some running modes out-of-the-box.
 
 `jf` has some built-in running mode.
 
-| mode         | description                         |
-| :----------- | :---------------------------------- |
-| `command`    | normal shell command                |
-| `shell`      | hard coded shell-script             |
-| `parallel`   | run some jobs parallel              |
-| `sequential` | run some jobs sequential            |
-| `watch`      | run job with watch some dir or file |
+| mode         | description                            |
+| :----------- | :------------------------------------- |
+| `command`    | normal shell command                   |
+| `shell`      | hard coded shell-script                |
+| `parallel`   | run some jobs parallel                 |
+| `sequential` | run some jobs sequential               |
+| `watch`      | run job with watching some dir or file |
 
 The default mode is `command`.
 
+# Dependencies
+
+- Rust
+- Cargo
+
 # Installation
+
+```bash
+$ git clone https://github.com/ysuzuki19/jf
+$ cd jf
+jf $ cargo install --path .
+```
 
 # Job Definition
 
@@ -98,6 +109,8 @@ By the following command, you can setup completion.
 ```bash
 $ source <(jf completion bash) # or zsh, powershell, elvish, fish
 ```
+
+If you want to setup completion permanently, command is following.
 
 ```bash
 $ echo "source <(jf completion bash)" >> ~/.bashrc
