@@ -27,10 +27,7 @@ impl std::io::Write for WritableString {
     }
 }
 
-pub fn generate<G>(shell: G) -> String
-where
-    G: clap_complete::Generator,
-{
+pub fn generate(shell: clap_complete::Shell) -> String {
     let mut cmd = <Args as clap::CommandFactory>::command();
     let bin_name = cmd.get_name().to_owned();
 
@@ -38,6 +35,11 @@ where
 
     clap_complete::generate(shell, &mut cmd, bin_name, &mut buf);
 
-    // For bash dynamic completion
-    buf.to_string().replace("\"<JOB_NAME>\"", "$(jf list)")
+    let script = buf.to_string();
+
+    // Optimize completion script such as dynamic completion
+    match shell {
+        clap_complete::Shell::Bash => script.replace("\"<JOB_NAME>\"", "$(jf list)"),
+        _ => script,
+    }
 }
