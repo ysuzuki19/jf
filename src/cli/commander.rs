@@ -24,7 +24,7 @@ impl Commander {
     pub async fn run(&self, job_name: String) -> JfResult<()> {
         self.pool
             .build(job_name, Agent::Cli)?
-            .run()
+            .start()
             .await?
             .wait()
             .await

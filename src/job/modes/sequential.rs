@@ -44,7 +44,7 @@ impl Sequential {
 
 #[async_trait::async_trait]
 impl Runner for Sequential {
-    async fn run(&self) -> JfResult<Self> {
+    async fn start(&self) -> JfResult<Self> {
         let handle: JfHandle = tokio::spawn({
             let jobs = self.jobs.clone();
             let is_cancelled = self.is_cancelled.clone();
@@ -55,7 +55,7 @@ impl Runner for Sequential {
                         job.cancel().await?;
                         continue;
                     }
-                    job.run().await?;
+                    job.start().await?;
                     job.wait_with_cancel(is_cancelled.clone()).await?;
                 }
                 Ok(())

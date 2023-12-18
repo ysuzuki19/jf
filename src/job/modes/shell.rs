@@ -27,8 +27,8 @@ impl Shell {
 
 #[async_trait::async_trait]
 impl Runner for Shell {
-    async fn run(&self) -> JfResult<Self> {
-        self.command.run().await?;
+    async fn start(&self) -> JfResult<Self> {
+        self.command.start().await?;
         Ok(self.clone())
     }
 

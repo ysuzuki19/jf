@@ -5,26 +5,27 @@ use std::sync::{
 
 use crate::error::JfResult;
 
+async fn sleep() {
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+}
+
 #[async_trait::async_trait]
 pub trait Runner
 where
     Self: Sized + Clone,
 {
-    async fn run(&self) -> JfResult<Self>;
+    async fn start(&self) -> JfResult<Self>;
     async fn is_finished(&self) -> JfResult<bool>;
     async fn cancel(&self) -> JfResult<()>;
     fn bunshin(&self) -> Self;
 
-    async fn sleep() {
-        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-    }
     async fn wait(&self) -> JfResult<()> {
         loop {
             if self.is_finished().await? {
                 break;
             }
 
-            Self::sleep().await;
+            sleep().await;
         }
         Ok(())
     }
@@ -40,7 +41,7 @@ where
                 break;
             }
 
-            Self::sleep().await;
+            sleep().await;
         }
         Ok(())
     }

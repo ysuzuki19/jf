@@ -43,13 +43,13 @@ impl Parallel {
 
 #[async_trait::async_trait]
 impl Runner for Parallel {
-    async fn run(&self) -> JfResult<Self> {
+    async fn start(&self) -> JfResult<Self> {
         let mut handles = Vec::new();
         for job in self.jobs.clone() {
             let handle: JfHandle = tokio::spawn({
                 let is_cancelled = self.is_cancelled.clone();
                 async move {
-                    job.run().await?;
+                    job.start().await?;
                     job.wait_with_cancel(is_cancelled).await?;
                     Ok(())
                 }

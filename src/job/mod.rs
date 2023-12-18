@@ -30,15 +30,15 @@ impl Job {
 
 #[async_trait::async_trait]
 impl Runner for Job {
-    async fn run(&self) -> JfResult<Self> {
+    async fn start(&self) -> JfResult<Self> {
         Ok(match self {
-            Self::Command(t) => t.run().await?.into(),
-            Self::Parallel(t) => t.run().await?.into(),
-            Self::Sequential(t) => t.run().await?.into(),
-            Self::Shell(t) => t.run().await?.into(),
-            Self::Watch(t) => t.run().await?.into(),
+            Self::Command(t) => t.start().await?.into(),
+            Self::Parallel(t) => t.start().await?.into(),
+            Self::Sequential(t) => t.start().await?.into(),
+            Self::Shell(t) => t.start().await?.into(),
+            Self::Watch(t) => t.start().await?.into(),
             #[cfg(test)]
-            Self::Mock(t) => t.run().await?.into(),
+            Self::Mock(t) => t.start().await?.into(),
         })
     }
 

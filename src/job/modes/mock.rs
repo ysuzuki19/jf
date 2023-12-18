@@ -50,7 +50,7 @@ impl Mock {
 
 #[async_trait::async_trait]
 impl Runner for Mock {
-    async fn run(&self) -> JfResult<Self> {
+    async fn start(&self) -> JfResult<Self> {
         self.is_running.store(true, Ordering::Relaxed);
         tokio::spawn({
             let each_sleep_time = self.each_sleep_time;
@@ -112,7 +112,7 @@ mod test {
         let mock = Mock::new(1, 3);
         let id = mock.id();
 
-        assert!(mock.run().await.is_ok());
+        assert!(mock.start().await.is_ok());
         mock.assert_status(MockStatus {
             is_running: true,
             is_finished: false,
@@ -134,7 +134,7 @@ mod test {
         let mock = Mock::new(1, 3);
         let id = mock.id();
 
-        assert!(mock.run().await.is_ok());
+        assert!(mock.start().await.is_ok());
 
         assert!(mock.cancel().await.is_ok());
         assert!(mock.is_running.load(Ordering::Relaxed));

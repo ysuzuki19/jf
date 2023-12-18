@@ -38,7 +38,7 @@ impl Watch {
 
 #[async_trait::async_trait]
 impl Runner for Watch {
-    async fn run(&self) -> JfResult<Self> {
+    async fn start(&self) -> JfResult<Self> {
         let (tx, rx) = std::sync::mpsc::channel();
         let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
 
@@ -49,7 +49,7 @@ impl Runner for Watch {
         }
 
         loop {
-            let running_job = self.job.bunshin().run().await?;
+            let running_job = self.job.bunshin().start().await?;
 
             loop {
                 match rx.recv()??.kind {

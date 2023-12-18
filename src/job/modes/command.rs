@@ -29,7 +29,7 @@ impl Command {
 
 #[async_trait::async_trait]
 impl Runner for Command {
-    async fn run(&self) -> JfResult<Self> {
+    async fn start(&self) -> JfResult<Self> {
         let mut jf = tokio::process::Command::new(self.params.command.clone());
         jf.args(self.params.args.clone());
         self.child.lock().await.replace(jf.spawn()?);
@@ -80,7 +80,7 @@ mod tests {
             command: "sleep".to_string(),
             args: vec!["1".to_string()],
         });
-        command.run().await?;
+        command.start().await?;
         assert!(!command.is_finished().await?);
         Ok(())
     }
@@ -91,7 +91,7 @@ mod tests {
             command: "sleep".to_string(),
             args: vec!["1".to_string()],
         });
-        command.run().await?;
+        command.start().await?;
         command.wait().await?;
         assert!(command.is_finished().await?);
         Ok(())
@@ -103,7 +103,7 @@ mod tests {
             command: "sleep".to_string(),
             args: vec!["1".to_string()],
         });
-        command.run().await?.cancel().await?;
+        command.start().await?.cancel().await?;
         assert!(command.is_finished().await?);
         Ok(())
     }
@@ -115,7 +115,7 @@ mod tests {
             args: vec!["1".to_string()],
         })
         .bunshin();
-        command.run().await?.cancel().await?;
+        command.start().await?.cancel().await?;
         assert!(command.is_finished().await?);
         Ok(())
     }
