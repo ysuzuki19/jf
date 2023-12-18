@@ -29,11 +29,7 @@ impl Cli {
                     println!("{}", completion_script::generate(shell))
                 }
                 _ => {
-                    let cfg = if let Some(cfg_path) = self.args.cfg {
-                        cfg::Cfg::load_with_path(&cfg_path)?
-                    } else {
-                        cfg::Cfg::load()?
-                    };
+                    let cfg = cfg::Cfg::load(self.args.cfg)?;
                     let cmdr = commander::Commander::new(cfg)?;
                     match sub_command {
                         SubCommand::Run { job_name } => {

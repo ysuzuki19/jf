@@ -15,7 +15,14 @@ pub struct Cfg {
 const DEFAULT_CFG: &str = "jf.toml";
 
 impl Cfg {
-    pub fn load() -> JfResult<Self> {
+    pub fn load(cfg_path: Option<String>) -> JfResult<Self> {
+        match cfg_path {
+            Some(path) => Self::load_with_path(&path),
+            None => Self::load_default(),
+        }
+    }
+
+    pub fn load_default() -> JfResult<Self> {
         let cfg_content = std::fs::read_to_string(DEFAULT_CFG)
             .map_err(|_| JfError::Custom(DEFAULT_CFG.to_string()))?;
         Ok(toml::from_str(&cfg_content)?)
