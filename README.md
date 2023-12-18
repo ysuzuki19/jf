@@ -115,3 +115,5 @@ If you want to setup completion permanently, command is following.
 ```bash
 $ echo "source <(jf completion bash)" >> ~/.bashrc
 ```
+
+Completion is optimized for `bash`.
