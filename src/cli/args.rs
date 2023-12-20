@@ -30,6 +30,12 @@ pub struct Args {
     job_name: Option<String>,
 }
 
+impl Args {
+    pub fn list(&self) -> bool {
+        self.list
+    }
+}
+
 pub enum Static {
     Completion { shell: clap_complete::Shell },
     Help,

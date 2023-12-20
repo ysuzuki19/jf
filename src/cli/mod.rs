@@ -20,11 +20,7 @@ impl Cli {
     }
 
     pub fn error_log_enabled(&self) -> bool {
-        let res_cli_behavior = self.args.clone().try_into();
-        match res_cli_behavior {
-            Ok(cb) => !matches!(cb, CliBehavior::Configured(Configured::List)),
-            Err(_) => true,
-        }
+        !self.args.list()
     }
 
     pub async fn run(mut self) -> JfResult<()> {
