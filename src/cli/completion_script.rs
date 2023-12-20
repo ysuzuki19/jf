@@ -39,7 +39,13 @@ pub fn generate(shell: clap_complete::Shell) -> String {
 
     // Optimize completion script such as dynamic completion
     match shell {
-        clap_complete::Shell::Bash => script.replace("\"<JOB_NAME>\"", "$(jf list)"),
+        clap_complete::Shell::Bash => {
+            script
+                // For Ubuntu/bash
+                .replace("\"<JOB_NAME>\"", "$(jf --list)")
+                // For MacOS/bash
+                .replace("[JOB_NAME]", "$(jf --list)")
+        }
         _ => script,
     }
 }
