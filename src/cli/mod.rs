@@ -6,7 +6,8 @@ use clap::Parser;
 
 use crate::{cfg, error::JfResult};
 
-pub use self::args::{Args, SubCommand};
+pub use self::args::Args;
+use self::args::CliBehavior;
 
 pub struct Cli {
     args: Args,
@@ -19,34 +20,39 @@ impl Cli {
     }
 
     pub fn error_log_enabled(&self) -> bool {
-        !matches!(self.args.sub_command, Some(SubCommand::List))
+        let res_cli_behavior = self.args.clone().try_into();
+        match res_cli_behavior {
+            Ok(cli_behavior) => !matches!(cli_behavior, CliBehavior::List),
+            Err(_) => true,
+        }
     }
 
-    pub async fn run(self) -> JfResult<()> {
-        if let Some(sub_command) = self.args.sub_command {
-            match sub_command {
-                SubCommand::Completion { shell } => {
-                    println!("{}", completion_script::generate(shell))
-                }
-                _ => {
-                    let cfg = cfg::Cfg::load(self.args.cfg)?;
-                    let jc = job_controller::JobController::new(cfg)?;
-                    match sub_command {
-                        SubCommand::Run { job_name } => {
-                            jc.run(job_name).await?;
-                        }
-                        SubCommand::Description { job_name } => {
-                            println!("{}", jc.description(job_name)?)
-                        }
-                        SubCommand::List => {
-                            println!("{}", jc.list().join(" "));
-                        }
-                        _ => unreachable!(),
+    pub async fn run(mut self) -> JfResult<()> {
+        let cfg_option = self.args.cfg.take();
+        let cli_behavior = self.args.try_into()?;
+        match cli_behavior {
+            CliBehavior::Completion { shell } => {
+                println!("{}", completion_script::generate(shell))
+            }
+            CliBehavior::Help => {
+                <Args as clap::CommandFactory>::command().print_help()?;
+            }
+            _ => {
+                let cfg = cfg::Cfg::load(cfg_option)?;
+                let jc = job_controller::JobController::new(cfg)?;
+                match cli_behavior {
+                    CliBehavior::List => {
+                        println!("{}", jc.list().join(" "));
                     }
+                    CliBehavior::Description { job_name } => {
+                        println!("{}", jc.description(job_name)?)
+                    }
+                    CliBehavior::Run { job_name } => {
+                        jc.run(job_name).await?;
+                    }
+                    _ => unreachable!(),
                 }
             }
-        } else {
-            <Args as clap::CommandFactory>::command().print_help()?;
         }
         Ok(())
     }
