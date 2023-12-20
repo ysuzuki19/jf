@@ -7,7 +7,7 @@ use clap::Parser;
 use crate::{cfg, error::JfResult};
 
 pub use self::args::Args;
-use self::args::CliBehavior;
+use self::args::{CliBehavior, Configured, Static};
 
 pub struct Cli {
     args: Args,
@@ -22,35 +22,33 @@ impl Cli {
     pub fn error_log_enabled(&self) -> bool {
         let res_cli_behavior = self.args.clone().try_into();
         match res_cli_behavior {
-            Ok(cli_behavior) => !matches!(cli_behavior, CliBehavior::List),
+            Ok(cb) => !matches!(cb, CliBehavior::Configured(Configured::List)),
             Err(_) => true,
         }
     }
 
     pub async fn run(mut self) -> JfResult<()> {
         let cfg_option = self.args.cfg.take();
-        let cli_behavior = self.args.try_into()?;
-        match cli_behavior {
-            CliBehavior::Completion { shell } => {
+        match self.args.try_into()? {
+            CliBehavior::Static(Static::Completion { shell }) => {
                 println!("{}", completion_script::generate(shell))
             }
-            CliBehavior::Help => {
+            CliBehavior::Static(Static::Help) => {
                 <Args as clap::CommandFactory>::command().print_help()?;
             }
-            _ => {
+            CliBehavior::Configured(wjc) => {
                 let cfg = cfg::Cfg::load(cfg_option)?;
                 let jc = job_controller::JobController::new(cfg)?;
-                match cli_behavior {
-                    CliBehavior::List => {
+                match wjc {
+                    Configured::List => {
                         println!("{}", jc.list().join(" "));
                     }
-                    CliBehavior::Description { job_name } => {
+                    Configured::Description { job_name } => {
                         println!("{}", jc.description(job_name)?)
                     }
-                    CliBehavior::Run { job_name } => {
+                    Configured::Run { job_name } => {
                         jc.run(job_name).await?;
                     }
-                    _ => unreachable!(),
                 }
             }
         }
