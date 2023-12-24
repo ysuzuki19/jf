@@ -30,6 +30,20 @@ impl JobdefPool {
         self.map.keys().cloned().collect()
     }
 
+    pub fn validate(&self) -> JfResult<()> {
+        let errs = self
+            .map
+            .iter()
+            .map(|(_, jobdef)| jobdef.build(self.clone(), Agent::Job))
+            .filter_map(|r| if let Err(e) = r { Some(e) } else { None })
+            .collect::<Vec<_>>();
+        if errs.is_empty() {
+            Ok(())
+        } else {
+            Err(JfError::Multi(errs))
+        }
+    }
+
     pub fn build(&self, job_name: String, agent: Agent) -> JfResult<Job> {
         self.get(job_name)?.build(self.clone(), agent)
     }

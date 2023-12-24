@@ -34,6 +34,9 @@ impl Cli {
                     Configured::List => {
                         println!("{}", jc.list().join(" "));
                     }
+                    Configured::Validate => {
+                        jc.validate()?;
+                    }
                     Configured::Run { job_name } => {
                         jc.run(job_name).await?;
                     }

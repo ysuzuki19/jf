@@ -31,4 +31,7 @@ pub enum JfError {
 
     #[error("{0}")]
     Custom(String),
+
+    #[error("{0:?}")]
+    Multi(Vec<JfError>),
 }

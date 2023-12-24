@@ -9,6 +9,7 @@ pub enum Static {
 
 pub enum Configured {
     List,
+    Validate,
     Description { job_name: String },
     Run { job_name: String },
 }
@@ -26,6 +27,8 @@ impl TryFrom<Args> for CliBehavior {
             Ok(Self::Static(Static::Completion { shell }))
         } else if args.list {
             Ok(Self::Configured(Configured::List))
+        } else if args.validate {
+            Ok(Self::Configured(Configured::Validate))
         } else if args.description {
             if let Some(job_name) = args.job_name {
                 Ok(Self::Configured(Configured::Description { job_name }))

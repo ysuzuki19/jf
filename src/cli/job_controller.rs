@@ -39,4 +39,8 @@ impl JobController {
         job_names.sort();
         job_names
     }
+
+    pub fn validate(&self) -> JfResult<()> {
+        self.pool.validate()
+    }
 }

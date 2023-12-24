@@ -1,8 +1,10 @@
 use clap::Parser;
 
+const AUTHOR: &str = "ysuzuki19";
+
 #[derive(Parser, Debug, Clone)]
 #[command(
-    author = "ysuzuki19",
+    author = AUTHOR,
     version,
     about,
     long_about = None,
@@ -11,6 +13,9 @@ use clap::Parser;
 pub struct Args {
     #[arg(long)]
     pub(super) verbose: bool,
+
+    #[arg(long)]
+    pub(super) validate: bool,
 
     #[arg(short, long)]
     pub(super) cfg: Option<String>,
