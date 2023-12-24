@@ -1,38 +1,42 @@
 [meta]
 version = "0.1.0"
 
-[job.run]
-command = "cargo"
-args = ["run"]
-description = "run the project"
-
-[job.live-run]
-mode = "watch"
-job = "run"
-watch_list = ["src/**", "Cargo.toml"]
-
-[job.test]
-command = "cargo"
-args = ["test"]
-description = "run the tests"
+[job.install]
+mode = "sequential"
+jobs = ["only-build", "only-install"]
 
 [job.live-test]
 mode = "watch"
 job = "test"
 watch_list = ["src/**", "Cargo.toml"]
 
+[job.live-run]
+mode = "watch"
+job = "run"
+watch_list = ["src/**", "Cargo.toml"]
+
 [job.test-run]
 mode = "sequential"
 jobs = ["test", "run"]
 
-[job.build]
+[job.run]
+command = "cargo"
+args = ["run"]
+description = "run the project"
+
+[job.only-test]
+command = "cargo"
+args = ["test"]
+description = "run the tests"
+
+[job.only-build]
 command = "cargo"
 args = ["build"]
 
-[job.test-build]
-mode = "parallel"
-jobs = ["test", "build"]
-
-[job.install]
+[job.only-install]
 command = "cargo"
 args = ["install", "--path", "."]
+
+[job.test-build]
+mode = "parallel"
+jobs = ["only-test", "only-build"]
