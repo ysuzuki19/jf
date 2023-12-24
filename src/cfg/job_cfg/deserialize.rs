@@ -48,8 +48,8 @@ mod tests {
     fn default() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
             r#"
-            command = "echo"
-            "#,
+command = "echo"
+"#,
         )?;
 
         if let JobCfg::Command(_) = cfg {
@@ -63,9 +63,9 @@ mod tests {
     fn command() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
             r#"
-            mode = "command"
-            command = "echo"
-            "#,
+mode = "command"
+command = "echo"
+"#,
         )?;
 
         if let JobCfg::Command(_) = cfg {
@@ -79,9 +79,9 @@ mod tests {
     fn parallel() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
             r#"
-            mode = "parallel"
-            jobs = ["test", "test2"]
-            "#,
+mode = "parallel"
+jobs = ["test", "test2"]
+"#,
         )?;
 
         if let JobCfg::Parallel(_) = cfg {
@@ -95,9 +95,9 @@ mod tests {
     fn sequential() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
             r#"
-            mode = "sequential"
-            jobs = ["test", "test2"]
-            "#,
+mode = "sequential"
+jobs = ["test", "test2"]
+"#,
         )?;
 
         if let JobCfg::Sequential(_) = cfg {
@@ -111,9 +111,9 @@ mod tests {
     fn shell() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
             r#"
-            mode = "shell"
-            script = "echo hello"
-            "#,
+mode = "shell"
+script = "echo hello"
+"#,
         )?;
 
         if let JobCfg::Shell(_) = cfg {
@@ -127,10 +127,10 @@ mod tests {
     fn watch() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
             r#"
-            mode = "watch"
-            job = "test"
-            watch_list = ["test", "test2"]
-            "#,
+mode = "watch"
+job = "test"
+watch_list = ["test", "test2"]
+"#,
         )?;
 
         if let JobCfg::Watch(_) = cfg {

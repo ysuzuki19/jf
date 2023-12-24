@@ -18,7 +18,7 @@ mod tests {
             r#"
 command = "test"
 args = ["test1", "test2"]
-            "#,
+"#,
         )?;
 
         assert_eq!(cfg.params.command, "test");
@@ -28,7 +28,7 @@ args = ["test1", "test2"]
             r#"
 description = "test-desc"
 command = "test"
-            "#,
+"#,
         )?;
 
         assert_eq!(cfg.params.command, "test");

@@ -17,7 +17,7 @@ mod tests {
         let cfg: ParallelCfg = toml::from_str(
             r#"
 jobs = ["test-job1", "test-job2"]
-            "#,
+"#,
         )?;
 
         assert_eq!(cfg.params.jobs, vec!["test-job1", "test-job2"]);

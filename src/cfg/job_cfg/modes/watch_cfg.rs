@@ -18,7 +18,7 @@ mod tests {
             r#"
 job = "test-job"
 watch_list = ["test1", "./src/**/*.rs"]
-            "#,
+"#,
         )?;
 
         assert_eq!(cfg.params.job, "test-job");

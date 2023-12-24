@@ -39,9 +39,9 @@ mod tests {
     fn deserialize_private() -> JfResult<()> {
         let cfg: CommonCfg = toml::from_str(
             r#"
-            visibility = "private"
-            description = "test"
-            "#,
+visibility = "private"
+description = "test"
+"#,
         )?;
 
         assert!(cfg.visibility().is_private());
@@ -53,9 +53,9 @@ mod tests {
     fn deserialize_public() -> JfResult<()> {
         let cfg: CommonCfg = toml::from_str(
             r#"
-            visibility = "public"
-            description = "test2"
-            "#,
+visibility = "public"
+description = "test2"
+"#,
         )?;
 
         assert!(cfg.visibility().is_public());

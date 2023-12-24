@@ -17,7 +17,7 @@ mod tests {
         let cfg: SequentialCfg = toml::from_str(
             r#"
 jobs = ["test"]
-            "#,
+"#,
         )?;
 
         assert_eq!(cfg.params.jobs, vec!["test"]);

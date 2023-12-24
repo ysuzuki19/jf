@@ -20,7 +20,7 @@ script = """
 test1
 test2
 """
-            "#,
+"#,
         )?;
 
         assert_eq!(cfg.params.script, "test1\ntest2\n");
