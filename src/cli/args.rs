@@ -1,5 +1,7 @@
 use clap::Parser;
 
+use super::LogLevel;
+
 const AUTHOR: &str = "ysuzuki19";
 
 #[derive(Parser, Debug, Clone)]
@@ -15,13 +17,13 @@ pub struct Args {
     pub(super) help: bool,
 
     #[arg(long)]
-    pub(super) verbose: bool,
-
-    #[arg(long)]
     pub(super) validate: bool,
 
     #[arg(short, long)]
     pub(super) cfg: Option<String>,
+
+    #[arg(long, default_value = "error")]
+    pub(super) log_level: LogLevel,
 
     #[arg(long)]
     pub(super) completion: Option<clap_complete::Shell>,

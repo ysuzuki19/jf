@@ -2,13 +2,15 @@ mod args;
 mod behavior;
 mod completion_script;
 mod job_controller;
+mod log_level;
 
 use clap::Parser;
 
-use crate::{cfg, error::JfResult};
+use crate::{cfg, error::JfResult, LOG_LEVEL};
 
 pub use self::args::Args;
 use self::behavior::{CliBehavior, Configured, Static};
+pub use log_level::LogLevel;
 
 pub struct Cli {
     args: Args,
@@ -20,11 +22,16 @@ impl Cli {
         Ok(Self { args })
     }
 
-    pub fn error_log_enabled(&self) -> bool {
-        !self.args.list
+    async fn load_log_level(&self) {
+        *LOG_LEVEL.write().await = if self.args.list {
+            LogLevel::None
+        } else {
+            self.args.log_level.clone()
+        }
     }
 
     pub async fn run(mut self) -> JfResult<()> {
+        self.load_log_level().await;
         let cfg_option = self.args.cfg.take();
         match self.args.try_into()? {
             CliBehavior::Configured(wjc) => {
