@@ -11,7 +11,7 @@ async fn main() {
             let error_log_enabled = cli.error_log_enabled();
             if let Err(e) = cli.run().await {
                 if error_log_enabled {
-                    eprintln!("Error: {}", e);
+                    eprintln!("{}", e);
                 }
                 std::process::exit(1);
             }
