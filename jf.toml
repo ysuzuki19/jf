@@ -7,7 +7,7 @@ jobs = ["only-test", "only-install"]
 
 [job.live-test]
 mode = "watch"
-job = "test"
+job = "only-test"
 watch_list = ["src/**", "Cargo.toml"]
 
 [job.live-run]
