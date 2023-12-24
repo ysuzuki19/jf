@@ -12,6 +12,9 @@ const AUTHOR: &str = "ysuzuki19";
 )]
 pub struct Args {
     #[arg(long)]
+    pub(super) help: bool,
+
+    #[arg(long)]
     pub(super) verbose: bool,
 
     #[arg(long)]
