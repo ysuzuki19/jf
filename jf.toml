@@ -17,7 +17,7 @@ watch_list = ["src/**", "Cargo.toml"]
 
 [job.test-run]
 mode = "sequential"
-jobs = ["test", "run"]
+jobs = ["only-test", "run"]
 
 [job.run]
 command = "cargo"
