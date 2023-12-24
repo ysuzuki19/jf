@@ -3,7 +3,7 @@ version = "0.1.0"
 
 [job.install]
 mode = "sequential"
-jobs = ["only-build", "only-install"]
+jobs = ["only-test", "only-install"]
 
 [job.live-test]
 mode = "watch"
@@ -26,7 +26,7 @@ description = "run the project"
 
 [job.only-test]
 command = "cargo"
-args = ["test"]
+args = ["test", "--release"]
 description = "run the tests"
 
 [job.only-build]
