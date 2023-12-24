@@ -5,6 +5,10 @@ version = "0.1.0"
 mode = "sequential"
 jobs = ["only-test", "only-install"]
 
+[job.uninstall]
+command = "cargo"
+args = ["uninstall"]
+
 [job.update]
 mode = "sequential"
 jobs = ["git-pull", "install"]
