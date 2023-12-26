@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap::Parser;
 
 use super::LogLevel;
@@ -20,7 +22,7 @@ pub struct Args {
     pub(super) validate: bool,
 
     #[arg(short, long)]
-    pub(super) cfg: Option<String>,
+    pub(super) cfg: Option<PathBuf>,
 
     #[arg(long, default_value = "error")]
     pub(super) log_level: LogLevel,
