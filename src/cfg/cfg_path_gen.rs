@@ -29,8 +29,8 @@ impl CfgPathGen {
 mod test {
     use super::*;
 
-    fn dummy_entities_dir_path() -> PathBuf {
-        PathBuf::from(".").join("dummy_entities")
+    fn fixtures_dir() -> PathBuf {
+        PathBuf::from(".").join("tests").join("fixtures")
     }
 
     #[test]
@@ -41,14 +41,14 @@ mod test {
 
     #[test]
     fn test_gen_from_dir() {
-        let dir = dummy_entities_dir_path();
+        let dir = fixtures_dir();
         let path = CfgPathGen::new(Some(dir.clone())).gen();
         assert_eq!(path, dir.join(DEFAULT_CFG_NAME));
     }
 
     #[test]
     fn test_gen_from_cfg() {
-        let file_path = dummy_entities_dir_path().join(DEFAULT_CFG_NAME);
+        let file_path = fixtures_dir().join(DEFAULT_CFG_NAME);
         let path = CfgPathGen::new(Some(file_path.clone())).gen();
         assert_eq!(path, file_path);
     }
