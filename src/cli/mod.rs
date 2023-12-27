@@ -34,10 +34,10 @@ impl Cli {
         self.load_log_level().await;
         let cfg_option = self.args.cfg.take();
         match self.args.try_into()? {
-            CliBehavior::Configured(wjc) => {
+            CliBehavior::Configured(behavior) => {
                 let cfg = cfg::Cfg::load(cfg_option)?;
                 let jc = job_controller::JobController::new(cfg)?;
-                match wjc {
+                match behavior {
                     Configured::List => {
                         println!("{}", jc.list().join(" "));
                     }
@@ -52,12 +52,14 @@ impl Cli {
                     }
                 }
             }
-            CliBehavior::Static(Static::Help) => {
-                <Args as clap::CommandFactory>::command().print_help()?;
-            }
-            CliBehavior::Static(Static::Completion { shell }) => {
-                println!("{}", completion_script::generate(shell))
-            }
+            CliBehavior::Static(behavior) => match behavior {
+                Static::Help => {
+                    <Args as clap::CommandFactory>::command().print_help()?;
+                }
+                Static::Completion { shell } => {
+                    println!("{}", completion_script::generate(shell))
+                }
+            },
         }
         Ok(())
     }
