@@ -1,41 +1,45 @@
 mod args;
 mod behavior;
 mod completion_script;
+mod containers;
 mod job_controller;
 mod log_level;
 
 use clap::Parser;
 
-use crate::{cfg, error::JfResult, LOG_LEVEL};
+use crate::{cfg, error::JfResult};
 
 pub use self::args::Args;
-use self::behavior::{CliBehavior, Configured, Static};
+use self::{
+    behavior::{CliBehavior, Configured, Static},
+    containers::{Context, Options},
+};
 pub use log_level::LogLevel;
 
 pub struct Cli {
-    args: Args,
+    context: Context,
+    behavior: CliBehavior,
+    options: Options,
 }
 
 impl Cli {
     pub fn load() -> JfResult<Self> {
-        let args = Args::parse();
-        Ok(Self { args })
+        let (context, behavior, options) = Args::parse().setup()?;
+        Ok(Self {
+            context,
+            behavior,
+            options,
+        })
     }
 
-    async fn load_log_level(&self) {
-        *LOG_LEVEL.write().await = if self.args.list {
-            LogLevel::None
-        } else {
-            self.args.log_level.clone()
-        }
+    pub fn context(&self) -> &Context {
+        &self.context
     }
 
-    pub async fn run(mut self) -> JfResult<()> {
-        self.load_log_level().await;
-        let cfg_option = self.args.cfg.take();
-        match self.args.try_into()? {
+    pub async fn run(self) -> JfResult<()> {
+        match self.behavior {
             CliBehavior::Configured(behavior) => {
-                let cfg = cfg::Cfg::load(cfg_option)?;
+                let cfg = cfg::Cfg::load(self.options.cfg)?;
                 let jc = job_controller::JobController::new(cfg)?;
                 match behavior {
                     Configured::List => {

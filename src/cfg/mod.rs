@@ -14,8 +14,8 @@ pub struct Cfg {
 }
 
 impl Cfg {
-    pub fn load(input_cfg_path: Option<PathBuf>) -> JfResult<Self> {
-        let file_path = cfg_path_gen::CfgPathGen::new(input_cfg_path).gen();
+    pub fn load(cfg: Option<PathBuf>) -> JfResult<Self> {
+        let file_path = cfg_path_gen::CfgPathGen::new(cfg).gen();
         let content = std::fs::read_to_string(file_path)?;
         Ok(toml::from_str(&content)?)
     }

@@ -42,9 +42,9 @@ pub fn generate(shell: clap_complete::Shell) -> String {
         clap_complete::Shell::Bash => {
             script
                 // For Ubuntu/bash
-                .replace("\"<JOB_NAME>\"", "$(jf --list)")
+                .replace("\"<JOB_NAME>\"", "$(jf --list --log-level none)")
                 // For MacOS/bash
-                .replace("[JOB_NAME]", "$(jf --list)")
+                .replace("[JOB_NAME]", "$(jf --list --log-level none)")
         }
         _ => script,
     }
