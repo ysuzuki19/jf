@@ -10,7 +10,7 @@ use crate::cli::LogLevel;
 async fn main() {
     match cli::Cli::load() {
         Ok(cli) => {
-            let log_level = cli.context().log_level.clone();
+            let log_level = cli.ctx().log_level;
             if let Err(e) = cli.run().await {
                 match log_level {
                     LogLevel::None => {}

@@ -1,7 +1,7 @@
 use clap::builder::PossibleValue;
 use clap::ValueEnum;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Copy)]
 #[non_exhaustive]
 pub enum LogLevel {
     Info,

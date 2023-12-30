@@ -17,31 +17,27 @@ use self::{
 pub use log_level::LogLevel;
 
 pub struct Cli {
-    context: Context,
-    action: Action,
-    options: Options,
+    ctx: Context,
+    act: Action,
+    opts: Options,
 }
 
 impl Cli {
     pub fn load() -> JfResult<Self> {
-        let (context, action, options) = Args::parse().setup()?;
-        Ok(Self {
-            context,
-            action,
-            options,
-        })
+        let (ctx, act, opts) = Args::parse().setup()?;
+        Ok(Self { ctx, act, opts })
     }
 
-    pub fn context(&self) -> &Context {
-        &self.context
+    pub fn ctx(&self) -> &Context {
+        &self.ctx
     }
 
     pub async fn run(self) -> JfResult<()> {
-        match self.action {
-            Action::Configured(action) => {
-                let cfg = cfg::Cfg::load(self.options.cfg)?;
+        match self.act {
+            Action::Configured(act) => {
+                let cfg = cfg::Cfg::load(self.opts.cfg)?;
                 let jc = job_controller::JobController::new(cfg)?;
-                match action {
+                match act {
                     Configured::List => {
                         println!("{}", jc.list().join(" "));
                     }
@@ -56,7 +52,7 @@ impl Cli {
                     }
                 }
             }
-            Action::Static(action) => match action {
+            Action::Static(act) => match act {
                 Static::Help => {
                     <Args as clap::CommandFactory>::command().print_help()?;
                 }

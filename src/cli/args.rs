@@ -58,7 +58,7 @@ impl Args {
 
     fn setup_context(&self) -> Context {
         Context {
-            log_level: self.log_level.clone(),
+            log_level: self.log_level,
         }
     }
 
