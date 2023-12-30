@@ -34,4 +34,7 @@ pub enum JfError {
 
     #[error("{0:?}")]
     Multi(Vec<JfError>),
+
+    #[error("Please input <JOB_NAME> to use --description")]
+    NeedJobNameForDescription,
 }

@@ -77,9 +77,7 @@ impl Args {
             if let Some(job_name) = self.job_name.clone() {
                 Ok(Action::Configured(Configured::Description(job_name)))
             } else {
-                Err(JfError::Custom(
-                    "Please input <JOB_NAME> to --description".to_string(),
-                ))
+                Err(JfError::NeedJobNameForDescription)
             }
         } else if let Some(job_name) = self.job_name.clone() {
             Ok(Action::Configured(Configured::Run(job_name)))
