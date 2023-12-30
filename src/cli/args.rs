@@ -50,15 +50,19 @@ impl Args {
     pub fn setup(&self) -> JfResult<(Context, Action, Options)> {
         let ctx = self.setup_context();
         let action = self.setup_action()?;
-        let options = Options {
-            cfg: self.cfg.clone(),
-        };
+        let options = self.setup_options();
         Ok((ctx, action, options))
     }
 
     fn setup_context(&self) -> Context {
         Context {
             log_level: self.log_level,
+        }
+    }
+
+    fn setup_options(&self) -> Options {
+        Options {
+            cfg: self.cfg.clone(),
         }
     }
 
