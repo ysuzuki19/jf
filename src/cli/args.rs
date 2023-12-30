@@ -50,8 +50,8 @@ impl Args {
     pub fn setup(&self) -> JfResult<(Ctx, Action, Opts)> {
         let ctx = self.setup_ctx();
         let action = self.setup_action()?;
-        let options = self.setup_options();
-        Ok((ctx, action, options))
+        let opts = self.setup_opts();
+        Ok((ctx, action, opts))
     }
 
     fn setup_ctx(&self) -> Ctx {
@@ -60,7 +60,7 @@ impl Args {
         }
     }
 
-    fn setup_options(&self) -> Opts {
+    fn setup_opts(&self) -> Opts {
         Opts {
             cfg: self.cfg.clone(),
         }
@@ -68,21 +68,21 @@ impl Args {
 
     fn setup_action(&self) -> JfResult<Action> {
         if let Some(shell) = self.completion {
-            Ok(Action::Static(Static::Completion { shell }))
+            Ok(Action::Static(Static::Completion(shell)))
         } else if self.list {
             Ok(Action::Configured(Configured::List))
         } else if self.validate {
             Ok(Action::Configured(Configured::Validate))
         } else if self.description {
             if let Some(job_name) = self.job_name.clone() {
-                Ok(Action::Configured(Configured::Description { job_name }))
+                Ok(Action::Configured(Configured::Description(job_name)))
             } else {
                 Err(JfError::Custom(
                     "Please input <JOB_NAME> to --description".to_string(),
                 ))
             }
         } else if let Some(job_name) = self.job_name.clone() {
-            Ok(Action::Configured(Configured::Run { job_name }))
+            Ok(Action::Configured(Configured::Run(job_name)))
         } else {
             Ok(Action::Static(Static::Help))
         }
