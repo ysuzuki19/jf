@@ -3,6 +3,18 @@ pub enum Action {
     Configured(Configured),
 }
 
+impl From<Static> for Action {
+    fn from(s: Static) -> Self {
+        Action::Static(s)
+    }
+}
+
+impl From<Configured> for Action {
+    fn from(c: Configured) -> Self {
+        Action::Configured(c)
+    }
+}
+
 // Action without job configuration
 pub enum Static {
     Completion(clap_complete::Shell),

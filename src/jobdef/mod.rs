@@ -5,7 +5,7 @@ pub use self::agent::Agent;
 pub use self::pool::JobdefPool;
 use crate::{
     cfg::job_cfg::{JobCfg, Visibility},
-    error::{JfError, JfResult},
+    error::{InternalError, JfError, JfResult},
     job::Job,
 };
 
@@ -31,10 +31,7 @@ impl Jobdef {
             return Ok(());
         }
         match agent {
-            Agent::Cli => Err(JfError::Custom(format!(
-                "job.{} is private\nPlease remove `private = true` if you run",
-                self.name
-            ))),
+            Agent::Cli => Err(InternalError::UnexpectedVisibilityPrivate(self.name.clone()).into()),
             _ => Ok(()),
         }
     }

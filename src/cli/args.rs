@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-use crate::error::{JfError, JfResult};
+use crate::error::{InternalError, JfResult};
 
 use super::{
     action::{Action, Configured, Static},
@@ -68,21 +68,21 @@ impl Args {
 
     fn setup_action(&self) -> JfResult<Action> {
         if let Some(shell) = self.completion {
-            Ok(Action::Static(Static::Completion(shell)))
+            Ok(Static::Completion(shell).into())
         } else if self.list {
-            Ok(Action::Configured(Configured::List))
+            Ok(Configured::List.into())
         } else if self.validate {
-            Ok(Action::Configured(Configured::Validate))
+            Ok(Configured::Validate.into())
         } else if self.description {
             if let Some(job_name) = self.job_name.clone() {
-                Ok(Action::Configured(Configured::Description(job_name)))
+                Ok(Configured::Description(job_name).into())
             } else {
-                Err(JfError::NeedJobNameForDescription)
+                Err(InternalError::NeedJobNameForDescription.into())
             }
         } else if let Some(job_name) = self.job_name.clone() {
-            Ok(Action::Configured(Configured::Run(job_name)))
+            Ok(Configured::Run(job_name).into())
         } else {
-            Ok(Action::Static(Static::Help))
+            Ok(Static::Help.into())
         }
     }
 }

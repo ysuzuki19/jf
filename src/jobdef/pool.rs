@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use super::{Agent, Jobdef};
 use crate::{
-    error::{JfError, JfResult},
+    error::{InternalError, JfError, JfResult},
     job::Job,
 };
 
@@ -23,7 +23,7 @@ impl JobdefPool {
     fn get(&self, job_name: String) -> JfResult<&Jobdef> {
         self.map
             .get(&job_name)
-            .ok_or(JfError::JobdefNotFound(job_name))
+            .ok_or(InternalError::JobdefNotFound(job_name).into())
     }
 
     pub fn list(&self) -> Vec<String> {

@@ -26,15 +26,21 @@ pub enum JfError {
     #[error("GlobPatternError occurred: {0}")]
     GlobPatternError(#[from] glob::PatternError),
 
-    #[error("Jobdef(name={0}) not found")]
-    JobdefNotFound(String),
-
-    #[error("{0}")]
-    Custom(String),
-
     #[error("{0:?}")]
     Multi(Vec<JfError>),
 
+    #[error("{0}")]
+    InternalError(#[from] InternalError),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum InternalError {
+    #[error("Jobdef(name={0}) not found")]
+    JobdefNotFound(String),
+
     #[error("Please input <JOB_NAME> to use --description")]
     NeedJobNameForDescription,
+
+    #[error("job.{0} is private\nPlease remove `visibility = \"private\"` if you run")]
+    UnexpectedVisibilityPrivate(String),
 }
