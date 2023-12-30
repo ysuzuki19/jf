@@ -12,7 +12,6 @@ use self::models::{
     action::{Action, CliAction},
     Ctx, Opts,
 };
-pub use models::LogLevel;
 
 pub struct Cli {
     ctx: Ctx,

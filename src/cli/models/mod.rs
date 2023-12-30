@@ -3,9 +3,7 @@ mod logger;
 
 use std::path::PathBuf;
 
-pub use action::Action;
-
-pub use self::logger::{LogLevel, Logger};
+pub use logger::{LogLevel, Logger};
 
 pub struct Ctx {
     pub logger: Logger,
