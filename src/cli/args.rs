@@ -6,7 +6,7 @@ use crate::error::{InternalError, JfResult};
 
 use super::models::{
     action::{Action, Configured, Static},
-    Ctx, LogLevel, Opts,
+    Ctx, LogLevel, Logger, Opts,
 };
 
 const AUTHOR: &str = "ysuzuki19";
@@ -55,7 +55,7 @@ impl Args {
 
     fn setup_ctx(&self) -> Ctx {
         Ctx {
-            log_level: self.log_level,
+            logger: Logger::new(self.log_level),
         }
     }
 

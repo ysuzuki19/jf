@@ -1,14 +1,14 @@
 pub mod action;
-mod log_level;
+mod logger;
 
 use std::path::PathBuf;
 
 pub use action::Action;
 
-pub use self::log_level::LogLevel;
+pub use self::logger::{LogLevel, Logger};
 
 pub struct Ctx {
-    pub log_level: LogLevel,
+    pub logger: Logger,
 }
 
 pub struct Opts {

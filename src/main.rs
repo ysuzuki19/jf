@@ -8,12 +8,9 @@ mod jobdef;
 async fn main() {
     match cli::Cli::load() {
         Ok(cli) => {
-            let log_level = cli.ctx().log_level;
+            let logger = cli.ctx().logger.clone();
             if let Err(e) = cli.run().await {
-                match log_level {
-                    cli::LogLevel::None => {}
-                    _ => eprintln!("{e}"),
-                }
+                logger.error(e.to_string());
                 std::process::exit(1);
             }
         }
