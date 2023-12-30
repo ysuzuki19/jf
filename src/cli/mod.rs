@@ -5,11 +5,11 @@ mod models;
 
 use clap::Parser;
 
-use crate::{cfg, error::JfResult};
+use crate::error::JfResult;
 
 pub use self::args::Args;
 use self::models::{
-    action::{Action, Configured, Static},
+    action::{Action, CliAction},
     Ctx, Opts,
 };
 pub use models::LogLevel;
@@ -31,26 +31,6 @@ impl Cli {
     }
 
     pub async fn run(self) -> JfResult<()> {
-        match self.action {
-            Action::Configured(act) => {
-                let cfg = cfg::Cfg::load(self.opts.cfg)?;
-                let jc = job_controller::JobController::new(cfg)?;
-                match act {
-                    Configured::List => self.ctx.logger.log(jc.list().join(" ")),
-                    Configured::Validate => jc.validate()?,
-                    Configured::Run(job_name) => jc.run(job_name).await?,
-                    Configured::Description(job_name) => {
-                        self.ctx.logger.log(jc.description(job_name)?)
-                    }
-                }
-            }
-            Action::Static(act) => match act {
-                Static::Help => <Args as clap::CommandFactory>::command().print_help()?,
-                Static::Completion(shell) => {
-                    self.ctx.logger.log(completion_script::generate(shell))
-                }
-            },
-        }
-        Ok(())
+        self.action.run(self.ctx, self.opts).await
     }
 }

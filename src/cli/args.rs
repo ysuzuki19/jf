@@ -5,7 +5,7 @@ use clap::Parser;
 use crate::error::{InternalError, JfResult};
 
 use super::models::{
-    action::{Action, Configured, Static},
+    action::{Action, Configured, Statics},
     Ctx, LogLevel, Logger, Opts,
 };
 
@@ -67,7 +67,7 @@ impl Args {
 
     fn setup_action(&self) -> JfResult<Action> {
         if let Some(shell) = self.completion {
-            Ok(Static::Completion(shell).into())
+            Ok(Statics::Completion(shell).into())
         } else if self.list {
             Ok(Configured::List.into())
         } else if self.validate {
@@ -81,7 +81,7 @@ impl Args {
         } else if let Some(job_name) = self.job_name.clone() {
             Ok(Configured::Run(job_name).into())
         } else {
-            Ok(Static::Help.into())
+            Ok(Statics::Help.into())
         }
     }
 }
