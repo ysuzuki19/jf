@@ -31,11 +31,11 @@ pub fn generate(shell: clap_complete::Shell) -> String {
     let mut cmd = <Args as clap::CommandFactory>::command();
     let bin_name = cmd.get_name().to_owned();
 
-    let mut buf = WritableString::new();
-
-    clap_complete::generate(shell, &mut cmd, bin_name, &mut buf);
-
-    let script = buf.to_string();
+    let script = {
+        let mut buf = WritableString::new();
+        clap_complete::generate(shell, &mut cmd, bin_name, &mut buf);
+        buf.to_string()
+    };
 
     // Optimize completion script such as dynamic completion
     match shell {
