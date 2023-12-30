@@ -5,7 +5,7 @@ use clap::Parser;
 use crate::error::{JfError, JfResult};
 
 use super::{
-    behavior::{CliBehavior, Configured, Static},
+    action::{Action, Configured, Static},
     containers::{Context, Options},
     LogLevel,
 };
@@ -47,13 +47,13 @@ pub struct Args {
 }
 
 impl Args {
-    pub fn setup(&self) -> JfResult<(Context, CliBehavior, Options)> {
+    pub fn setup(&self) -> JfResult<(Context, Action, Options)> {
         let ctx = self.setup_context();
-        let behavior = self.setup_behavior()?;
+        let action = self.setup_action()?;
         let options = Options {
             cfg: self.cfg.clone(),
         };
-        Ok((ctx, behavior, options))
+        Ok((ctx, action, options))
     }
 
     fn setup_context(&self) -> Context {
@@ -62,27 +62,25 @@ impl Args {
         }
     }
 
-    fn setup_behavior(&self) -> JfResult<CliBehavior> {
+    fn setup_action(&self) -> JfResult<Action> {
         if let Some(shell) = self.completion {
-            Ok(CliBehavior::Static(Static::Completion { shell }))
+            Ok(Action::Static(Static::Completion { shell }))
         } else if self.list {
-            Ok(CliBehavior::Configured(Configured::List))
+            Ok(Action::Configured(Configured::List))
         } else if self.validate {
-            Ok(CliBehavior::Configured(Configured::Validate))
+            Ok(Action::Configured(Configured::Validate))
         } else if self.description {
             if let Some(job_name) = self.job_name.clone() {
-                Ok(CliBehavior::Configured(Configured::Description {
-                    job_name,
-                }))
+                Ok(Action::Configured(Configured::Description { job_name }))
             } else {
                 Err(JfError::Custom(
                     "Please input <JOB_NAME> to --description".to_string(),
                 ))
             }
         } else if let Some(job_name) = self.job_name.clone() {
-            Ok(CliBehavior::Configured(Configured::Run { job_name }))
+            Ok(Action::Configured(Configured::Run { job_name }))
         } else {
-            Ok(CliBehavior::Static(Static::Help))
+            Ok(Action::Static(Static::Help))
         }
     }
 }

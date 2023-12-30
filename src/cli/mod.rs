@@ -1,5 +1,5 @@
+mod action;
 mod args;
-mod behavior;
 mod completion_script;
 mod containers;
 mod job_controller;
@@ -11,23 +11,23 @@ use crate::{cfg, error::JfResult};
 
 pub use self::args::Args;
 use self::{
-    behavior::{CliBehavior, Configured, Static},
+    action::{Action, Configured, Static},
     containers::{Context, Options},
 };
 pub use log_level::LogLevel;
 
 pub struct Cli {
     context: Context,
-    behavior: CliBehavior,
+    action: Action,
     options: Options,
 }
 
 impl Cli {
     pub fn load() -> JfResult<Self> {
-        let (context, behavior, options) = Args::parse().setup()?;
+        let (context, action, options) = Args::parse().setup()?;
         Ok(Self {
             context,
-            behavior,
+            action,
             options,
         })
     }
@@ -37,11 +37,11 @@ impl Cli {
     }
 
     pub async fn run(self) -> JfResult<()> {
-        match self.behavior {
-            CliBehavior::Configured(behavior) => {
+        match self.action {
+            Action::Configured(action) => {
                 let cfg = cfg::Cfg::load(self.options.cfg)?;
                 let jc = job_controller::JobController::new(cfg)?;
-                match behavior {
+                match action {
                     Configured::List => {
                         println!("{}", jc.list().join(" "));
                     }
@@ -56,7 +56,7 @@ impl Cli {
                     }
                 }
             }
-            CliBehavior::Static(behavior) => match behavior {
+            Action::Static(action) => match action {
                 Static::Help => {
                     <Args as clap::CommandFactory>::command().print_help()?;
                 }

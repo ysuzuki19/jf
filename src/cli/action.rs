@@ -10,7 +10,7 @@ pub enum Configured {
     Run { job_name: String },
 }
 
-pub enum CliBehavior {
+pub enum Action {
     Static(Static),
     Configured(Configured),
 }
