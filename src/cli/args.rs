@@ -6,7 +6,7 @@ use crate::error::{JfError, JfResult};
 
 use super::{
     action::{Action, Configured, Static},
-    containers::{Context, Options},
+    containers::{Ctx, Opts},
     LogLevel,
 };
 
@@ -47,21 +47,21 @@ pub struct Args {
 }
 
 impl Args {
-    pub fn setup(&self) -> JfResult<(Context, Action, Options)> {
-        let ctx = self.setup_context();
+    pub fn setup(&self) -> JfResult<(Ctx, Action, Opts)> {
+        let ctx = self.setup_ctx();
         let action = self.setup_action()?;
         let options = self.setup_options();
         Ok((ctx, action, options))
     }
 
-    fn setup_context(&self) -> Context {
-        Context {
+    fn setup_ctx(&self) -> Ctx {
+        Ctx {
             log_level: self.log_level,
         }
     }
 
-    fn setup_options(&self) -> Options {
-        Options {
+    fn setup_options(&self) -> Opts {
+        Opts {
             cfg: self.cfg.clone(),
         }
     }

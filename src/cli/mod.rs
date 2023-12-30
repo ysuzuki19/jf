@@ -12,28 +12,28 @@ use crate::{cfg, error::JfResult};
 pub use self::args::Args;
 use self::{
     action::{Action, Configured, Static},
-    containers::{Context, Options},
+    containers::{Ctx, Opts},
 };
 pub use log_level::LogLevel;
 
 pub struct Cli {
-    ctx: Context,
-    act: Action,
-    opts: Options,
+    ctx: Ctx,
+    action: Action,
+    opts: Opts,
 }
 
 impl Cli {
     pub fn load() -> JfResult<Self> {
-        let (ctx, act, opts) = Args::parse().setup()?;
-        Ok(Self { ctx, act, opts })
+        let (ctx, action, opts) = Args::parse().setup()?;
+        Ok(Self { ctx, action, opts })
     }
 
-    pub fn ctx(&self) -> &Context {
+    pub fn ctx(&self) -> &Ctx {
         &self.ctx
     }
 
     pub async fn run(self) -> JfResult<()> {
-        match self.act {
+        match self.action {
             Action::Configured(act) => {
                 let cfg = cfg::Cfg::load(self.opts.cfg)?;
                 let jc = job_controller::JobController::new(cfg)?;
