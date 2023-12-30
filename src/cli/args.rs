@@ -22,28 +22,28 @@ const AUTHOR: &str = "ysuzuki19";
 )]
 pub struct Args {
     #[arg(long)]
-    pub(super) help: bool,
+    pub help: bool,
 
     #[arg(long)]
-    pub(super) validate: bool,
+    pub validate: bool,
 
     #[arg(short, long)]
-    pub(super) cfg: Option<PathBuf>,
+    pub cfg: Option<PathBuf>,
 
     #[arg(long, default_value = "error")]
     pub log_level: LogLevel,
 
     #[arg(long)]
-    pub(super) completion: Option<clap_complete::Shell>,
+    pub completion: Option<clap_complete::Shell>,
 
     #[arg(long)]
-    pub(super) list: bool,
+    pub list: bool,
 
     #[arg(long)]
-    pub(super) description: bool,
+    pub description: bool,
 
     #[command()]
-    pub(super) job_name: Option<String>,
+    pub job_name: Option<String>,
 }
 
 impl Args {
