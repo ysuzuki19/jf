@@ -1,20 +1,18 @@
-mod action;
 mod args;
 mod completion_script;
-mod containers;
 mod job_controller;
-mod log_level;
+mod models;
 
 use clap::Parser;
 
 use crate::{cfg, error::JfResult};
 
 pub use self::args::Args;
-use self::{
+use self::models::{
     action::{Action, Configured, Static},
-    containers::{Ctx, Opts},
+    Ctx, Opts,
 };
-pub use log_level::LogLevel;
+pub use models::LogLevel;
 
 pub struct Cli {
     ctx: Ctx,

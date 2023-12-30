@@ -4,8 +4,6 @@ mod error;
 mod job;
 mod jobdef;
 
-use crate::cli::LogLevel;
-
 #[tokio::main]
 async fn main() {
     match cli::Cli::load() {
@@ -13,7 +11,7 @@ async fn main() {
             let log_level = cli.ctx().log_level;
             if let Err(e) = cli.run().await {
                 match log_level {
-                    LogLevel::None => {}
+                    cli::LogLevel::None => {}
                     _ => eprintln!("{e}"),
                 }
                 std::process::exit(1);

@@ -4,10 +4,9 @@ use clap::Parser;
 
 use crate::error::{InternalError, JfResult};
 
-use super::{
+use super::models::{
     action::{Action, Configured, Static},
-    containers::{Ctx, Opts},
-    LogLevel,
+    Ctx, LogLevel, Opts,
 };
 
 const AUTHOR: &str = "ysuzuki19";
