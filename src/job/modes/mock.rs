@@ -60,7 +60,7 @@ impl Runner for Mock {
             let is_cancelled = self.is_cancelled.clone();
             async move {
                 for _ in 0..sleep_count {
-                    tokio::time::sleep(tokio::time::Duration::from_secs(each_sleep_time)).await;
+                    tokio::time::sleep(tokio::time::Duration::from_millis(each_sleep_time)).await;
                     if is_cancelled.load(Ordering::Relaxed) {
                         break;
                     }
@@ -96,9 +96,12 @@ mod test {
     use super::*;
     use std::sync::atomic::Ordering;
 
+    const MOCK_SLEEP_TIME: u64 = 1;
+    const MOCK_SLEEP_COUNT: u8 = 3;
+
     #[tokio::test]
     async fn new() {
-        let mock = Mock::new(1, 3);
+        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
 
         mock.assert_status(MockStatus {
             is_running: false,
@@ -109,7 +112,7 @@ mod test {
 
     #[tokio::test]
     async fn run_wait() {
-        let mock = Mock::new(1, 3);
+        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
         let id = mock.id();
 
         assert!(mock.start().await.is_ok());
@@ -131,7 +134,7 @@ mod test {
 
     #[tokio::test]
     async fn run_cancel_wait() {
-        let mock = Mock::new(1, 3);
+        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
         let id = mock.id();
 
         assert!(mock.start().await.is_ok());
@@ -145,5 +148,36 @@ mod test {
         assert!(!mock.is_running.load(Ordering::Relaxed));
 
         assert_eq!(mock.id(), id);
+    }
+
+    #[tokio::test]
+    async fn bunshin() {
+        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
+        let id = mock.id();
+
+        let bunshin = mock.bunshin();
+        assert_ne!(bunshin.id(), id);
+        assert_eq!(bunshin.each_sleep_time, mock.each_sleep_time);
+        assert_eq!(bunshin.sleep_count, mock.sleep_count);
+        assert!(!bunshin.is_running.load(Ordering::Relaxed));
+        assert!(!bunshin.is_finished.load(Ordering::Relaxed));
+        assert!(!bunshin.is_cancelled.load(Ordering::Relaxed));
+    }
+
+    #[tokio::test]
+    async fn from() {
+        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
+        let id = mock.id();
+
+        if let Job::Mock(mock) = mock.into() {
+            assert_eq!(mock.id(), id);
+            assert_eq!(mock.each_sleep_time, MOCK_SLEEP_TIME);
+            assert_eq!(mock.sleep_count, MOCK_SLEEP_COUNT);
+            assert!(!mock.is_running.load(Ordering::Relaxed));
+            assert!(!mock.is_finished.load(Ordering::Relaxed));
+            assert!(!mock.is_cancelled.load(Ordering::Relaxed));
+        } else {
+            panic!("Invalid Variant: Job::Mock expected");
+        }
     }
 }
