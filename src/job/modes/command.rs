@@ -74,12 +74,16 @@ impl From<Command> for Job {
 mod tests {
     use super::*;
 
+    fn test_command_factory() -> Command {
+        Command::new(CommandParams {
+            command: String::from("sleep"),
+            args: vec![String::from("1")],
+        })
+    }
+
     #[tokio::test]
     async fn run_without_blocking() -> JfResult<()> {
-        let command = Command::new(CommandParams {
-            command: "sleep".to_string(),
-            args: vec!["1".to_string()],
-        });
+        let command = test_command_factory();
         command.start().await?;
         assert!(!command.is_finished().await?);
         Ok(())
@@ -87,10 +91,7 @@ mod tests {
 
     #[tokio::test]
     async fn wait() -> JfResult<()> {
-        let command = Command::new(CommandParams {
-            command: "sleep".to_string(),
-            args: vec!["1".to_string()],
-        });
+        let command = test_command_factory();
         command.start().await?;
         command.wait().await?;
         assert!(command.is_finished().await?);
@@ -99,10 +100,7 @@ mod tests {
 
     #[tokio::test]
     async fn cancel() -> JfResult<()> {
-        let command = Command::new(CommandParams {
-            command: "sleep".to_string(),
-            args: vec!["1".to_string()],
-        });
+        let command = test_command_factory();
         command.start().await?.cancel().await?;
         assert!(command.is_finished().await?);
         Ok(())
@@ -110,11 +108,7 @@ mod tests {
 
     #[tokio::test]
     async fn bunshin() -> JfResult<()> {
-        let command = Command::new(CommandParams {
-            command: "sleep".to_string(),
-            args: vec!["1".to_string()],
-        })
-        .bunshin();
+        let command = test_command_factory().bunshin();
         command.start().await?.cancel().await?;
         assert!(command.is_finished().await?);
         Ok(())
