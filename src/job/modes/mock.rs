@@ -99,9 +99,13 @@ mod test {
     const MOCK_SLEEP_TIME: u64 = 1;
     const MOCK_SLEEP_COUNT: u8 = 3;
 
+    fn test_mock_factory() -> Mock {
+        Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT)
+    }
+
     #[tokio::test]
     async fn new() {
-        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
+        let mock = test_mock_factory();
 
         mock.assert_status(MockStatus {
             is_running: false,
@@ -112,7 +116,7 @@ mod test {
 
     #[tokio::test]
     async fn run_wait() {
-        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
+        let mock = test_mock_factory();
         let id = mock.id();
 
         assert!(mock.start().await.is_ok());
@@ -134,7 +138,7 @@ mod test {
 
     #[tokio::test]
     async fn run_cancel_wait() {
-        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
+        let mock = test_mock_factory();
         let id = mock.id();
 
         assert!(mock.start().await.is_ok());
@@ -152,7 +156,7 @@ mod test {
 
     #[tokio::test]
     async fn bunshin() {
-        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
+        let mock = test_mock_factory();
         let id = mock.id();
 
         let bunshin = mock.bunshin();
@@ -166,7 +170,7 @@ mod test {
 
     #[tokio::test]
     async fn from() {
-        let mock = Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT);
+        let mock = test_mock_factory();
         let id = mock.id();
 
         if let Job::Mock(mock) = mock.into() {
