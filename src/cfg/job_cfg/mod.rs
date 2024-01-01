@@ -12,6 +12,8 @@ pub enum JobCfg {
     Sequential(modes::SequentialCfg),
     Shell(modes::ShellCfg),
     Watch(modes::WatchCfg),
+    #[cfg(test)]
+    Mock(modes::MockCfg),
 }
 
 impl JobCfg {
@@ -22,6 +24,8 @@ impl JobCfg {
             JobCfg::Sequential(s) => s.common.visibility(),
             JobCfg::Shell(s) => s.common.visibility(),
             JobCfg::Watch(w) => w.common.visibility(),
+            #[cfg(test)]
+            JobCfg::Mock(m) => m.common.visibility(),
         }
     }
 
@@ -32,6 +36,8 @@ impl JobCfg {
             JobCfg::Sequential(s) => s.common.description(),
             JobCfg::Shell(s) => s.common.description(),
             JobCfg::Watch(w) => w.common.description(),
+            #[cfg(test)]
+            JobCfg::Mock(m) => m.common.description(),
         }
     }
 }

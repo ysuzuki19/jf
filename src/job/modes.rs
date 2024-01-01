@@ -20,3 +20,5 @@ pub use watch::WatchParams;
 mod mock;
 #[cfg(test)]
 pub(super) use mock::Mock;
+#[cfg(test)]
+pub use mock::MockParams;

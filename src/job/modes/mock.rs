@@ -14,6 +14,12 @@ pub struct MockStatus {
     is_cancelled: bool,
 }
 
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct MockParams {
+    pub each_sleep_time: u64,
+    pub sleep_count: u8,
+}
+
 #[derive(Clone, Default)]
 pub struct Mock {
     each_sleep_time: u64,
@@ -25,10 +31,10 @@ pub struct Mock {
 }
 
 impl Mock {
-    pub fn new(each_sleep_time: u64, sleep_count: u8) -> Self {
+    pub fn new(params: MockParams) -> Self {
         Self {
-            each_sleep_time,
-            sleep_count,
+            each_sleep_time: params.each_sleep_time,
+            sleep_count: params.sleep_count,
             id: MOCK_ID_COUNTER.fetch_add(1, Ordering::Relaxed),
             ..Default::default()
         }
@@ -82,7 +88,10 @@ impl Runner for Mock {
     }
 
     fn bunshin(&self) -> Self {
-        Self::new(self.each_sleep_time, self.sleep_count)
+        Self::new(MockParams {
+            each_sleep_time: self.each_sleep_time,
+            sleep_count: self.sleep_count,
+        })
     }
 }
 
@@ -100,7 +109,10 @@ mod test {
     const MOCK_SLEEP_COUNT: u8 = 3;
 
     fn test_mock_factory() -> Mock {
-        Mock::new(MOCK_SLEEP_TIME, MOCK_SLEEP_COUNT)
+        Mock::new(MockParams {
+            each_sleep_time: MOCK_SLEEP_TIME,
+            sleep_count: MOCK_SLEEP_COUNT,
+        })
     }
 
     #[tokio::test]
@@ -160,7 +172,7 @@ mod test {
         let id = mock.id();
 
         let bunshin = mock.bunshin();
-        assert_ne!(bunshin.id(), id);
+        assert_ne!(bunshin.id(), id); // check new mock job creation
         assert_eq!(bunshin.each_sleep_time, mock.each_sleep_time);
         assert_eq!(bunshin.sleep_count, mock.sleep_count);
         assert!(!bunshin.is_running.load(Ordering::Relaxed));

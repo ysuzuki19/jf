@@ -33,6 +33,10 @@ impl<'de> serde::Deserialize<'de> for JobCfg {
             "watch" => Ok(Self::Watch(
                 WatchCfg::deserialize(value).map_err(serde::de::Error::custom)?,
             )),
+            #[cfg(test)]
+            "mock" => Ok(Self::Mock(
+                super::modes::MockCfg::deserialize(value).map_err(serde::de::Error::custom)?,
+            )),
             m => Err(serde::de::Error::custom(format!("Unknown mode: {m}"))),
         }
     }
@@ -137,6 +141,23 @@ watch_list = ["test", "test2"]
             Ok(())
         } else {
             panic!("expected JobCfg::Watch");
+        }
+    }
+
+    #[test]
+    fn mock() -> JfResult<()> {
+        let cfg: JobCfg = toml::from_str(
+            r#"
+mode = "mock"
+each_sleep_time = 1
+sleep_count = 3
+"#,
+        )?;
+
+        if let JobCfg::Mock(_) = cfg {
+            Ok(())
+        } else {
+            panic!("expected JobCfg::Mock");
         }
     }
 }

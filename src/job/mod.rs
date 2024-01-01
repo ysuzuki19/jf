@@ -24,6 +24,8 @@ impl Job {
             JobCfg::Sequential(c) => modes::Sequential::new(c.params, pool)?.into(),
             JobCfg::Shell(c) => modes::Shell::new(c.params).into(),
             JobCfg::Watch(c) => modes::Watch::new(c.params, pool)?.into(),
+            #[cfg(test)]
+            JobCfg::Mock(c) => modes::Mock::new(c.params).into(),
         })
     }
 }
