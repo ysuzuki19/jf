@@ -8,10 +8,9 @@ use std::{
 
 use tokio::sync::Mutex;
 
-use super::super::runner::Runner;
 use crate::{
     error::JfResult,
-    job::{types::JfHandle, Job},
+    job::{types::JfHandle, Job, Runner},
     jobdef::{Agent, JobdefPool},
 };
 

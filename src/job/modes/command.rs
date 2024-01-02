@@ -2,8 +2,10 @@ use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
-use super::super::runner::Runner;
-use crate::{error::JfResult, job::Job};
+use crate::{
+    error::JfResult,
+    job::{Job, Runner},
+};
 
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct CommandParams {

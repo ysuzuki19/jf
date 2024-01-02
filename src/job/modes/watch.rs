@@ -5,10 +5,9 @@ use std::sync::{
 
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
 
-use super::super::runner::Runner;
 use crate::{
     error::JfResult,
-    job::Job,
+    job::{Job, Runner},
     jobdef::{Agent, JobdefPool},
 };
 

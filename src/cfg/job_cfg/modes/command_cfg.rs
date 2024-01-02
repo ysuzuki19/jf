@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct CommandCfg {
     #[serde(flatten)]
-    pub common: super::super::common::CommonCfg,
+    pub common: crate::cfg::job_cfg::common::CommonCfg,
     #[serde(flatten)]
     pub params: crate::job::modes::CommandParams,
 }
