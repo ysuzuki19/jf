@@ -56,11 +56,8 @@ command = "echo"
 "#,
         )?;
 
-        if let JobCfg::Command(_) = cfg {
-            Ok(())
-        } else {
-            unreachable!("expected JobCfg::Command");
-        }
+        matches!(cfg, JobCfg::Command(_));
+        Ok(())
     }
 
     #[test]
@@ -72,11 +69,8 @@ command = "echo"
 "#,
         )?;
 
-        if let JobCfg::Command(_) = cfg {
-            Ok(())
-        } else {
-            unreachable!("expected JobCfg::Command");
-        }
+        matches!(cfg, JobCfg::Command(_));
+        Ok(())
     }
 
     #[test]
@@ -88,11 +82,8 @@ jobs = ["test", "test2"]
 "#,
         )?;
 
-        if let JobCfg::Parallel(_) = cfg {
-            Ok(())
-        } else {
-            unreachable!("expected JobCfg::Parallel");
-        }
+        matches!(cfg, JobCfg::Parallel(_));
+        Ok(())
     }
 
     #[test]
@@ -104,11 +95,8 @@ jobs = ["test", "test2"]
 "#,
         )?;
 
-        if let JobCfg::Sequential(_) = cfg {
-            Ok(())
-        } else {
-            unreachable!("expected JobCfg::Sequential");
-        }
+        matches!(cfg, JobCfg::Sequential(_));
+        Ok(())
     }
 
     #[test]
@@ -120,11 +108,8 @@ script = "echo hello"
 "#,
         )?;
 
-        if let JobCfg::Shell(_) = cfg {
-            Ok(())
-        } else {
-            unreachable!("expected JobCfg::Shell");
-        }
+        matches!(cfg, JobCfg::Shell(_));
+        Ok(())
     }
 
     #[test]
@@ -137,11 +122,8 @@ watch_list = ["test", "test2"]
 "#,
         )?;
 
-        if let JobCfg::Watch(_) = cfg {
-            Ok(())
-        } else {
-            unreachable!("expected JobCfg::Watch");
-        }
+        matches!(cfg, JobCfg::Watch(_));
+        Ok(())
     }
 
     #[test]
@@ -154,18 +136,12 @@ sleep_count = 3
 "#,
         )?;
 
-        if let JobCfg::Mock(_) = cfg {
-            Ok(())
-        } else {
-            unreachable!("expected JobCfg::Mock");
-        }
+        matches!(cfg, JobCfg::Mock(_));
+        Ok(())
     }
 
     #[test]
-    fn unknown() -> JfResult<()> {
-        match toml::from_str::<JobCfg>(r#"mode = "unknown""#) {
-            Err(_) => Ok(()),
-            _ => unreachable!("expected error"),
-        }
+    fn unknown() {
+        assert!(toml::from_str::<JobCfg>(r#"mode = "unknown""#).is_err());
     }
 }
