@@ -164,8 +164,8 @@ sleep_count = 3
     #[test]
     fn unknown() -> JfResult<()> {
         match toml::from_str::<JobCfg>(r#"mode = "unknown""#) {
-            Ok(_) => unreachable!("expected error"),
             Err(_) => Ok(()),
+            _ => unreachable!("expected error"),
         }
     }
 }
