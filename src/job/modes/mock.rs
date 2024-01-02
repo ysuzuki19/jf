@@ -8,7 +8,7 @@ use crate::job::Runner;
 
 static MOCK_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
-struct CheckList {
+pub struct CheckList {
     is_started: Option<bool>,
     is_running: Option<bool>,
     is_finished: Option<bool>,
@@ -105,7 +105,7 @@ impl Mock {
         );
     }
 
-    fn assert_status(&self, check_list: CheckList) {
+    pub fn assert_status(&self, check_list: CheckList) {
         if let Some(is_started) = check_list.is_started {
             let flag = self.is_started.load(Ordering::Relaxed);
             assert_eq!(

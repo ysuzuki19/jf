@@ -48,8 +48,8 @@ impl Runner for Parallel {
         for job in self.jobs.clone() {
             let handle: JfHandle = tokio::spawn({
                 let is_cancelled = self.is_cancelled.clone();
+                job.start().await?;
                 async move {
-                    job.start().await?;
                     job.wait_with_cancel(is_cancelled).await?;
                     Ok(())
                 }
@@ -95,5 +95,123 @@ impl Runner for Parallel {
 impl From<Parallel> for Job {
     fn from(value: Parallel) -> Self {
         Job::Parallel(value)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        cfg::job_cfg::JobCfg,
+        error::JfResult,
+        job::{
+            modes::{mock::CheckList, Parallel, ParallelParams},
+            Runner,
+        },
+        jobdef::{Jobdef, JobdefPool},
+    };
+
+    #[tokio::test]
+    async fn invalid_new_with_unknown_job() -> JfResult<()> {
+        let must_fail = Parallel::new(
+            ParallelParams {
+                jobs: vec!["mock".into(), "mock".into()],
+            },
+            JobdefPool::new(vec![]),
+        );
+        assert!(must_fail.is_err());
+        Ok(())
+    }
+
+    fn test_jobdef_pool_factory() -> JfResult<JobdefPool> {
+        let mock_cfg: JobCfg = toml::from_str(
+            r#"
+mode = "mock"
+each_sleep_time = 100
+sleep_count = 3
+"#,
+        )?;
+        let jobdefs = vec![Jobdef::new("fast".into(), mock_cfg)?];
+        Ok(JobdefPool::new(jobdefs))
+    }
+
+    #[tokio::test]
+    async fn new() -> JfResult<()> {
+        let p = Parallel::new(
+            ParallelParams {
+                jobs: vec!["fast".into(), "fast".into()],
+            },
+            test_jobdef_pool_factory()?,
+        )?;
+        assert!(p.jobs.len() == 2);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn start() -> JfResult<()> {
+        let p = Parallel::new(
+            ParallelParams {
+                jobs: vec!["fast".into(), "fast".into()],
+            },
+            test_jobdef_pool_factory()?,
+        )?;
+        p.start().await?;
+        for job in p.jobs {
+            let m = job.as_mock();
+            m.assert_status(CheckList::new().started(true));
+        }
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn cancel() -> JfResult<()> {
+        let p = Parallel::new(
+            ParallelParams {
+                jobs: vec!["fast".into(), "fast".into()],
+            },
+            test_jobdef_pool_factory()?,
+        )?;
+        p.start().await?.cancel().await?;
+        for job in p.jobs {
+            let m = job.as_mock();
+            m.assert_status(CheckList::new().started(true).cancelled(true));
+        }
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn wait() -> JfResult<()> {
+        let p = Parallel::new(
+            ParallelParams {
+                jobs: vec!["fast".into(), "fast".into()],
+            },
+            test_jobdef_pool_factory()?,
+        )?;
+        p.start().await?.wait().await?;
+        for job in p.jobs {
+            let m = job.as_mock();
+            m.assert_status(CheckList::new().started(true).finished(true));
+        }
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn bunshin() -> JfResult<()> {
+        let origin = Parallel::new(
+            ParallelParams {
+                jobs: vec!["fast".into(), "fast".into()],
+            },
+            test_jobdef_pool_factory()?,
+        )?;
+        origin.start().await?.cancel().await?;
+
+        let bunshin = origin.bunshin();
+        assert_eq!(origin.jobs.len(), bunshin.jobs.len());
+        for (bunshin_job, origin_job) in bunshin.jobs.iter().zip(origin.jobs) {
+            let bunshin_mock = bunshin_job.as_mock();
+            let origin_mock = origin_job.as_mock();
+            bunshin_mock.assert_id_ne(origin_mock.id());
+            bunshin_mock.assert_status(CheckList::new().started(false));
+        }
+        Ok(())
     }
 }

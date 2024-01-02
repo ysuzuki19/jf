@@ -80,3 +80,15 @@ impl Runner for Job {
         }
     }
 }
+
+#[cfg(test)]
+impl Job {
+    #[cfg(test)]
+    pub fn as_mock(&self) -> &modes::Mock {
+        if let Self::Mock(t) = self {
+            t
+        } else {
+            panic!("invalid job type expected Mock");
+        }
+    }
+}
