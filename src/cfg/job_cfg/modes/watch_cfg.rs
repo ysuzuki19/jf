@@ -7,6 +7,15 @@ pub struct WatchCfg {
 }
 
 #[cfg(test)]
+pub mod fixtures {
+    pub const SIMPLE: &str = r#"
+job = "test-job"
+watch_list = ["test1", "./src/**/*.rs"]"#;
+    pub const JOB: &str = "test-job";
+    pub const WATCH_LIST: &[&str] = &["test1", "./src/**/*.rs"];
+}
+
+#[cfg(test)]
 mod tests {
     use crate::error::JfResult;
 
@@ -14,15 +23,10 @@ mod tests {
 
     #[test]
     fn deserialize() -> JfResult<()> {
-        let cfg: WatchCfg = toml::from_str(
-            r#"
-job = "test-job"
-watch_list = ["test1", "./src/**/*.rs"]
-"#,
-        )?;
+        let cfg: WatchCfg = toml::from_str(fixtures::SIMPLE)?;
 
-        assert_eq!(cfg.params.job, "test-job");
-        assert_eq!(cfg.params.watch_list, vec!["test1", "./src/**/*.rs"]);
+        assert_eq!(cfg.params.job, fixtures::JOB);
+        assert_eq!(cfg.params.watch_list, fixtures::WATCH_LIST);
         Ok(())
     }
 }

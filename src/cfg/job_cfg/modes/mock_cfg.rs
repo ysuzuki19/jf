@@ -7,6 +7,14 @@ pub struct MockCfg {
 }
 
 #[cfg(test)]
+pub mod fixtures {
+    pub const SIMPLE: &str = r#"
+description = "test-desc"
+each_sleep_time = 1
+sleep_count = 3"#;
+}
+
+#[cfg(test)]
 mod tests {
     use crate::error::JfResult;
 
@@ -14,12 +22,7 @@ mod tests {
 
     #[test]
     fn deserialize() -> JfResult<()> {
-        let cfg: MockCfg = toml::from_str(
-            r#"
-each_sleep_time = 1
-sleep_count = 3
-"#,
-        )?;
+        let cfg: MockCfg = toml::from_str(fixtures::SIMPLE)?;
 
         assert_eq!(cfg.params.each_sleep_time, 1);
         assert_eq!(cfg.params.sleep_count, 3);

@@ -7,6 +7,17 @@ pub struct ShellCfg {
 }
 
 #[cfg(test)]
+pub mod fixtures {
+    pub const SIMPLE: &str = r#"
+script = """
+test1
+test2
+"""
+"#;
+    pub const SCRIPT: &str = "test1\ntest2\n";
+}
+
+#[cfg(test)]
 mod tests {
     use crate::error::JfResult;
 
@@ -14,16 +25,9 @@ mod tests {
 
     #[test]
     fn deserialize() -> JfResult<()> {
-        let cfg: ShellCfg = toml::from_str(
-            r#"
-script = """
-test1
-test2
-"""
-"#,
-        )?;
+        let cfg: ShellCfg = toml::from_str(fixtures::SIMPLE)?;
+        assert_eq!(cfg.params.script, fixtures::SCRIPT);
 
-        assert_eq!(cfg.params.script, "test1\ntest2\n");
         Ok(())
     }
 }

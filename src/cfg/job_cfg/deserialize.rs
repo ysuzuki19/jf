@@ -44,17 +44,20 @@ impl<'de> serde::Deserialize<'de> for JobCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::error::JfResult;
+    use crate::{cfg::job_cfg::modes, error::JfResult};
 
     use super::*;
 
+    fn generate_modable_cfg(mode: &str, content: &str) -> String {
+        format!(
+            r#"mode = "{mode}"
+{content}"#,
+        )
+    }
+
     #[test]
     fn default() -> JfResult<()> {
-        let cfg: JobCfg = toml::from_str(
-            r#"
-command = "echo"
-"#,
-        )?;
+        let cfg: JobCfg = toml::from_str(modes::fixtures::command::SIMPLE)?;
 
         matches!(cfg, JobCfg::Command(_));
         Ok(())
@@ -63,10 +66,7 @@ command = "echo"
     #[test]
     fn command() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
-            r#"
-mode = "command"
-command = "echo"
-"#,
+            generate_modable_cfg("command", modes::fixtures::command::COMMAND_WITH_ARGS).as_str(),
         )?;
 
         matches!(cfg, JobCfg::Command(_));
@@ -76,10 +76,7 @@ command = "echo"
     #[test]
     fn parallel() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
-            r#"
-mode = "parallel"
-jobs = ["test", "test2"]
-"#,
+            generate_modable_cfg("parallel", modes::fixtures::parallel::SIMPLE).as_str(),
         )?;
 
         matches!(cfg, JobCfg::Parallel(_));
@@ -89,10 +86,7 @@ jobs = ["test", "test2"]
     #[test]
     fn sequential() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(
-            r#"
-mode = "sequential"
-jobs = ["test", "test2"]
-"#,
+            generate_modable_cfg("sequential", modes::fixtures::sequential::SIMPLE).as_str(),
         )?;
 
         matches!(cfg, JobCfg::Sequential(_));
@@ -101,12 +95,8 @@ jobs = ["test", "test2"]
 
     #[test]
     fn shell() -> JfResult<()> {
-        let cfg: JobCfg = toml::from_str(
-            r#"
-mode = "shell"
-script = "echo hello"
-"#,
-        )?;
+        let cfg: JobCfg =
+            toml::from_str(generate_modable_cfg("shell", modes::fixtures::shell::SIMPLE).as_str())?;
 
         matches!(cfg, JobCfg::Shell(_));
         Ok(())
@@ -114,13 +104,8 @@ script = "echo hello"
 
     #[test]
     fn watch() -> JfResult<()> {
-        let cfg: JobCfg = toml::from_str(
-            r#"
-mode = "watch"
-job = "test"
-watch_list = ["test", "test2"]
-"#,
-        )?;
+        let cfg: JobCfg =
+            toml::from_str(generate_modable_cfg("watch", modes::fixtures::watch::SIMPLE).as_str())?;
 
         matches!(cfg, JobCfg::Watch(_));
         Ok(())
@@ -128,13 +113,8 @@ watch_list = ["test", "test2"]
 
     #[test]
     fn mock() -> JfResult<()> {
-        let cfg: JobCfg = toml::from_str(
-            r#"
-mode = "mock"
-each_sleep_time = 1
-sleep_count = 3
-"#,
-        )?;
+        let cfg: JobCfg =
+            toml::from_str(generate_modable_cfg("mock", modes::fixtures::mock::SIMPLE).as_str())?;
 
         matches!(cfg, JobCfg::Mock(_));
         Ok(())
@@ -142,6 +122,6 @@ sleep_count = 3
 
     #[test]
     fn unknown() {
-        assert!(toml::from_str::<JobCfg>(r#"mode = "unknown""#).is_err());
+        assert!(toml::from_str::<JobCfg>(generate_modable_cfg("unknown", "").as_str()).is_err());
     }
 }
