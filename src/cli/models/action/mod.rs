@@ -13,6 +13,7 @@ pub trait CliAction {
     async fn run(self, ctx: Ctx, opts: Opts) -> JfResult<()>;
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub enum Action {
     Statics(Statics),
     Configured(Configured),

@@ -3,6 +3,7 @@ mod log_level;
 pub use self::log_level::LogLevel;
 
 #[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub struct Logger {
     level: LogLevel,
 }
@@ -32,5 +33,10 @@ impl Logger {
 
     pub fn error<S: AsRef<str>>(&self, msg: S) {
         self.display(LogLevel::Error, msg)
+    }
+
+    #[cfg(test)]
+    pub fn level(&self) -> LogLevel {
+        self.level
     }
 }

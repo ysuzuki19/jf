@@ -16,6 +16,7 @@ impl From<Configured> for Action {
 }
 
 // Action with job configuration
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub enum Configured {
     List,
     Validate,

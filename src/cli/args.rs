@@ -12,6 +12,7 @@ use super::models::{
 const AUTHOR: &str = "ysuzuki19";
 
 #[derive(Parser, Debug, Clone)]
+#[cfg_attr(test, derive(Default))]
 #[command(
     author = AUTHOR,
     version,
@@ -83,5 +84,138 @@ impl Args {
         } else {
             Ok(Statics::Help.into())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn setup() -> JfResult<()> {
+        let args = Args::default();
+
+        let (ctx, action, opts) = args.setup()?;
+        assert_eq!(ctx, args.setup_ctx());
+        assert_eq!(action, args.setup_action()?);
+        assert_eq!(opts, args.setup_opts());
+        Ok(())
+    }
+
+    #[test]
+    fn setup_ctx() {
+        let args = Args {
+            log_level: LogLevel::Error,
+            ..Default::default()
+        };
+
+        let ctx = args.setup_ctx();
+        assert_eq!(ctx.logger.level(), LogLevel::Error);
+    }
+
+    #[test]
+    fn setup_opts() {
+        let cfg = PathBuf::from("test");
+        let args = Args {
+            cfg: Some(cfg.clone()),
+            ..Default::default()
+        };
+
+        let opts = args.setup_opts();
+        assert_eq!(opts.cfg, Some(cfg));
+    }
+
+    #[test]
+    fn setup_action_completion() -> JfResult<()> {
+        let args = Args {
+            completion: Some(clap_complete::Shell::Bash),
+            ..Default::default()
+        };
+
+        let action = args.setup_action()?;
+        matches!(
+            action,
+            Action::Statics(Statics::Completion(clap_complete::Shell::Bash))
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn setup_action_list() -> JfResult<()> {
+        let args = Args {
+            list: true,
+            ..Default::default()
+        };
+
+        let action = args.setup_action()?;
+        matches!(action, Action::Configured(Configured::List));
+        Ok(())
+    }
+
+    #[test]
+    fn setup_action_validate() -> JfResult<()> {
+        let args = Args {
+            validate: true,
+            ..Default::default()
+        };
+
+        let action = args.setup_action()?;
+        matches!(action, Action::Configured(Configured::Validate));
+        Ok(())
+    }
+
+    #[test]
+    fn setup_action_description() -> JfResult<()> {
+        let job_name = "test".to_string();
+        let args = Args {
+            description: true,
+            job_name: Some(job_name.clone()),
+            ..Default::default()
+        };
+
+        let action = args.setup_action()?;
+        matches!(
+            action,
+            Action::Configured(Configured::Description(jn)) if jn == job_name
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn setup_action_description_without_job_name() {
+        let args = Args {
+            description: true,
+            ..Default::default()
+        };
+
+        let action = args.setup_action();
+        assert!(action.is_err());
+    }
+
+    #[test]
+    fn setup_action_run() -> JfResult<()> {
+        let job_name = "test".to_string();
+        let args = Args {
+            job_name: Some(job_name.clone()),
+            ..Default::default()
+        };
+
+        let action = args.setup_action()?;
+        matches!(
+            action,
+            Action::Configured(Configured::Run(jn)) if jn == job_name
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn setup_action_help() -> JfResult<()> {
+        let args = Args {
+            ..Default::default()
+        };
+
+        let action = args.setup_action()?;
+        matches!(action, Action::Statics(Statics::Help));
+        Ok(())
     }
 }

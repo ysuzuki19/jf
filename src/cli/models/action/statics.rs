@@ -10,6 +10,7 @@ use crate::{
 use super::{Action, CliAction};
 
 // Action without job configuration
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub enum Statics {
     Completion(clap_complete::Shell),
     Help,
