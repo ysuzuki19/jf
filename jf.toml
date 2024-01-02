@@ -1,6 +1,12 @@
 [meta]
 version = "0.1.0"
 
+[job.setup-dev]
+mode = "shell"
+script = """
+cargo binstall cargo-llvm-cov
+"""
+
 [job.install]
 mode = "sequential"
 jobs = ["only-test", "only-install"]
@@ -12,6 +18,15 @@ args = ["uninstall"]
 [job.update]
 mode = "sequential"
 jobs = ["git-pull", "install"]
+
+[job.live-test-coverage]
+mode = "watch"
+job = "test-coverage"
+watch_list = ["src/**", "Cargo.toml"]
+
+[job.test-coverage]
+command = "cargo"
+args = ["llvm-cov", "--lcov", "--output-path", "target/lcov.info"]
 
 [job.live-test]
 mode = "watch"
