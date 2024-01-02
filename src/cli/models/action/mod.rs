@@ -28,3 +28,28 @@ impl CliAction for Action {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fixtures() -> (Ctx, Opts) {
+        (Ctx::fixture(), Opts::fixture())
+    }
+
+    #[tokio::test]
+    async fn help() -> JfResult<()> {
+        let s = Action::Statics(Statics::Help);
+        let (ctx, opts) = fixtures();
+        s.run(ctx, opts).await?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn run() -> JfResult<()> {
+        let c = Action::Configured(Configured::Run(String::from("test-fixture")));
+        let (ctx, opts) = fixtures();
+        c.run(ctx, opts).await?;
+        Ok(())
+    }
+}

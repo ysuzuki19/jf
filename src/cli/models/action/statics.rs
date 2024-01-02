@@ -32,3 +32,28 @@ impl CliAction for Statics {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fixtures() -> (Ctx, Opts) {
+        (Ctx::fixture(), Opts::fixture())
+    }
+
+    #[tokio::test]
+    async fn help() -> JfResult<()> {
+        let s = Statics::Help;
+        let (ctx, opts) = fixtures();
+        s.run(ctx, opts).await?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn completion() -> JfResult<()> {
+        let s = Statics::Completion(clap_complete::Shell::Bash);
+        let (ctx, opts) = fixtures();
+        s.run(ctx, opts).await?;
+        Ok(())
+    }
+}
