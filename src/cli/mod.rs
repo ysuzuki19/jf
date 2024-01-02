@@ -33,3 +33,22 @@ impl Cli {
         self.action.run(self.ctx, self.opts).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::cli::models::action::Statics;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn load() -> JfResult<()> {
+        let cli = Cli {
+            ctx: Ctx::fixture(),
+            action: Action::Statics(Statics::Help),
+            opts: Opts::fixture(),
+        };
+        assert_eq!(cli.ctx(), &Ctx::fixture());
+        cli.run().await?;
+        Ok(())
+    }
+}
