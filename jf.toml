@@ -24,6 +24,10 @@ mode = "watch"
 job = "test-coverage"
 watch_list = ["src/**", "Cargo.toml"]
 
+[job.test-coverage-display]
+command = "cargo"
+args = ["llvm-cov"]
+
 [job.test-coverage]
 command = "cargo"
 args = ["llvm-cov", "--lcov", "--output-path", "target/lcov.info"]
