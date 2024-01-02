@@ -19,13 +19,10 @@ impl Logger {
         }
     }
 
-    #[cfg(not(test))]
     fn write(&self, msg: &str) {
-        println!("{}", msg)
-    }
-
-    #[cfg(test)]
-    fn write(&self, msg: &str) {
+        #[cfg(not(test))]
+        println!("{}", msg);
+        #[cfg(test)]
         self.log.borrow_mut().push(msg.to_string());
     }
 
