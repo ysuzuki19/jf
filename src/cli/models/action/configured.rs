@@ -38,3 +38,50 @@ impl CliAction for Configured {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::error::JfResult;
+
+    use super::*;
+
+    fn fixtures() -> (Ctx, Opts, String) {
+        (
+            Ctx::fixture(),
+            Opts::fixture(),
+            String::from("test-fixture"),
+        )
+    }
+
+    #[tokio::test]
+    async fn list() -> JfResult<()> {
+        let c = Configured::List;
+        let (ctx, opts, _) = fixtures();
+        c.run(ctx, opts).await?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn validate() -> JfResult<()> {
+        let c = Configured::Validate;
+        let (ctx, opts, _) = fixtures();
+        c.run(ctx, opts).await?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn run() -> JfResult<()> {
+        let (ctx, opts, cmd) = fixtures();
+        let c = Configured::Run(cmd);
+        c.run(ctx, opts).await?;
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn description() -> JfResult<()> {
+        let (ctx, opts, cmd) = fixtures();
+        let c = Configured::Description(cmd);
+        c.run(ctx, opts).await?;
+        Ok(())
+    }
+}

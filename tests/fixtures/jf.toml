@@ -1,3 +1,8 @@
+[job.test-fixture]
+description = "this is a fixture job for testing"
+command = "echo"
+args = ["hello"]
+
 [job.run]
 command = "cargo"
 args = ["run"]
