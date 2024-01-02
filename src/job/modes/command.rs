@@ -30,9 +30,9 @@ impl Command {
 #[async_trait::async_trait]
 impl Runner for Command {
     async fn start(&self) -> JfResult<Self> {
-        let mut jf = tokio::process::Command::new(self.params.command.clone());
-        jf.args(self.params.args.clone());
-        self.child.lock().await.replace(jf.spawn()?);
+        let mut cmd = tokio::process::Command::new(self.params.command.clone());
+        cmd.args(self.params.args.clone());
+        self.child.lock().await.replace(cmd.spawn()?);
         Ok(self.clone())
     }
 
