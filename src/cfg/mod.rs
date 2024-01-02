@@ -20,3 +20,14 @@ impl Cfg {
         Ok(toml::from_str(&content)?)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn load() -> JfResult<()> {
+        Cfg::load(Some(cfg_path_gen::test::fixtures_dir()))?;
+        Ok(())
+    }
+}
