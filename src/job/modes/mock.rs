@@ -229,20 +229,20 @@ mod test {
 
     #[tokio::test]
     async fn bunshin() -> JfResult<()> {
-        let mock = test_mock_factory();
-        let id = mock.id();
+        let origin = test_mock_factory();
 
-        mock.start().await?.cancel().await?;
-        mock.assert_is_started_eq(true)
+        origin.start().await?.cancel().await?;
+        origin
+            .assert_is_started_eq(true)
             .assert_is_running_eq(true)
             .assert_is_finished_eq(false)
             .assert_is_cancelled_eq(true);
 
-        let bunshin = mock.bunshin();
+        let bunshin = origin.bunshin();
         bunshin
-            .assert_id_ne(id) // check new mock job creation
-            .assert_each_sleep_time_eq(mock.each_sleep_time)
-            .assert_sleep_count_eq(mock.sleep_count)
+            .assert_id_ne(origin.id) // check new mock job creation
+            .assert_each_sleep_time_eq(origin.each_sleep_time)
+            .assert_sleep_count_eq(origin.sleep_count)
             .assert_is_started_eq(false)
             .assert_is_running_eq(false)
             .assert_is_finished_eq(false)
@@ -251,7 +251,7 @@ mod test {
     }
 
     #[tokio::test]
-    async fn from() {
+    async fn into_job() {
         let mock = test_mock_factory();
         let id = mock.id();
 
