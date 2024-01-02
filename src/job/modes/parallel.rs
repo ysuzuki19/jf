@@ -104,7 +104,7 @@ mod test {
         cfg::job_cfg::JobCfg,
         error::JfResult,
         job::{
-            modes::{mock::CheckList, Parallel, ParallelParams},
+            modes::{Parallel, ParallelParams},
             Runner,
         },
         jobdef::{Jobdef, JobdefPool},
@@ -156,8 +156,7 @@ sleep_count = 3
         )?;
         p.start().await?;
         for job in p.jobs {
-            let m = job.as_mock();
-            m.assert_status(CheckList::new().started(true));
+            job.as_mock().assert_is_started_eq(true);
         }
         Ok(())
     }
@@ -172,8 +171,9 @@ sleep_count = 3
         )?;
         p.start().await?.cancel().await?;
         for job in p.jobs {
-            let m = job.as_mock();
-            m.assert_status(CheckList::new().started(true).cancelled(true));
+            job.as_mock()
+                .assert_is_started_eq(true)
+                .assert_is_cancelled_eq(true);
         }
         Ok(())
     }
@@ -188,8 +188,9 @@ sleep_count = 3
         )?;
         p.start().await?.wait().await?;
         for job in p.jobs {
-            let m = job.as_mock();
-            m.assert_status(CheckList::new().started(true).finished(true));
+            job.as_mock()
+                .assert_is_started_eq(true)
+                .assert_is_finished_eq(true);
         }
         Ok(())
     }
@@ -207,10 +208,10 @@ sleep_count = 3
         let bunshin = origin.bunshin();
         assert_eq!(origin.jobs.len(), bunshin.jobs.len());
         for (bunshin_job, origin_job) in bunshin.jobs.iter().zip(origin.jobs) {
-            let bunshin_mock = bunshin_job.as_mock();
-            let origin_mock = origin_job.as_mock();
-            bunshin_mock.assert_id_ne(origin_mock.id());
-            bunshin_mock.assert_status(CheckList::new().started(false));
+            bunshin_job
+                .as_mock()
+                .assert_id_ne(origin_job.as_mock().id())
+                .assert_is_started_eq(false);
         }
         Ok(())
     }
