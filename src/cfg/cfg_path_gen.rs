@@ -26,10 +26,10 @@ impl CfgPathGen {
 }
 
 #[cfg(test)]
-mod test {
+pub mod test {
     use super::*;
 
-    fn fixtures_dir() -> PathBuf {
+    pub fn fixtures_dir() -> PathBuf {
         PathBuf::from(".").join("tests").join("fixtures")
     }
 
