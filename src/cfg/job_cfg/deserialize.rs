@@ -59,7 +59,7 @@ command = "echo"
         if let JobCfg::Command(_) = cfg {
             Ok(())
         } else {
-            panic!("expected JobCfg::Command");
+            unreachable!("expected JobCfg::Command");
         }
     }
 
@@ -75,7 +75,7 @@ command = "echo"
         if let JobCfg::Command(_) = cfg {
             Ok(())
         } else {
-            panic!("expected JobCfg::Command");
+            unreachable!("expected JobCfg::Command");
         }
     }
 
@@ -91,7 +91,7 @@ jobs = ["test", "test2"]
         if let JobCfg::Parallel(_) = cfg {
             Ok(())
         } else {
-            panic!("expected JobCfg::Parallel");
+            unreachable!("expected JobCfg::Parallel");
         }
     }
 
@@ -107,7 +107,7 @@ jobs = ["test", "test2"]
         if let JobCfg::Sequential(_) = cfg {
             Ok(())
         } else {
-            panic!("expected JobCfg::Sequential");
+            unreachable!("expected JobCfg::Sequential");
         }
     }
 
@@ -123,7 +123,7 @@ script = "echo hello"
         if let JobCfg::Shell(_) = cfg {
             Ok(())
         } else {
-            panic!("expected JobCfg::Shell");
+            unreachable!("expected JobCfg::Shell");
         }
     }
 
@@ -140,7 +140,7 @@ watch_list = ["test", "test2"]
         if let JobCfg::Watch(_) = cfg {
             Ok(())
         } else {
-            panic!("expected JobCfg::Watch");
+            unreachable!("expected JobCfg::Watch");
         }
     }
 
@@ -157,7 +157,15 @@ sleep_count = 3
         if let JobCfg::Mock(_) = cfg {
             Ok(())
         } else {
-            panic!("expected JobCfg::Mock");
+            unreachable!("expected JobCfg::Mock");
+        }
+    }
+
+    #[test]
+    fn unknown() -> JfResult<()> {
+        match toml::from_str::<JobCfg>(r#"mode = "unknown""#) {
+            Ok(_) => unreachable!("expected error"),
+            Err(_) => Ok(()),
         }
     }
 }
