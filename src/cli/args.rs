@@ -96,8 +96,28 @@ impl Args {
 }
 
 #[cfg(test)]
+mod fixtures {
+    const APP_NAME: &str = "jf";
+    pub const SIMPLE:&[&str] = &[APP_NAME, "test"];
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse() {
+        let args = Args::parse_from(fixtures::SIMPLE);
+        assert!(!args.version);
+        assert!(!args.help);
+        assert!(!args.validate);
+        assert_eq!(args.cfg, None);
+        assert_eq!(args.log_level, LogLevel::Error);
+        assert_eq!(args.completion, None);
+        assert!(!args.list);
+        assert!(!args.description);
+        assert_eq!(args.job_name, Some("test".to_string()));
+    }
 
     #[test]
     fn setup() -> JfResult<()> {
@@ -219,6 +239,7 @@ mod tests {
     #[test]
     fn setup_action_help() -> JfResult<()> {
         let args = Args {
+            help: true,
             ..Default::default()
         };
 
