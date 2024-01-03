@@ -17,15 +17,15 @@ pub enum Job {
 }
 
 impl Job {
-    pub fn new(job_cfg: JobCfg, pool: JobdefPool) -> JfResult<Self> {
+    pub fn new(job_cfg: &JobCfg, pool: JobdefPool) -> JfResult<Self> {
         Ok(match job_cfg {
-            JobCfg::Command(c) => modes::Command::new(c.params).into(),
-            JobCfg::Parallel(c) => modes::Parallel::new(c.params, pool)?.into(),
-            JobCfg::Sequential(c) => modes::Sequential::new(c.params, pool)?.into(),
-            JobCfg::Shell(c) => modes::Shell::new(c.params).into(),
-            JobCfg::Watch(c) => modes::Watch::new(c.params, pool)?.into(),
+            JobCfg::Command(c) => modes::Command::new(c.params.clone()).into(),
+            JobCfg::Parallel(c) => modes::Parallel::new(c.params.clone(), pool)?.into(),
+            JobCfg::Sequential(c) => modes::Sequential::new(c.params.clone(), pool)?.into(),
+            JobCfg::Shell(c) => modes::Shell::new(c.params.clone()).into(),
+            JobCfg::Watch(c) => modes::Watch::new(c.params.clone(), pool)?.into(),
             #[cfg(test)]
-            JobCfg::Mock(c) => modes::Mock::new(c.params).into(),
+            JobCfg::Mock(c) => modes::Mock::new(c.params.clone()).into(),
         })
     }
 }

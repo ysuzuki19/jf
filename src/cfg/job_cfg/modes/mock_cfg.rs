@@ -1,4 +1,4 @@
-#[derive(Clone, serde::Deserialize)]
+#[derive(serde::Deserialize)]
 pub struct MockCfg {
     #[serde(flatten)]
     pub common: crate::cfg::job_cfg::common::CommonCfg,

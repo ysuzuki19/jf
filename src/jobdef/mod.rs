@@ -38,7 +38,7 @@ impl Jobdef {
 
     fn build(&self, pool: JobdefPool, agent: Agent) -> JfResult<Job> {
         self.visibility_guard(agent)?;
-        Job::new(self.job_cfg.clone(), pool)
+        Job::new(&self.job_cfg, pool)
     }
 
     fn name(&self) -> &String {
