@@ -14,6 +14,7 @@ use super::{Action, CliAction};
 pub enum Statics {
     Completion(clap_complete::Shell),
     Help,
+    Version,
 }
 
 impl From<Statics> for Action {
@@ -27,8 +28,9 @@ impl CliAction for Statics {
     async fn run(self, ctx: Ctx, _: Opts) -> JfResult<()> {
         let mut cmd = <Args as clap::CommandFactory>::command();
         let s = match self {
-            Statics::Help => cmd.render_help().to_string(),
             Statics::Completion(shell) => completion_script::generate(shell),
+            Statics::Help => cmd.render_help().to_string(),
+            Statics::Version => cmd.render_version().to_string(),
         };
         ctx.logger.log(s);
         Ok(())
@@ -44,6 +46,14 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn completion() -> JfResult<()> {
+        let s = Statics::Completion(clap_complete::Shell::Bash);
+        let (ctx, opts) = fixtures();
+        s.run(ctx, opts).await?;
+        Ok(())
+    }
+
+    #[tokio::test]
     async fn help() -> JfResult<()> {
         let s = Statics::Help;
         let (ctx, opts) = fixtures();
@@ -52,8 +62,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn completion() -> JfResult<()> {
-        let s = Statics::Completion(clap_complete::Shell::Bash);
+    async fn version() -> JfResult<()> {
+        let s = Statics::Version;
         let (ctx, opts) = fixtures();
         s.run(ctx, opts).await?;
         Ok(())

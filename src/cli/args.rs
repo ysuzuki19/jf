@@ -16,18 +16,22 @@ const AUTHOR: &str = "ysuzuki19";
 #[command(
     author = AUTHOR,
     version,
+    disable_version_flag = true, 
     about,
     long_about = None,
     disable_help_flag = true,
 )]
 pub struct Args {
     #[arg(long)]
+    pub version: bool,
+
+    #[arg(long)]
     pub help: bool,
 
     #[arg(long)]
     pub validate: bool,
 
-    #[arg(short, long)]
+    #[arg(long)]
     pub cfg: Option<PathBuf>,
 
     #[arg(long, default_value = "error")]
@@ -67,7 +71,11 @@ impl Args {
     }
 
     fn setup_action(&self) -> JfResult<Action> {
-        if let Some(shell) = self.completion {
+        if self.version {
+            Ok(Statics::Version.into())
+        } else if self.help {
+            Ok(Statics::Help.into())
+        } else if let Some(shell) = self.completion {
             Ok(Statics::Completion(shell).into())
         } else if self.list {
             Ok(Configured::List.into())
@@ -216,6 +224,18 @@ mod tests {
 
         let action = args.setup_action()?;
         matches!(action, Action::Statics(Statics::Help));
+        Ok(())
+    }
+
+    #[test]
+    fn setup_action_version() -> JfResult<()> {
+        let args = Args {
+            version: true,
+            ..Default::default()
+        };
+
+        let action = args.setup_action()?;
+        matches!(action, Action::Statics(Statics::Version));
         Ok(())
     }
 }
