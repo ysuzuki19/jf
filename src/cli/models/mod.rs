@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 pub use logger::{LogLevel, Logger};
 
-#[cfg_attr(test, derive(Debug, PartialEq))]
+#[cfg_attr(test, derive(Debug, PartialEq, Default))]
 pub struct Ctx {
     pub logger: Logger,
 }

@@ -4,9 +4,12 @@ mod error;
 mod job;
 mod jobdef;
 
+use clap::Parser;
+
 #[tokio::main]
 async fn main() {
-    match cli::Cli::load() {
+    let args = cli::Args::parse();
+    match cli::Cli::load(args) {
         Ok(cli) => {
             let logger = cli.ctx().logger.clone();
             if let Err(e) = cli.run().await {

@@ -3,7 +3,7 @@ mod log_level;
 pub use self::log_level::LogLevel;
 
 #[derive(Clone)]
-#[cfg_attr(test, derive(Debug, PartialEq))]
+#[cfg_attr(test, derive(Debug, PartialEq, Default))]
 pub struct Logger {
     level: LogLevel,
     #[cfg(test)]

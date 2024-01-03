@@ -96,9 +96,11 @@ impl Args {
 }
 
 #[cfg(test)]
-mod fixtures {
+pub mod fixtures {
     const APP_NAME: &str = "jf";
-    pub const SIMPLE:&[&str] = &[APP_NAME, "test"];
+    pub const JOB_NAME: &str = "test-job-name";
+    pub const CFG_PATH: &str = "test-cfg-path";
+    pub const SIMPLE:&[&str] = &[APP_NAME, JOB_NAME];
 }
 
 #[cfg(test)]
@@ -116,7 +118,7 @@ mod tests {
         assert_eq!(args.completion, None);
         assert!(!args.list);
         assert!(!args.description);
-        assert_eq!(args.job_name, Some("test".to_string()));
+        assert_eq!(args.job_name, Some(fixtures::JOB_NAME.to_string()));
     }
 
     #[test]
@@ -143,14 +145,14 @@ mod tests {
 
     #[test]
     fn setup_opts() {
-        let cfg = PathBuf::from("test");
+        let cfg = PathBuf::from(fixtures::CFG_PATH);
         let args = Args {
-            cfg: Some(cfg.clone()),
+            cfg: Some(cfg),
             ..Default::default()
         };
 
         let opts = args.setup_opts();
-        assert_eq!(opts.cfg, Some(cfg));
+        assert_eq!(opts.cfg, Some(PathBuf::from(fixtures::CFG_PATH)));
     }
 
     #[test]
@@ -194,17 +196,16 @@ mod tests {
 
     #[test]
     fn setup_action_description() -> JfResult<()> {
-        let job_name = "test".to_string();
         let args = Args {
             description: true,
-            job_name: Some(job_name.clone()),
+            job_name: Some(fixtures::JOB_NAME.to_owned()),
             ..Default::default()
         };
 
         let action = args.setup_action()?;
         matches!(
             action,
-            Action::Configured(Configured::Description(jn)) if jn == job_name
+            Action::Configured(Configured::Description(jn)) if jn == fixtures::JOB_NAME
         );
         Ok(())
     }
@@ -222,16 +223,15 @@ mod tests {
 
     #[test]
     fn setup_action_run() -> JfResult<()> {
-        let job_name = "test".to_string();
         let args = Args {
-            job_name: Some(job_name.clone()),
+            job_name: Some(fixtures::JOB_NAME.to_string()),
             ..Default::default()
         };
 
         let action = args.setup_action()?;
         matches!(
             action,
-            Action::Configured(Configured::Run(jn)) if jn == job_name
+            Action::Configured(Configured::Run(jn)) if jn == fixtures::JOB_NAME
         );
         Ok(())
     }

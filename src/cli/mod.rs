@@ -3,8 +3,6 @@ mod completion_script;
 mod job_controller;
 mod models;
 
-use clap::Parser;
-
 use crate::error::JfResult;
 
 pub use self::args::Args;
@@ -20,8 +18,8 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub fn load() -> JfResult<Self> {
-        let (ctx, action, opts) = Args::parse().setup()?;
+    pub fn load(args: Args) -> JfResult<Self> {
+        let (ctx, action, opts) = args.setup()?;
         Ok(Self { ctx, action, opts })
     }
 
@@ -36,9 +34,27 @@ impl Cli {
 
 #[cfg(test)]
 mod tests {
-    use crate::cli::models::action::Statics;
+    use clap::Parser;
+
+    use crate::cli::{
+        args::fixtures,
+        models::action::{Configured, Statics},
+    };
 
     use super::*;
+
+    #[test]
+    fn load() -> JfResult<()> {
+        let args = Args::parse_from(args::fixtures::SIMPLE);
+        let cli = Cli::load(args)?;
+        assert_eq!(cli.ctx(), &Ctx::default());
+        assert_eq!(
+            cli.action,
+            Configured::Run(fixtures::JOB_NAME.into()).into()
+        );
+        assert_eq!(cli.opts, Opts::default());
+        Ok(())
+    }
 
     #[tokio::test]
     async fn run() -> JfResult<()> {
