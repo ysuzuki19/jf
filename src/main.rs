@@ -3,6 +3,8 @@ mod cli;
 mod error;
 mod job;
 mod jobdef;
+#[cfg(test)]
+mod testutil;
 
 use clap::Parser;
 

@@ -30,17 +30,22 @@ impl CliAction for Action {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn fixtures() -> (Ctx, Opts) {
-        (Ctx::fixture(), Opts::fixture())
+impl crate::testutil::Fixture for Action {
+    fn fixture() -> Self {
+        Action::Statics(Statics::fixture())
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::testutil::tuple_fixture;
+
+    use super::*;
 
     #[tokio::test]
     async fn help() -> JfResult<()> {
         let s = Action::Statics(Statics::Help);
-        let (ctx, opts) = fixtures();
+        let (ctx, opts) = tuple_fixture();
         s.run(ctx, opts).await?;
         Ok(())
     }
@@ -48,7 +53,7 @@ mod tests {
     #[tokio::test]
     async fn run() -> JfResult<()> {
         let c = Action::Configured(Configured::Run(String::from("test-fixture")));
-        let (ctx, opts) = fixtures();
+        let (ctx, opts) = tuple_fixture();
         c.run(ctx, opts).await?;
         Ok(())
     }

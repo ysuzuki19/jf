@@ -38,17 +38,28 @@ impl CliAction for Statics {
 }
 
 #[cfg(test)]
+impl crate::testutil::Fixture for Statics {
+    fn fixture() -> Self {
+        Statics::Help
+    }
+}
+
+#[cfg(test)]
 mod tests {
+    use crate::testutil::{tuple_fixture, Fixture};
+
     use super::*;
 
-    fn fixtures() -> (Ctx, Opts) {
-        (Ctx::fixture(), Opts::fixture())
+    #[test]
+    fn fixture() {
+        let s = Statics::fixture();
+        assert_eq!(s, Statics::Help);
     }
 
     #[tokio::test]
     async fn completion() -> JfResult<()> {
         let s = Statics::Completion(clap_complete::Shell::Bash);
-        let (ctx, opts) = fixtures();
+        let (ctx, opts) = tuple_fixture();
         s.run(ctx, opts).await?;
         Ok(())
     }
@@ -56,7 +67,7 @@ mod tests {
     #[tokio::test]
     async fn help() -> JfResult<()> {
         let s = Statics::Help;
-        let (ctx, opts) = fixtures();
+        let (ctx, opts) = tuple_fixture();
         s.run(ctx, opts).await?;
         Ok(())
     }
@@ -64,7 +75,7 @@ mod tests {
     #[tokio::test]
     async fn version() -> JfResult<()> {
         let s = Statics::Version;
-        let (ctx, opts) = fixtures();
+        let (ctx, opts) = tuple_fixture();
         s.run(ctx, opts).await?;
         Ok(())
     }

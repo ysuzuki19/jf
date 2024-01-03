@@ -40,23 +40,20 @@ impl CliAction for Configured {
 }
 
 #[cfg(test)]
+mod fixtures {
+    pub const JOB_NAME: &str = "test-fixture";
+}
+
+#[cfg(test)]
 mod tests {
-    use crate::error::JfResult;
+    use crate::{error::JfResult, testutil::tuple_fixture};
 
     use super::*;
-
-    fn fixtures() -> (Ctx, Opts, String) {
-        (
-            Ctx::fixture(),
-            Opts::fixture(),
-            String::from("test-fixture"),
-        )
-    }
 
     #[tokio::test]
     async fn list() -> JfResult<()> {
         let c = Configured::List;
-        let (ctx, opts, _) = fixtures();
+        let (ctx, opts) = tuple_fixture();
         c.run(ctx, opts).await?;
         Ok(())
     }
@@ -64,23 +61,23 @@ mod tests {
     #[tokio::test]
     async fn validate() -> JfResult<()> {
         let c = Configured::Validate;
-        let (ctx, opts, _) = fixtures();
+        let (ctx, opts) = tuple_fixture();
         c.run(ctx, opts).await?;
         Ok(())
     }
 
     #[tokio::test]
     async fn run() -> JfResult<()> {
-        let (ctx, opts, cmd) = fixtures();
-        let c = Configured::Run(cmd);
+        let (ctx, opts) = tuple_fixture();
+        let c = Configured::Run(fixtures::JOB_NAME.to_owned());
         c.run(ctx, opts).await?;
         Ok(())
     }
 
     #[tokio::test]
     async fn description() -> JfResult<()> {
-        let (ctx, opts, cmd) = fixtures();
-        let c = Configured::Description(cmd);
+        let (ctx, opts) = tuple_fixture();
+        let c = Configured::Description(fixtures::JOB_NAME.to_owned());
         c.run(ctx, opts).await?;
         Ok(())
     }

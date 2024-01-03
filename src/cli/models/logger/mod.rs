@@ -19,11 +19,6 @@ impl Logger {
         }
     }
 
-    #[cfg(test)]
-    pub fn fixture() -> Self {
-        Self::new(LogLevel::None)
-    }
-
     fn write(&self, msg: &str) {
         #[cfg(not(test))]
         println!("{}", msg);
@@ -57,6 +52,13 @@ impl Logger {
     #[cfg(test)]
     pub fn level(&self) -> LogLevel {
         self.level
+    }
+}
+
+#[cfg(test)]
+impl crate::testutil::Fixture for Logger {
+    fn fixture() -> Self {
+        Self::new(LogLevel::None)
     }
 }
 

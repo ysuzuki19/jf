@@ -11,11 +11,10 @@ pub struct Ctx {
 }
 
 #[cfg(test)]
-impl Ctx {
-    #[cfg(test)]
-    pub fn fixture() -> Self {
+impl crate::testutil::Fixture for Ctx {
+    fn fixture() -> Self {
         Self {
-            logger: logger::Logger::fixture(),
+            logger: crate::testutil::Fixture::fixture(),
         }
     }
 }
@@ -26,8 +25,8 @@ pub struct Opts {
 }
 
 #[cfg(test)]
-impl Opts {
-    pub fn fixture() -> Self {
+impl crate::testutil::Fixture for Opts {
+    fn fixture() -> Self {
         let cfg = PathBuf::from(".").join("tests").join("fixtures");
         Opts { cfg: Some(cfg) }
     }
