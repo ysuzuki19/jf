@@ -41,7 +41,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn load() -> JfResult<()> {
+    async fn run() -> JfResult<()> {
         let cli = Cli {
             ctx: Ctx::fixture(),
             action: Action::Statics(Statics::Help),
