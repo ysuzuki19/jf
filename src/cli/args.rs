@@ -16,7 +16,7 @@ const AUTHOR: &str = "ysuzuki19";
 #[command(
     author = AUTHOR,
     version,
-    disable_version_flag = true, 
+    disable_version_flag = true,
     about,
     long_about = None,
     disable_help_flag = true,
@@ -100,7 +100,7 @@ pub mod fixtures {
     const APP_NAME: &str = "jf";
     pub const JOB_NAME: &str = "test-job-name";
     pub const CFG_PATH: &str = "test-cfg-path";
-    pub const SIMPLE:&[&str] = &[APP_NAME, JOB_NAME];
+    pub const SIMPLE: &[&str] = &[APP_NAME, JOB_NAME];
 }
 
 #[cfg(test)]
