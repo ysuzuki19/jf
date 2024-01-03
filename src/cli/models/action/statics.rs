@@ -25,10 +25,12 @@ impl From<Statics> for Action {
 #[async_trait::async_trait]
 impl CliAction for Statics {
     async fn run(self, ctx: Ctx, _: Opts) -> JfResult<()> {
-        match self {
-            Statics::Help => <Args as clap::CommandFactory>::command().print_help()?,
-            Statics::Completion(shell) => ctx.logger.log(completion_script::generate(shell)),
-        }
+        let mut cmd = <Args as clap::CommandFactory>::command();
+        let s = match self {
+            Statics::Help => cmd.render_help().to_string(),
+            Statics::Completion(shell) => completion_script::generate(shell),
+        };
+        ctx.logger.log(s);
         Ok(())
     }
 }
