@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Clone, serde::Deserialize)]
 pub struct WatchCfg {
     #[serde(flatten)]
     pub common: crate::cfg::job_cfg::common::CommonCfg,

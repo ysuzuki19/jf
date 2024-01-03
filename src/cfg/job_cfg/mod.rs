@@ -5,7 +5,7 @@ mod visibility;
 
 pub use self::visibility::Visibility;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum JobCfg {
     Command(modes::CommandCfg),
     Parallel(modes::ParallelCfg),

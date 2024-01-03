@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use crate::error::JfResult;
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Cfg {
     #[serde(rename = "job")]
     pub jobs: HashMap<String, job_cfg::JobCfg>,
