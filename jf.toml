@@ -4,6 +4,7 @@ version = "0.1.0"
 [job.setup-dev]
 mode = "shell"
 script = """
+cargo install cargo-binstall
 cargo binstall cargo-llvm-cov
 """
 
