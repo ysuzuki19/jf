@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use super::Visibility;
 
-#[derive(Clone, Deserialize)]
+#[derive(Deserialize)]
 pub struct CommonCfg {
     #[serde(default)]
     visibility: Visibility,
