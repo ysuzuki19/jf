@@ -105,6 +105,8 @@ pub mod fixtures {
 
 #[cfg(test)]
 mod tests {
+    use clap_complete::Shell;
+
     use super::*;
 
     #[test]
@@ -163,10 +165,7 @@ mod tests {
         };
 
         let action = args.setup_action()?;
-        matches!(
-            action,
-            Action::Statics(Statics::Completion(clap_complete::Shell::Bash))
-        );
+        matches!(action, Action::Statics(Statics::Completion(Shell::Bash)));
         Ok(())
     }
 
