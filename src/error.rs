@@ -43,4 +43,7 @@ pub enum InternalError {
 
     #[error("job.{0} is private\nPlease remove `visibility = \"private\"` if you run")]
     UnexpectedVisibilityPrivate(String),
+
+    #[error("mode={0} must have at least one job")]
+    MustHaveAtLeastOneJob(String),
 }

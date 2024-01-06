@@ -5,7 +5,7 @@ use std::sync::{
 
 use crate::error::JfResult;
 
-async fn sleep() {
+pub async fn sleep() {
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 }
 
