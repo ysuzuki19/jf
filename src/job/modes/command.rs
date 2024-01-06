@@ -42,7 +42,7 @@ impl Runner for Command {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
             Ok(child.try_wait()?.is_some())
         } else {
-            Ok(true)
+            Ok(false) // not yet started
         }
     }
 
@@ -113,6 +113,13 @@ mod tests {
         let command = test_command_factory().bunshin();
         command.start().await?.cancel().await?;
         assert!(command.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn is_finished_not_yet_started() -> JfResult<()> {
+        let command = test_command_factory();
+        assert!(!command.is_finished().await?);
         Ok(())
     }
 }
