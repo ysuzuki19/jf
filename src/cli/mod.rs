@@ -33,17 +33,6 @@ impl Cli {
 }
 
 #[cfg(test)]
-impl crate::testutil::Fixture for Cli {
-    fn fixture() -> Self {
-        Self {
-            ctx: crate::testutil::Fixture::fixture(),
-            action: crate::testutil::Fixture::fixture(),
-            opts: crate::testutil::Fixture::fixture(),
-        }
-    }
-}
-
-#[cfg(test)]
 mod tests {
     use clap::Parser;
 
@@ -53,6 +42,16 @@ mod tests {
     };
 
     use super::*;
+
+    impl Fixture for Cli {
+        fn gen() -> Self {
+            Self {
+                ctx: Fixture::gen(),
+                action: Fixture::gen(),
+                opts: Fixture::gen(),
+            }
+        }
+    }
 
     #[test]
     fn load() -> JfResult<()> {
@@ -69,9 +68,9 @@ mod tests {
 
     #[tokio::test]
     async fn run() -> JfResult<()> {
-        let cli = Cli::fixture();
-        assert_eq!(cli.ctx(), &Ctx::fixture());
-        assert_eq!(cli.action, Action::fixture());
+        let cli = Cli::gen();
+        assert_eq!(cli.ctx(), &Ctx::gen());
+        assert_eq!(cli.action, Action::gen());
         cli.run().await?;
         Ok(())
     }

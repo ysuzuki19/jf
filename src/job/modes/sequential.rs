@@ -123,7 +123,7 @@ mod test {
     use super::*;
 
     impl Fixture for SequentialParams {
-        fn fixture() -> Self {
+        fn gen() -> Self {
             Self {
                 jobs: vec!["fast".into(), "fast".into()],
             }
@@ -152,14 +152,14 @@ mod test {
     #[tokio::test]
     async fn new() -> JfResult<()> {
         let pool = fixtures::pool()?;
-        Sequential::new(Fixture::fixture(), pool)?;
+        Sequential::new(Fixture::gen(), pool)?;
         Ok(())
     }
 
     #[tokio::test]
     async fn start() -> JfResult<()> {
         let pool = fixtures::pool()?;
-        let s = Sequential::new(Fixture::fixture(), pool)?.start().await?;
+        let s = Sequential::new(Fixture::gen(), pool)?.start().await?;
         assert!(!s.is_finished().await?);
         for (index, job) in s.jobs.iter().enumerate() {
             if index == 0 {
@@ -176,7 +176,7 @@ mod test {
     #[tokio::test]
     async fn cancel() -> JfResult<()> {
         let pool = fixtures::pool()?;
-        let s = Sequential::new(Fixture::fixture(), pool)?.start().await?;
+        let s = Sequential::new(Fixture::gen(), pool)?.start().await?;
         s.cancel().await?;
         runner::sleep().await; // sleep for job interval
         assert!(s.is_cancelled.load(Ordering::Relaxed));
@@ -186,7 +186,7 @@ mod test {
     #[tokio::test]
     async fn wait() -> JfResult<()> {
         let pool = fixtures::pool()?;
-        let s = Sequential::new(Fixture::fixture(), pool)?.start().await?;
+        let s = Sequential::new(Fixture::gen(), pool)?.start().await?;
         s.wait().await?;
         s.is_finished().await?;
         for job in s.jobs.iter() {
@@ -198,7 +198,7 @@ mod test {
     #[tokio::test]
     async fn bunshin() -> JfResult<()> {
         let pool = fixtures::pool()?;
-        let origin = Sequential::new(Fixture::fixture(), pool)?;
+        let origin = Sequential::new(Fixture::gen(), pool)?;
         origin.start().await?.cancel().await?;
 
         let bunshin = origin.bunshin();
@@ -216,7 +216,7 @@ mod test {
     #[tokio::test]
     async fn is_finished_not_yet_started() -> JfResult<()> {
         let pool = fixtures::pool()?;
-        let s = Sequential::new(Fixture::fixture(), pool)?;
+        let s = Sequential::new(Fixture::gen(), pool)?;
         assert!(!s.is_finished().await?);
         Ok(())
     }

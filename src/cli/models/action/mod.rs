@@ -30,31 +30,29 @@ impl CliAction for Action {
 }
 
 #[cfg(test)]
-impl crate::testutil::Fixture for Action {
-    fn fixture() -> Self {
-        Action::Statics(Statics::fixture())
-    }
-}
-
-#[cfg(test)]
 mod tests {
-    use crate::testutil::tuple_fixture;
+
+    use crate::testutil::Fixture;
 
     use super::*;
+
+    impl Fixture for Action {
+        fn gen() -> Self {
+            Action::Statics(Fixture::gen())
+        }
+    }
 
     #[tokio::test]
     async fn help() -> JfResult<()> {
         let s = Action::Statics(Statics::Help);
-        let (ctx, opts) = tuple_fixture();
-        s.run(ctx, opts).await?;
+        s.run(Fixture::gen(), Fixture::gen()).await?;
         Ok(())
     }
 
     #[tokio::test]
     async fn run() -> JfResult<()> {
         let c = Action::Configured(Configured::Run(String::from("test-fixture")));
-        let (ctx, opts) = tuple_fixture();
-        c.run(ctx, opts).await?;
+        c.run(Fixture::gen(), Fixture::gen()).await?;
         Ok(())
     }
 }

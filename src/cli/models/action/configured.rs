@@ -46,39 +46,35 @@ mod fixtures {
 
 #[cfg(test)]
 mod tests {
-    use crate::{error::JfResult, testutil::tuple_fixture};
+    use crate::{error::JfResult, testutil::Fixture};
 
     use super::*;
 
     #[tokio::test]
     async fn list() -> JfResult<()> {
         let c = Configured::List;
-        let (ctx, opts) = tuple_fixture();
-        c.run(ctx, opts).await?;
+        c.run(Fixture::gen(), Fixture::gen()).await?;
         Ok(())
     }
 
     #[tokio::test]
     async fn validate() -> JfResult<()> {
         let c = Configured::Validate;
-        let (ctx, opts) = tuple_fixture();
-        c.run(ctx, opts).await?;
+        c.run(Fixture::gen(), Fixture::gen()).await?;
         Ok(())
     }
 
     #[tokio::test]
     async fn run() -> JfResult<()> {
-        let (ctx, opts) = tuple_fixture();
         let c = Configured::Run(fixtures::JOB_NAME.to_owned());
-        c.run(ctx, opts).await?;
+        c.run(Fixture::gen(), Fixture::gen()).await?;
         Ok(())
     }
 
     #[tokio::test]
     async fn description() -> JfResult<()> {
-        let (ctx, opts) = tuple_fixture();
         let c = Configured::Description(fixtures::JOB_NAME.to_owned());
-        c.run(ctx, opts).await?;
+        c.run(Fixture::gen(), Fixture::gen()).await?;
         Ok(())
     }
 }

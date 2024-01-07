@@ -56,15 +56,14 @@ impl Logger {
 }
 
 #[cfg(test)]
-impl crate::testutil::Fixture for Logger {
-    fn fixture() -> Self {
-        Self::new(LogLevel::None)
-    }
-}
-
-#[cfg(test)]
 mod tests {
     use super::*;
+
+    impl crate::testutil::Fixture for Logger {
+        fn gen() -> Self {
+            Self::new(LogLevel::None)
+        }
+    }
 
     #[test]
     fn cover() {

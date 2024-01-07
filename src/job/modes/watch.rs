@@ -122,7 +122,7 @@ mod test {
     use super::*;
 
     impl Fixture for WatchParams {
-        fn fixture() -> Self {
+        fn gen() -> Self {
             WatchParams {
                 job: "fast".to_string(),
                 watch_list: fixtures::watch_list(),
@@ -131,8 +131,8 @@ mod test {
     }
 
     impl Fixture for Watch {
-        fn fixture() -> Self {
-            let params = WatchParams::fixture();
+        fn gen() -> Self {
+            let params = WatchParams::gen();
             let pool = fixtures::pool().unwrap();
             Watch::new(params, pool).unwrap()
         }
@@ -151,14 +151,14 @@ mod test {
 
     #[tokio::test]
     async fn new() -> JfResult<()> {
-        let w = Watch::fixture();
+        let w = Watch::gen();
         assert!(!w.is_finished().await?);
         Ok(())
     }
 
     #[tokio::test]
     async fn bunshin() -> JfResult<()> {
-        let origin = Watch::fixture();
+        let origin = Watch::gen();
         let bunshin = origin.bunshin();
         assert_ne!(origin.job.as_mock().id(), bunshin.job.as_mock().id());
         Ok(())

@@ -65,7 +65,7 @@ mod test {
     use super::*;
 
     impl Fixture for ShellParams {
-        fn fixture() -> Self {
+        fn gen() -> Self {
             ShellParams {
                 script: "echo hello".to_string(),
                 args: None,
@@ -74,14 +74,14 @@ mod test {
     }
 
     impl Fixture for Shell {
-        fn fixture() -> Self {
-            Shell::new(Fixture::fixture())
+        fn gen() -> Self {
+            Shell::new(Fixture::gen())
         }
     }
 
     #[tokio::test]
     async fn run_without_blocking() -> JfResult<()> {
-        let shell = Shell::fixture();
+        let shell = Shell::gen();
         shell.start().await?;
         assert!(!shell.is_finished().await?);
         assert!(!shell.command.is_finished().await?);
@@ -90,7 +90,7 @@ mod test {
 
     #[tokio::test]
     async fn wait() -> JfResult<()> {
-        let shell = Shell::fixture().start().await?;
+        let shell = Shell::gen().start().await?;
         shell.wait().await?;
         assert!(shell.is_finished().await?);
         assert!(shell.command.is_finished().await?);
@@ -99,7 +99,7 @@ mod test {
 
     #[tokio::test]
     async fn cancel() -> JfResult<()> {
-        let shell = Shell::fixture().start().await?;
+        let shell = Shell::gen().start().await?;
         shell.cancel().await?;
         assert!(shell.is_finished().await?);
         assert!(shell.command.is_finished().await?);
@@ -108,7 +108,7 @@ mod test {
 
     #[tokio::test]
     async fn bunshin() -> JfResult<()> {
-        let origin = Shell::fixture().start().await?;
+        let origin = Shell::gen().start().await?;
         origin.cancel().await?;
         assert!(origin.is_finished().await?);
         let bunshin = origin.bunshin();
@@ -118,7 +118,7 @@ mod test {
 
     #[tokio::test]
     async fn is_finished_not_yet_started() -> JfResult<()> {
-        let shell = Shell::fixture();
+        let shell = Shell::gen();
         assert!(!shell.is_finished().await?);
         Ok(())
     }
