@@ -164,7 +164,7 @@ impl Runner for Mock {
 
 impl From<Mock> for Job {
     fn from(value: Mock) -> Self {
-        Job::Mock(value)
+        Self::Mock(value)
     }
 }
 

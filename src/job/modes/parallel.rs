@@ -92,7 +92,7 @@ impl Runner for Parallel {
 
 impl From<Parallel> for Job {
     fn from(value: Parallel) -> Self {
-        Job::Parallel(value)
+        Self::Parallel(value)
     }
 }
 

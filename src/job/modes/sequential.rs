@@ -93,7 +93,7 @@ impl Runner for Sequential {
 
 impl From<Sequential> for Job {
     fn from(value: Sequential) -> Self {
-        Job::Sequential(value)
+        Self::Sequential(value)
     }
 }
 

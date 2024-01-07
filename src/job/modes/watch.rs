@@ -87,7 +87,7 @@ impl Runner for Watch {
 
 impl From<Watch> for Job {
     fn from(value: Watch) -> Self {
-        Job::Watch(value)
+        Self::Watch(value)
     }
 }
 

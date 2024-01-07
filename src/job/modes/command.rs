@@ -68,7 +68,7 @@ impl Runner for Command {
 
 impl From<Command> for Job {
     fn from(value: Command) -> Self {
-        Job::Command(value)
+        Self::Command(value)
     }
 }
 

@@ -54,7 +54,7 @@ impl Runner for Shell {
 
 impl From<Shell> for Job {
     fn from(value: Shell) -> Self {
-        Job::Shell(value)
+        Self::Shell(value)
     }
 }
 
