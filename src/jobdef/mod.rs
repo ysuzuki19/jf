@@ -59,8 +59,47 @@ impl TryFrom<(String, JobCfg)> for Jobdef {
 }
 
 #[cfg(test)]
-impl crate::testutil::TryFixture for Jobdef {
-    fn try_gen() -> JfResult<Self> {
-        Jobdef::new("fast".into(), crate::testutil::TryFixture::try_gen()?)
+mod test {
+    use crate::{
+        cfg::job_cfg::{CommonCfg, MockCfg},
+        job::modes::MockParams,
+        testutil::TryFixture,
+    };
+
+    use super::*;
+
+    impl TryFixture for Jobdef {
+        fn try_gen() -> JfResult<Self> {
+            Self::new("fast".into(), TryFixture::try_gen()?)
+        }
+    }
+
+    #[tokio::test]
+    async fn visibility_guard() -> JfResult<()> {
+        let jobdef_public = Jobdef::new(
+            "dummy".into(),
+            JobCfg::Mock(MockCfg {
+                common: CommonCfg::new(Visibility::Public, "".into()),
+                params: MockParams {
+                    each_sleep_time: 0,
+                    sleep_count: 0,
+                },
+            }),
+        )?;
+        assert!(jobdef_public.visibility_guard(Agent::Cli).is_ok());
+
+        let jobdef_private = Jobdef::new(
+            "dummy".into(),
+            JobCfg::Mock(MockCfg {
+                common: CommonCfg::new(Visibility::Private, "".into()),
+                params: MockParams {
+                    each_sleep_time: 0,
+                    sleep_count: 0,
+                },
+            }),
+        )?;
+        assert!(jobdef_private.visibility_guard(Agent::Job).is_ok());
+        assert!(jobdef_private.visibility_guard(Agent::Cli).is_err());
+        Ok(())
     }
 }

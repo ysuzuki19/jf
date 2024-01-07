@@ -21,6 +21,16 @@ impl CommonCfg {
 }
 
 #[cfg(test)]
+impl CommonCfg {
+    pub fn new(visibility: Visibility, description: String) -> Self {
+        Self {
+            visibility,
+            description,
+        }
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use crate::error::JfResult;
 

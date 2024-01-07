@@ -59,3 +59,8 @@ sleep_count = 3
         }
     }
 }
+
+#[cfg(test)]
+pub use common::CommonCfg;
+#[cfg(test)]
+pub use modes::MockCfg;
