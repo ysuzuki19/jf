@@ -3,7 +3,7 @@ use std::sync::{
     Arc,
 };
 
-use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
 use crate::{
     error::JfResult,
@@ -52,9 +52,7 @@ impl Runner for Watch {
 
             loop {
                 match rx.recv()??.kind {
-                    notify::EventKind::Modify(_)
-                    | notify::EventKind::Create(_)
-                    | notify::EventKind::Remove(_) => {
+                    EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => {
                         break;
                     }
                     _ => {}
