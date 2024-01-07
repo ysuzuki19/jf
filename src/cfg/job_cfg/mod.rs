@@ -4,6 +4,10 @@ mod modes;
 mod visibility;
 
 pub use self::visibility::Visibility;
+#[cfg(test)]
+pub use common::CommonCfg;
+#[cfg(test)]
+pub use modes::MockCfg;
 
 pub enum JobCfg {
     Command(modes::CommandCfg),
@@ -59,8 +63,3 @@ sleep_count = 3
         }
     }
 }
-
-#[cfg(test)]
-pub use common::CommonCfg;
-#[cfg(test)]
-pub use modes::MockCfg;
