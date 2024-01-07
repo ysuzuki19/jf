@@ -40,3 +40,22 @@ impl JobCfg {
         }
     }
 }
+
+#[cfg(test)]
+mod fixtures {
+    use crate::{error::JfResult, testutil::TryFixture};
+
+    use super::*;
+
+    const CFG_CONTENT: &str = r#"
+mode = "mock"
+each_sleep_time = 100
+sleep_count = 3
+"#;
+
+    impl TryFixture for JobCfg {
+        fn try_gen() -> JfResult<Self> {
+            Ok(toml::from_str(CFG_CONTENT)?)
+        }
+    }
+}

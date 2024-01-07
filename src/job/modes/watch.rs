@@ -93,31 +93,14 @@ impl From<Watch> for Job {
 
 #[cfg(test)]
 mod fixtures {
-    use crate::{
-        error::JfResult,
-        jobdef::{Jobdef, JobdefPool},
-    };
-
-    pub const CFG_CONTENT: &str = r#"
-mode = "mock"
-each_sleep_time = 100
-sleep_count = 3
-"#;
-
     pub fn watch_list() -> Vec<String> {
         vec!["./tests/dummy_entities/*".to_string()]
-    }
-
-    pub fn pool() -> JfResult<JobdefPool> {
-        let cfg = toml::from_str(CFG_CONTENT)?;
-        let jobdefs = vec![Jobdef::new("fast".into(), cfg)?];
-        Ok(JobdefPool::new(jobdefs))
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::testutil::Fixture;
+    use crate::testutil::{Fixture, TryFixture};
 
     use super::*;
 
@@ -130,11 +113,9 @@ mod test {
         }
     }
 
-    impl Fixture for Watch {
-        fn gen() -> Self {
-            let params = WatchParams::gen();
-            let pool = fixtures::pool().unwrap();
-            Watch::new(params, pool).unwrap()
+    impl TryFixture for Watch {
+        fn try_gen() -> JfResult<Self> {
+            Watch::new(Fixture::gen(), TryFixture::try_gen()?)
         }
     }
 
@@ -144,21 +125,20 @@ mod test {
             job: "unknown".to_string(),
             watch_list: fixtures::watch_list(),
         };
-        let pool = fixtures::pool()?;
-        assert!(Watch::new(params, pool).is_err());
+        assert!(Watch::new(params, TryFixture::try_gen()?).is_err());
         Ok(())
     }
 
     #[tokio::test]
     async fn new() -> JfResult<()> {
-        let w = Watch::gen();
+        let w = Watch::try_gen()?;
         assert!(!w.is_finished().await?);
         Ok(())
     }
 
     #[tokio::test]
     async fn bunshin() -> JfResult<()> {
-        let origin = Watch::gen();
+        let origin = Watch::try_gen()?;
         let bunshin = origin.bunshin();
         assert_ne!(origin.job.as_mock().id(), bunshin.job.as_mock().id());
         Ok(())

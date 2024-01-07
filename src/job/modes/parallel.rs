@@ -97,35 +97,29 @@ impl From<Parallel> for Job {
 }
 
 #[cfg(test)]
-mod fixtures {
-    use crate::{cfg::job_cfg::JobCfg, jobdef::Jobdef};
+mod test {
+    use crate::{
+        error::JfResult,
+        job::Runner,
+        jobdef::JobdefPool,
+        testutil::{Fixture, TryFixture},
+    };
 
     use super::*;
 
-    pub const CFG_CONTENT: &str = r#"
-mode = "mock"
-each_sleep_time = 100
-sleep_count = 3
-"#;
-
-    pub fn params() -> super::ParallelParams {
-        super::ParallelParams {
-            jobs: vec!["fast".into(), "fast".into()],
+    impl Fixture for ParallelParams {
+        fn gen() -> Self {
+            Self {
+                jobs: vec!["fast".into(), "fast".into()],
+            }
         }
     }
 
-    pub fn pool() -> JfResult<super::JobdefPool> {
-        let mock_cfg: JobCfg = toml::from_str(CFG_CONTENT)?;
-        let jobdefs = vec![Jobdef::new("fast".into(), mock_cfg).unwrap()];
-        Ok(super::JobdefPool::new(jobdefs))
+    impl TryFixture for Parallel {
+        fn try_gen() -> JfResult<Self> {
+            Parallel::new(Fixture::gen(), TryFixture::try_gen()?)
+        }
     }
-}
-
-#[cfg(test)]
-mod test {
-    use crate::{error::JfResult, job::Runner, jobdef::JobdefPool};
-
-    use super::*;
 
     #[tokio::test]
     async fn invalid_new_with_unknown_job() -> JfResult<()> {
@@ -141,18 +135,14 @@ mod test {
 
     #[tokio::test]
     async fn new() -> JfResult<()> {
-        let params = fixtures::params();
-        let pool = fixtures::pool()?;
-        let p = Parallel::new(params, pool)?;
+        let p = Parallel::try_gen()?;
         assert!(p.jobs.len() == 2);
         Ok(())
     }
 
     #[tokio::test]
     async fn start() -> JfResult<()> {
-        let params = fixtures::params();
-        let pool = fixtures::pool()?;
-        let p = Parallel::new(params, pool)?;
+        let p = Parallel::try_gen()?;
         p.start().await?;
         for job in p.jobs {
             job.as_mock().assert_is_started_eq(true);
@@ -162,9 +152,7 @@ mod test {
 
     #[tokio::test]
     async fn cancel() -> JfResult<()> {
-        let params = fixtures::params();
-        let pool = fixtures::pool()?;
-        let p = Parallel::new(params, pool)?;
+        let p = Parallel::try_gen()?;
         p.start().await?.cancel().await?;
         for job in p.jobs {
             job.as_mock()
@@ -176,9 +164,7 @@ mod test {
 
     #[tokio::test]
     async fn wait() -> JfResult<()> {
-        let params = fixtures::params();
-        let pool = fixtures::pool()?;
-        let p = Parallel::new(params, pool)?;
+        let p = Parallel::try_gen()?;
         p.start().await?.wait().await?;
         for job in p.jobs {
             job.as_mock()
@@ -190,9 +176,7 @@ mod test {
 
     #[tokio::test]
     async fn bunshin() -> JfResult<()> {
-        let params = fixtures::params();
-        let pool = fixtures::pool()?;
-        let origin = Parallel::new(params, pool)?;
+        let origin = Parallel::try_gen()?;
         origin.start().await?.cancel().await?;
 
         let bunshin = origin.bunshin();

@@ -57,3 +57,10 @@ impl TryFrom<(String, JobCfg)> for Jobdef {
         Self::new(value.0, value.1)
     }
 }
+
+#[cfg(test)]
+impl crate::testutil::TryFixture for Jobdef {
+    fn try_gen() -> JfResult<Self> {
+        Jobdef::new("fast".into(), crate::testutil::TryFixture::try_gen()?)
+    }
+}
