@@ -92,3 +92,77 @@ impl From<Watch> for Job {
         Job::Watch(value)
     }
 }
+
+#[cfg(test)]
+mod fixtures {
+    use crate::{
+        error::JfResult,
+        jobdef::{Jobdef, JobdefPool},
+    };
+
+    pub const CFG_CONTENT: &str = r#"
+mode = "mock"
+each_sleep_time = 100
+sleep_count = 3
+"#;
+
+    pub fn watch_list() -> Vec<String> {
+        vec!["./tests/dummy_entities/*".to_string()]
+    }
+
+    pub fn pool() -> JfResult<JobdefPool> {
+        let cfg = toml::from_str(CFG_CONTENT)?;
+        let jobdefs = vec![Jobdef::new("fast".into(), cfg)?];
+        Ok(JobdefPool::new(jobdefs))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::testutil::Fixture;
+
+    use super::*;
+
+    impl Fixture for WatchParams {
+        fn fixture() -> Self {
+            WatchParams {
+                job: "fast".to_string(),
+                watch_list: fixtures::watch_list(),
+            }
+        }
+    }
+
+    impl Fixture for Watch {
+        fn fixture() -> Self {
+            let params = WatchParams::fixture();
+            let pool = fixtures::pool().unwrap();
+            Watch::new(params, pool).unwrap()
+        }
+    }
+
+    #[tokio::test]
+    async fn invalid_new_with_unknown_job() -> JfResult<()> {
+        let params = WatchParams {
+            job: "unknown".to_string(),
+            watch_list: fixtures::watch_list(),
+        };
+        let pool = fixtures::pool()?;
+        assert!(Watch::new(params, pool).is_err());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn new() -> JfResult<()> {
+        let w = Watch::fixture();
+        assert!(!w.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn bunshin() -> JfResult<()> {
+        let origin = Watch::fixture();
+        let bunshin = origin.bunshin();
+        assert_ne!(origin.job.as_mock().id(), bunshin.job.as_mock().id());
+        Ok(())
+    }
+}
