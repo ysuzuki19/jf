@@ -109,12 +109,6 @@ each_sleep_time = 100
 sleep_count = 3
 "#;
 
-    pub fn params() -> SequentialParams {
-        SequentialParams {
-            jobs: vec!["fast".to_string(), "fast".to_string()],
-        }
-    }
-
     pub fn pool() -> JfResult<JobdefPool> {
         let cfg = toml::from_str(CFG_CONTENT)?;
         let jobdefs = vec![Jobdef::new("fast".into(), cfg)?];
@@ -124,9 +118,17 @@ sleep_count = 3
 
 #[cfg(test)]
 mod test {
-    use crate::job::runner;
+    use crate::{job::runner, testutil::Fixture};
 
     use super::*;
+
+    impl Fixture for SequentialParams {
+        fn fixture() -> Self {
+            Self {
+                jobs: vec!["fast".into(), "fast".into()],
+            }
+        }
+    }
 
     #[test]
     fn invalid_new_with_empty_job() -> JfResult<()> {
@@ -149,17 +151,15 @@ mod test {
 
     #[tokio::test]
     async fn new() -> JfResult<()> {
-        let params = fixtures::params();
         let pool = fixtures::pool()?;
-        Sequential::new(params, pool)?;
+        Sequential::new(Fixture::fixture(), pool)?;
         Ok(())
     }
 
     #[tokio::test]
     async fn start() -> JfResult<()> {
-        let params = fixtures::params();
         let pool = fixtures::pool()?;
-        let s = Sequential::new(params, pool)?.start().await?;
+        let s = Sequential::new(Fixture::fixture(), pool)?.start().await?;
         assert!(!s.is_finished().await?);
         for (index, job) in s.jobs.iter().enumerate() {
             if index == 0 {
@@ -175,9 +175,8 @@ mod test {
 
     #[tokio::test]
     async fn cancel() -> JfResult<()> {
-        let params = fixtures::params();
         let pool = fixtures::pool()?;
-        let s = Sequential::new(params, pool)?.start().await?;
+        let s = Sequential::new(Fixture::fixture(), pool)?.start().await?;
         s.cancel().await?;
         runner::sleep().await; // sleep for job interval
         assert!(s.is_cancelled.load(Ordering::Relaxed));
@@ -186,9 +185,8 @@ mod test {
 
     #[tokio::test]
     async fn wait() -> JfResult<()> {
-        let params = fixtures::params();
         let pool = fixtures::pool()?;
-        let s = Sequential::new(params, pool)?.start().await?;
+        let s = Sequential::new(Fixture::fixture(), pool)?.start().await?;
         s.wait().await?;
         s.is_finished().await?;
         for job in s.jobs.iter() {
@@ -199,9 +197,8 @@ mod test {
 
     #[tokio::test]
     async fn bunshin() -> JfResult<()> {
-        let params = fixtures::params();
         let pool = fixtures::pool()?;
-        let origin = Sequential::new(params, pool)?;
+        let origin = Sequential::new(Fixture::fixture(), pool)?;
         origin.start().await?.cancel().await?;
 
         let bunshin = origin.bunshin();
@@ -218,9 +215,8 @@ mod test {
 
     #[tokio::test]
     async fn is_finished_not_yet_started() -> JfResult<()> {
-        let params = fixtures::params();
         let pool = fixtures::pool()?;
-        let s = Sequential::new(params, pool)?;
+        let s = Sequential::new(Fixture::fixture(), pool)?;
         assert!(!s.is_finished().await?);
         Ok(())
     }
