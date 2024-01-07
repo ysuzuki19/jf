@@ -62,8 +62,7 @@ impl TryFrom<(String, JobCfg)> for Jobdef {
 mod test {
     use crate::{
         cfg::job_cfg::{CommonCfg, MockCfg},
-        job::modes::MockParams,
-        testutil::TryFixture,
+        testutil::{Fixture, TryFixture},
     };
 
     use super::*;
@@ -80,22 +79,17 @@ mod test {
             "dummy".into(),
             JobCfg::Mock(MockCfg {
                 common: CommonCfg::new(Visibility::Public, "".into()),
-                params: MockParams {
-                    each_sleep_time: 0,
-                    sleep_count: 0,
-                },
+                params: Fixture::gen(),
             }),
         )?;
+        assert!(jobdef_public.visibility_guard(Agent::Job).is_ok());
         assert!(jobdef_public.visibility_guard(Agent::Cli).is_ok());
 
         let jobdef_private = Jobdef::new(
             "dummy".into(),
             JobCfg::Mock(MockCfg {
                 common: CommonCfg::new(Visibility::Private, "".into()),
-                params: MockParams {
-                    each_sleep_time: 0,
-                    sleep_count: 0,
-                },
+                params: Fixture::gen(),
             }),
         )?;
         assert!(jobdef_private.visibility_guard(Agent::Job).is_ok());

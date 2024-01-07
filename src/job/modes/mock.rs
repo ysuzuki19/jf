@@ -5,6 +5,7 @@ use std::sync::{atomic::Ordering, Arc};
 use crate::error::JfResult;
 use crate::job::Job;
 use crate::job::Runner;
+use crate::testutil::Fixture;
 
 static MOCK_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -165,6 +166,15 @@ impl Runner for Mock {
 impl From<Mock> for Job {
     fn from(value: Mock) -> Self {
         Self::Mock(value)
+    }
+}
+
+impl Fixture for MockParams {
+    fn gen() -> Self {
+        Self {
+            each_sleep_time: 1,
+            sleep_count: 3,
+        }
     }
 }
 
