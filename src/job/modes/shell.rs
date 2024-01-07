@@ -57,3 +57,69 @@ impl From<Shell> for Job {
         Job::Shell(value)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::testutil::Fixture;
+
+    use super::*;
+
+    impl Fixture for ShellParams {
+        fn fixture() -> Self {
+            ShellParams {
+                script: "echo hello".to_string(),
+                args: None,
+            }
+        }
+    }
+
+    impl Fixture for Shell {
+        fn fixture() -> Self {
+            Shell::new(Fixture::fixture())
+        }
+    }
+
+    #[tokio::test]
+    async fn run_without_blocking() -> JfResult<()> {
+        let shell = Shell::fixture();
+        shell.start().await?;
+        assert!(!shell.is_finished().await?);
+        assert!(!shell.command.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn wait() -> JfResult<()> {
+        let shell = Shell::fixture().start().await?;
+        shell.wait().await?;
+        assert!(shell.is_finished().await?);
+        assert!(shell.command.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn cancel() -> JfResult<()> {
+        let shell = Shell::fixture().start().await?;
+        shell.cancel().await?;
+        assert!(shell.is_finished().await?);
+        assert!(shell.command.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn bunshin() -> JfResult<()> {
+        let origin = Shell::fixture().start().await?;
+        origin.cancel().await?;
+        assert!(origin.is_finished().await?);
+        let bunshin = origin.bunshin();
+        assert!(!bunshin.is_finished().await?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn is_finished_not_yet_started() -> JfResult<()> {
+        let shell = Shell::fixture();
+        assert!(!shell.is_finished().await?);
+        Ok(())
+    }
+}
