@@ -9,7 +9,7 @@ use crate::testutil::Fixture;
 
 static MOCK_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Clone, serde::Deserialize)]
 pub struct MockParams {
     pub each_sleep_time: u64,
     pub sleep_count: u8,
