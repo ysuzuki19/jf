@@ -31,4 +31,12 @@ mod tests {
         Cfg::load(Some(cfg_path_gen::test::fixtures_dir()))?;
         Ok(())
     }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn load_unexist() -> JfResult<()> {
+        let must_fail = Cfg::load(Some(cfg_path_gen::test::unexist_dir()));
+        assert!(must_fail.is_err());
+        Ok(())
+    }
 }

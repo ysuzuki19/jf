@@ -30,6 +30,11 @@ pub mod test {
     use super::*;
 
     #[cfg_attr(coverage, coverage(off))]
+    pub fn unexist_dir() -> PathBuf {
+        PathBuf::from(".").join("tests").join("unexist")
+    }
+
+    #[cfg_attr(coverage, coverage(off))]
     pub fn fixtures_dir() -> PathBuf {
         PathBuf::from(".").join("tests").join("fixtures")
     }
