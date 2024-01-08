@@ -34,13 +34,29 @@ command = "cargo"
 args = ["+nightly", "llvm-cov", "--lcov", "--output-path", "target/lcov.info"]
 
 [job."live-llvm-cov:html"]
+mode = "parallel"
+jobs = ["serve:llvm-cov:html", "llvm-cov:html:watch"]
+
+[job."llvm-cov:html:watch"]
 mode = "watch"
 job = "llvm-cov:html"
-watch_list = ["src/**", "Cargo.toml"]
+watch_list = ["src/*", "src/**", "Cargo.toml"]
+
+[job."serve:llvm-cov:html"]
+command = "npx"
+args = [
+  "browser-sync",
+  "start",
+  "--server",
+  "target/llvm-cov/html",
+  "--files",
+  "target/llvm-cov/html/**",
+  "--no-open",
+]
 
 [job."llvm-cov:html"]
 command = "cargo"
-args = ["+nightly", "llvm-cov", "--html"]
+args = ["+nightly", "llvm-cov", "--html", "--no-clean"]
 
 [job.live-test]
 mode = "watch"
