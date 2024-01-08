@@ -62,7 +62,7 @@ impl TryFrom<(String, JobCfg)> for Jobdef {
 mod test {
     use crate::{
         cfg::job_cfg::{CommonCfg, MockCfg},
-        testutil::{Fixture, TryFixture},
+        testutil::{async_test, Fixture, TryFixture},
     };
 
     use super::*;
@@ -74,28 +74,33 @@ mod test {
         }
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn visibility_guard() -> JfResult<()> {
-        let jobdef_public = Jobdef::new(
-            "dummy".into(),
-            JobCfg::Mock(MockCfg {
-                common: CommonCfg::new(Visibility::Public, "".into()),
-                params: Fixture::gen(),
-            }),
-        )?;
-        assert!(jobdef_public.visibility_guard(Agent::Job).is_ok());
-        assert!(jobdef_public.visibility_guard(Agent::Cli).is_ok());
+    fn visibility_guard() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let jobdef_public = Jobdef::new(
+                    "dummy".into(),
+                    JobCfg::Mock(MockCfg {
+                        common: CommonCfg::new(Visibility::Public, "".into()),
+                        params: Fixture::gen(),
+                    }),
+                )?;
+                assert!(jobdef_public.visibility_guard(Agent::Job).is_ok());
+                assert!(jobdef_public.visibility_guard(Agent::Cli).is_ok());
 
-        let jobdef_private = Jobdef::new(
-            "dummy".into(),
-            JobCfg::Mock(MockCfg {
-                common: CommonCfg::new(Visibility::Private, "".into()),
-                params: Fixture::gen(),
-            }),
-        )?;
-        assert!(jobdef_private.visibility_guard(Agent::Job).is_ok());
-        assert!(jobdef_private.visibility_guard(Agent::Cli).is_err());
-        Ok(())
+                let jobdef_private = Jobdef::new(
+                    "dummy".into(),
+                    JobCfg::Mock(MockCfg {
+                        common: CommonCfg::new(Visibility::Private, "".into()),
+                        params: Fixture::gen(),
+                    }),
+                )?;
+                assert!(jobdef_private.visibility_guard(Agent::Job).is_ok());
+                assert!(jobdef_private.visibility_guard(Agent::Cli).is_err());
+                Ok(())
+            },
+        )
     }
 }

@@ -102,7 +102,7 @@ mod test {
         error::JfResult,
         job::Runner,
         jobdef::JobdefPool,
-        testutil::{Fixture, TryFixture},
+        testutil::{async_test, Fixture, TryFixture},
     };
 
     use super::*;
@@ -123,9 +123,9 @@ mod test {
         }
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn invalid_new_with_unknown_job() -> JfResult<()> {
+    fn invalid_new_with_unknown_job() -> JfResult<()> {
         let must_fail = Parallel::new(
             ParallelParams {
                 jobs: vec!["mock".into(), "mock".into()],
@@ -136,65 +136,85 @@ mod test {
         Ok(())
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn new() -> JfResult<()> {
+    fn new() -> JfResult<()> {
         let p = Parallel::try_gen()?;
         assert!(p.jobs.len() == 2);
         Ok(())
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn start() -> JfResult<()> {
-        let p = Parallel::try_gen()?;
-        p.start().await?;
-        for job in p.jobs {
-            job.as_mock().assert_is_started_eq(true);
-        }
-        Ok(())
+    fn start() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let p = Parallel::try_gen()?;
+                p.start().await?;
+                for job in p.jobs {
+                    job.as_mock().assert_is_started_eq(true);
+                }
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn cancel() -> JfResult<()> {
-        let p = Parallel::try_gen()?;
-        p.start().await?.cancel().await?;
-        for job in p.jobs {
-            job.as_mock()
-                .assert_is_started_eq(true)
-                .assert_is_cancelled_eq(true);
-        }
-        Ok(())
+    fn cancel() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let p = Parallel::try_gen()?;
+                p.start().await?.cancel().await?;
+                for job in p.jobs {
+                    job.as_mock()
+                        .assert_is_started_eq(true)
+                        .assert_is_cancelled_eq(true);
+                }
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn wait() -> JfResult<()> {
-        let p = Parallel::try_gen()?;
-        p.start().await?.wait().await?;
-        for job in p.jobs {
-            job.as_mock()
-                .assert_is_started_eq(true)
-                .assert_is_finished_eq(true);
-        }
-        Ok(())
+    fn wait() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let p = Parallel::try_gen()?;
+                p.start().await?.wait().await?;
+                for job in p.jobs {
+                    job.as_mock()
+                        .assert_is_started_eq(true)
+                        .assert_is_finished_eq(true);
+                }
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn bunshin() -> JfResult<()> {
-        let origin = Parallel::try_gen()?;
-        origin.start().await?.cancel().await?;
+    fn bunshin() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let origin = Parallel::try_gen()?;
+                origin.start().await?.cancel().await?;
 
-        let bunshin = origin.bunshin();
-        assert_eq!(origin.jobs.len(), bunshin.jobs.len());
-        for (bunshin_job, origin_job) in bunshin.jobs.iter().zip(origin.jobs) {
-            bunshin_job
-                .as_mock()
-                .assert_id_ne(origin_job.as_mock().id())
-                .assert_is_started_eq(false);
-        }
-        Ok(())
+                let bunshin = origin.bunshin();
+                assert_eq!(origin.jobs.len(), bunshin.jobs.len());
+                for (bunshin_job, origin_job) in bunshin.jobs.iter().zip(origin.jobs) {
+                    bunshin_job
+                        .as_mock()
+                        .assert_id_ne(origin_job.as_mock().id())
+                        .assert_is_started_eq(false);
+                }
+                Ok(())
+            },
+        )
     }
 }

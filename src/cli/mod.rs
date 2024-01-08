@@ -38,7 +38,7 @@ mod tests {
 
     use crate::{
         cli::{args::fixtures, models::action::Configured},
-        testutil::Fixture,
+        testutil::{async_test, Fixture},
     };
 
     use super::*;
@@ -68,13 +68,18 @@ mod tests {
         Ok(())
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn run() -> JfResult<()> {
-        let cli = Cli::gen();
-        assert_eq!(cli.ctx(), &Ctx::gen());
-        assert_eq!(cli.action, Action::gen());
-        cli.run().await?;
-        Ok(())
+    fn run() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let cli = Cli::gen();
+                assert_eq!(cli.ctx(), &Ctx::gen());
+                assert_eq!(cli.action, Action::gen());
+                cli.run().await?;
+                Ok(())
+            },
+        )
     }
 }

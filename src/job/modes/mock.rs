@@ -180,6 +180,8 @@ impl Fixture for MockParams {
 }
 
 mod test {
+    use crate::testutil::async_test;
+
     use super::*;
 
     const MOCK_SLEEP_TIME: u64 = 1;
@@ -193,9 +195,9 @@ mod test {
         })
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn new() {
+    fn new() {
         let mock = test_mock_factory();
 
         mock.assert_is_started_eq(false)
@@ -204,71 +206,86 @@ mod test {
             .assert_is_cancelled_eq(false);
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn run_wait() -> JfResult<()> {
-        let mock = test_mock_factory();
-        let id = mock.id();
+    fn run_wait() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let mock = test_mock_factory();
+                let id = mock.id();
 
-        mock.start().await?;
-        mock.assert_is_started_eq(true)
-            .assert_is_running_eq(true)
-            .assert_is_cancelled_eq(false);
+                mock.start().await?;
+                mock.assert_is_started_eq(true)
+                    .assert_is_running_eq(true)
+                    .assert_is_cancelled_eq(false);
 
-        mock.wait().await?;
-        mock.assert_id_eq(id) // not changed mock instance
-            .assert_is_started_eq(true)
-            .assert_is_running_eq(false)
-            .assert_is_finished_eq(true)
-            .assert_is_cancelled_eq(false);
+                mock.wait().await?;
+                mock.assert_id_eq(id) // not changed mock instance
+                    .assert_is_started_eq(true)
+                    .assert_is_running_eq(false)
+                    .assert_is_finished_eq(true)
+                    .assert_is_cancelled_eq(false);
 
-        Ok(())
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn run_cancel_wait() -> JfResult<()> {
-        let mock = test_mock_factory();
-        let id = mock.id();
+    fn run_cancel_wait() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let mock = test_mock_factory();
+                let id = mock.id();
 
-        mock.start().await?.cancel().await?;
-        mock.assert_is_cancelled_eq(true);
+                mock.start().await?.cancel().await?;
+                mock.assert_is_cancelled_eq(true);
 
-        mock.wait().await?;
-        mock.assert_id_eq(id)
-            .assert_is_running_eq(false)
-            .assert_is_finished_eq(true);
+                mock.wait().await?;
+                mock.assert_id_eq(id)
+                    .assert_is_running_eq(false)
+                    .assert_is_finished_eq(true);
 
-        Ok(())
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn bunshin() -> JfResult<()> {
-        let origin = test_mock_factory();
+    fn bunshin() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let origin = test_mock_factory();
 
-        origin.start().await?.cancel().await?;
-        origin
-            .assert_is_started_eq(true)
-            .assert_is_running_eq(true)
-            .assert_is_finished_eq(false)
-            .assert_is_cancelled_eq(true);
+                origin.start().await?.cancel().await?;
+                origin
+                    .assert_is_started_eq(true)
+                    .assert_is_running_eq(true)
+                    .assert_is_finished_eq(false)
+                    .assert_is_cancelled_eq(true);
 
-        let bunshin = origin.bunshin();
-        bunshin
-            .assert_id_ne(origin.id) // check new mock job creation
-            .assert_each_sleep_time_eq(origin.each_sleep_time)
-            .assert_sleep_count_eq(origin.sleep_count)
-            .assert_is_started_eq(false)
-            .assert_is_running_eq(false)
-            .assert_is_finished_eq(false)
-            .assert_is_cancelled_eq(false);
-        Ok(())
+                let bunshin = origin.bunshin();
+                bunshin
+                    .assert_id_ne(origin.id) // check new mock job creation
+                    .assert_each_sleep_time_eq(origin.each_sleep_time)
+                    .assert_sleep_count_eq(origin.sleep_count)
+                    .assert_is_started_eq(false)
+                    .assert_is_running_eq(false)
+                    .assert_is_finished_eq(false)
+                    .assert_is_cancelled_eq(false);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn into_job() {
+    fn into_job() {
         let mock = test_mock_factory();
         let id = mock.id();
 

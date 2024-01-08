@@ -39,7 +39,7 @@ impl CliAction for Statics {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::Fixture;
+    use crate::testutil::{async_test, Fixture};
 
     use super::*;
 
@@ -57,27 +57,42 @@ mod tests {
         assert_eq!(s, Statics::Help);
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn completion() -> JfResult<()> {
-        let s = Statics::Completion(clap_complete::Shell::Bash);
-        s.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn completion() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let s = Statics::Completion(clap_complete::Shell::Bash);
+                s.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn help() -> JfResult<()> {
-        let s = Statics::Help;
-        s.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn help() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let s = Statics::Help;
+                s.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn version() -> JfResult<()> {
-        let s = Statics::Version;
-        s.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn version() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let s = Statics::Version;
+                s.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 }

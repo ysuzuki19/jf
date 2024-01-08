@@ -32,7 +32,7 @@ impl CliAction for Action {
 #[cfg(test)]
 mod tests {
 
-    use crate::testutil::Fixture;
+    use crate::testutil::{async_test, Fixture};
 
     use super::*;
 
@@ -43,19 +43,29 @@ mod tests {
         }
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn help() -> JfResult<()> {
-        let s = Action::Statics(Statics::Help);
-        s.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn help() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let s = Action::Statics(Statics::Help);
+                s.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn run() -> JfResult<()> {
-        let c = Action::Configured(Configured::Run(String::from("test-fixture")));
-        c.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn run() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let c = Action::Configured(Configured::Run(String::from("test-fixture")));
+                c.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 }

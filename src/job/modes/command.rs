@@ -74,6 +74,8 @@ impl From<Command> for Job {
 
 #[cfg(test)]
 mod tests {
+    use crate::testutil::async_test;
+
     use super::*;
 
     #[cfg_attr(coverage, coverage(off))]
@@ -84,48 +86,73 @@ mod tests {
         })
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn run_without_blocking() -> JfResult<()> {
-        let command = test_command_factory();
-        command.start().await?;
-        assert!(!command.is_finished().await?);
-        Ok(())
+    fn run_without_blocking() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let command = test_command_factory();
+                command.start().await?;
+                assert!(!command.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn wait() -> JfResult<()> {
-        let command = test_command_factory();
-        command.start().await?;
-        command.wait().await?;
-        assert!(command.is_finished().await?);
-        Ok(())
+    fn wait() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let command = test_command_factory();
+                command.start().await?;
+                command.wait().await?;
+                assert!(command.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn cancel() -> JfResult<()> {
-        let command = test_command_factory();
-        command.start().await?.cancel().await?;
-        assert!(command.is_finished().await?);
-        Ok(())
+    fn cancel() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let command = test_command_factory();
+                command.start().await?.cancel().await?;
+                assert!(command.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn bunshin() -> JfResult<()> {
-        let command = test_command_factory().bunshin();
-        command.start().await?.cancel().await?;
-        assert!(command.is_finished().await?);
-        Ok(())
+    fn bunshin() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let command = test_command_factory().bunshin();
+                command.start().await?.cancel().await?;
+                assert!(command.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn is_finished_not_yet_started() -> JfResult<()> {
-        let command = test_command_factory();
-        assert!(!command.is_finished().await?);
-        Ok(())
+    fn is_finished_not_yet_started() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let command = test_command_factory();
+                assert!(!command.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 }

@@ -60,7 +60,7 @@ impl From<Shell> for Job {
 
 #[cfg(test)]
 mod test {
-    use crate::testutil::Fixture;
+    use crate::testutil::{async_test, Fixture};
 
     use super::*;
 
@@ -81,52 +81,77 @@ mod test {
         }
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn run_without_blocking() -> JfResult<()> {
-        let shell = Shell::gen();
-        shell.start().await?;
-        assert!(!shell.is_finished().await?);
-        assert!(!shell.command.is_finished().await?);
-        Ok(())
+    fn run_without_blocking() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let shell = Shell::gen();
+                shell.start().await?;
+                assert!(!shell.is_finished().await?);
+                assert!(!shell.command.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn wait() -> JfResult<()> {
-        let shell = Shell::gen().start().await?;
-        shell.wait().await?;
-        assert!(shell.is_finished().await?);
-        assert!(shell.command.is_finished().await?);
-        Ok(())
+    fn wait() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let shell = Shell::gen().start().await?;
+                shell.wait().await?;
+                assert!(shell.is_finished().await?);
+                assert!(shell.command.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn cancel() -> JfResult<()> {
-        let shell = Shell::gen().start().await?;
-        shell.cancel().await?;
-        assert!(shell.is_finished().await?);
-        assert!(shell.command.is_finished().await?);
-        Ok(())
+    fn cancel() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let shell = Shell::gen().start().await?;
+                shell.cancel().await?;
+                assert!(shell.is_finished().await?);
+                assert!(shell.command.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn bunshin() -> JfResult<()> {
-        let origin = Shell::gen().start().await?;
-        origin.cancel().await?;
-        assert!(origin.is_finished().await?);
-        let bunshin = origin.bunshin();
-        assert!(!bunshin.is_finished().await?);
-        Ok(())
+    fn bunshin() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let origin = Shell::gen().start().await?;
+                origin.cancel().await?;
+                assert!(origin.is_finished().await?);
+                let bunshin = origin.bunshin();
+                assert!(!bunshin.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn is_finished_not_yet_started() -> JfResult<()> {
-        let shell = Shell::gen();
-        assert!(!shell.is_finished().await?);
-        Ok(())
+    fn is_finished_not_yet_started() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let shell = Shell::gen();
+                assert!(!shell.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 }

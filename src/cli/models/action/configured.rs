@@ -46,39 +46,62 @@ mod fixtures {
 
 #[cfg(test)]
 mod tests {
-    use crate::{error::JfResult, testutil::Fixture};
+    use crate::{
+        error::JfResult,
+        testutil::{async_test, Fixture},
+    };
 
     use super::*;
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn list() -> JfResult<()> {
-        let c = Configured::List;
-        c.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn list() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let c = Configured::List;
+                c.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn validate() -> JfResult<()> {
-        let c = Configured::Validate;
-        c.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn validate() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let c = Configured::Validate;
+                c.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn run() -> JfResult<()> {
-        let c = Configured::Run(fixtures::JOB_NAME.to_owned());
-        c.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn run() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let c = Configured::Run(fixtures::JOB_NAME.to_owned());
+                c.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn description() -> JfResult<()> {
-        let c = Configured::Description(fixtures::JOB_NAME.to_owned());
-        c.run(Fixture::gen(), Fixture::gen()).await?;
-        Ok(())
+    fn description() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let c = Configured::Description(fixtures::JOB_NAME.to_owned());
+                c.run(Fixture::gen(), Fixture::gen()).await?;
+                Ok(())
+            },
+        )
     }
 }

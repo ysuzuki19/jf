@@ -101,7 +101,7 @@ impl From<Sequential> for Job {
 mod test {
     use crate::{
         job::runner,
-        testutil::{Fixture, TryFixture},
+        testutil::{async_test, Fixture, TryFixture},
     };
 
     use super::*;
@@ -149,68 +149,93 @@ mod test {
         Ok(())
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn start() -> JfResult<()> {
-        let s = Sequential::try_gen()?.start().await?;
-        assert!(!s.is_finished().await?);
-        for (index, job) in s.jobs.iter().enumerate() {
-            if index == 0 {
-                // first job is started immediately
-                job.as_mock().assert_is_started_eq(true);
-            } else {
-                // other jobs are not started yet
-                job.as_mock().assert_is_started_eq(false);
-            }
-        }
-        Ok(())
+    fn start() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let s = Sequential::try_gen()?.start().await?;
+                assert!(!s.is_finished().await?);
+                for (index, job) in s.jobs.iter().enumerate() {
+                    if index == 0 {
+                        // first job is started immediately
+                        job.as_mock().assert_is_started_eq(true);
+                    } else {
+                        // other jobs are not started yet
+                        job.as_mock().assert_is_started_eq(false);
+                    }
+                }
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn cancel() -> JfResult<()> {
-        let s = Sequential::try_gen()?.start().await?;
-        s.cancel().await?;
-        runner::sleep().await; // sleep for job interval
-        assert!(s.is_cancelled.load(Ordering::Relaxed));
-        Ok(())
+    fn cancel() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let s = Sequential::try_gen()?.start().await?;
+                s.cancel().await?;
+                runner::sleep().await; // sleep for job interval
+                assert!(s.is_cancelled.load(Ordering::Relaxed));
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn wait() -> JfResult<()> {
-        let s = Sequential::try_gen()?.start().await?;
-        s.wait().await?;
-        s.is_finished().await?;
-        for job in s.jobs.iter() {
-            job.as_mock().assert_is_finished_eq(true);
-        }
-        Ok(())
+    fn wait() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let s = Sequential::try_gen()?.start().await?;
+                s.wait().await?;
+                s.is_finished().await?;
+                for job in s.jobs.iter() {
+                    job.as_mock().assert_is_finished_eq(true);
+                }
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn bunshin() -> JfResult<()> {
-        let origin = Sequential::try_gen()?;
-        origin.start().await?.cancel().await?;
+    fn bunshin() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let origin = Sequential::try_gen()?;
+                origin.start().await?.cancel().await?;
 
-        let bunshin = origin.bunshin();
-        assert_eq!(origin.jobs.len(), bunshin.jobs.len());
-        for (bunshin_job, origin_job) in bunshin.jobs.iter().zip(origin.jobs) {
-            bunshin_job
-                .as_mock()
-                .assert_id_ne(origin_job.as_mock().id())
-                .assert_is_started_eq(false)
-                .assert_is_cancelled_eq(false);
-        }
-        Ok(())
+                let bunshin = origin.bunshin();
+                assert_eq!(origin.jobs.len(), bunshin.jobs.len());
+                for (bunshin_job, origin_job) in bunshin.jobs.iter().zip(origin.jobs) {
+                    bunshin_job
+                        .as_mock()
+                        .assert_id_ne(origin_job.as_mock().id())
+                        .assert_is_started_eq(false)
+                        .assert_is_cancelled_eq(false);
+                }
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn is_finished_not_yet_started() -> JfResult<()> {
-        let s = Sequential::try_gen()?;
-        assert!(!s.is_finished().await?);
-        Ok(())
+    fn is_finished_not_yet_started() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let s = Sequential::try_gen()?;
+                assert!(!s.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 }

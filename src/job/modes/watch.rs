@@ -101,7 +101,7 @@ mod fixtures {
 
 #[cfg(test)]
 mod test {
-    use crate::testutil::{Fixture, TryFixture};
+    use crate::testutil::{async_test, Fixture, TryFixture};
 
     use super::*;
 
@@ -122,31 +122,46 @@ mod test {
         }
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn invalid_new_with_unknown_job() -> JfResult<()> {
-        let params = WatchParams {
-            job: "unknown".to_string(),
-            watch_list: fixtures::watch_list(),
-        };
-        assert!(Watch::new(params, TryFixture::try_gen()?).is_err());
-        Ok(())
+    fn invalid_new_with_unknown_job() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let params = WatchParams {
+                    job: "unknown".to_string(),
+                    watch_list: fixtures::watch_list(),
+                };
+                assert!(Watch::new(params, TryFixture::try_gen()?).is_err());
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn new() -> JfResult<()> {
-        let w = Watch::try_gen()?;
-        assert!(!w.is_finished().await?);
-        Ok(())
+    fn new() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let w = Watch::try_gen()?;
+                assert!(!w.is_finished().await?);
+                Ok(())
+            },
+        )
     }
 
-    #[tokio::test]
+    #[test]
     #[cfg_attr(coverage, coverage(off))]
-    async fn bunshin() -> JfResult<()> {
-        let origin = Watch::try_gen()?;
-        let bunshin = origin.bunshin();
-        assert_ne!(origin.job.as_mock().id(), bunshin.job.as_mock().id());
-        Ok(())
+    fn bunshin() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let origin = Watch::try_gen()?;
+                let bunshin = origin.bunshin();
+                assert_ne!(origin.job.as_mock().id(), bunshin.job.as_mock().id());
+                Ok(())
+            },
+        )
     }
 }
