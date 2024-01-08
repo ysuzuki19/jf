@@ -20,12 +20,6 @@ impl JobdefPool {
         Self { map: Arc::new(map) }
     }
 
-    fn get(&self, job_name: String) -> JfResult<&Jobdef> {
-        self.map
-            .get(&job_name)
-            .ok_or(InternalError::JobdefNotFound(job_name).into())
-    }
-
     pub fn list_public(&self) -> Vec<String> {
         self.map
             .values()
@@ -42,15 +36,24 @@ impl JobdefPool {
     pub fn validate(&self) -> JfResult<()> {
         let errs = self
             .map
-            .iter()
-            .map(|(_, jobdef)| jobdef.build(self.clone(), Agent::Job))
-            .filter_map(|r| if let Err(e) = r { Some(e) } else { None })
+            .values()
+            .map(|jobdef| jobdef.build(self.clone(), Agent::Job))
+            .filter_map(|res| match res {
+                Ok(_) => None,
+                Err(e) => Some(e),
+            })
             .collect::<Vec<_>>();
         if errs.is_empty() {
             Ok(())
         } else {
             Err(JfError::Multi(errs))
         }
+    }
+
+    fn get(&self, job_name: String) -> JfResult<&Jobdef> {
+        self.map
+            .get(&job_name)
+            .ok_or(InternalError::JobdefNotFound(job_name).into())
     }
 
     pub fn build(&self, job_name: String, agent: Agent) -> JfResult<Job> {
