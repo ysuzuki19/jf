@@ -20,16 +20,16 @@ args = ["uninstall"]
 mode = "sequential"
 jobs = ["git-pull", "install"]
 
-[job.live-test-coverage]
+[job.live-llvm-cov]
 mode = "watch"
-job = "test-coverage"
+job = "llvm-cov"
 watch_list = ["src/**", "Cargo.toml"]
 
-[job.test-coverage-display]
+[job."llvm-cov:term"]
 command = "cargo"
 args = ["+nightly", "llvm-cov"]
 
-[job."test-coverage"]
+[job."llvm-cov"]
 command = "cargo"
 args = ["+nightly", "llvm-cov", "--lcov", "--output-path", "target/lcov.info"]
 
