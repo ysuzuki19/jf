@@ -23,6 +23,8 @@ impl Cfg {
 
 #[cfg(test)]
 mod tests {
+    use crate::error::JfError;
+
     use super::*;
 
     #[test]
@@ -37,6 +39,7 @@ mod tests {
     fn load_unexist() -> JfResult<()> {
         let must_fail = Cfg::load(Some(cfg_path_gen::test::unexist_dir()));
         assert!(must_fail.is_err());
+        assert!(matches!(must_fail.err().unwrap(), JfError::IoError(_)));
         Ok(())
     }
 }
