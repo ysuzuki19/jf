@@ -37,14 +37,14 @@ mod tests {
     use super::*;
 
     impl Fixture for Action {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn gen() -> Self {
             Action::Statics(Fixture::gen())
         }
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn help() -> JfResult<()> {
         let s = Action::Statics(Statics::Help);
         s.run(Fixture::gen(), Fixture::gen()).await?;
@@ -52,7 +52,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn run() -> JfResult<()> {
         let c = Action::Configured(Configured::Run(String::from("test-fixture")));
         c.run(Fixture::gen(), Fixture::gen()).await?;

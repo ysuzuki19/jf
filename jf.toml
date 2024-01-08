@@ -27,11 +27,11 @@ watch_list = ["src/**", "Cargo.toml"]
 
 [job.test-coverage-display]
 command = "cargo"
-args = ["llvm-cov"]
+args = ["+nightly", "llvm-cov"]
 
 [job."test-coverage"]
 command = "cargo"
-args = ["llvm-cov", "--lcov", "--output-path", "target/lcov.info"]
+args = ["+nightly", "llvm-cov", "--lcov", "--output-path", "target/lcov.info"]
 
 [job."live-llvm-cov:html"]
 mode = "watch"
@@ -40,7 +40,7 @@ watch_list = ["src/**", "Cargo.toml"]
 
 [job."llvm-cov:html"]
 command = "cargo"
-args = ["llvm-cov", "--html"]
+args = ["+nightly", "llvm-cov", "--html"]
 
 [job.live-test]
 mode = "watch"

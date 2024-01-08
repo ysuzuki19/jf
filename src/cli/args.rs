@@ -110,7 +110,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn parse() {
         let args = Args::parse_from(fixtures::SIMPLE);
         assert!(!args.version);
@@ -125,7 +125,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup() -> JfResult<()> {
         let args = Args::default();
 
@@ -137,7 +137,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_ctx() {
         let args = Args {
             log_level: LogLevel::Error,
@@ -149,7 +149,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_opts() {
         let cfg = PathBuf::from(fixtures::CFG_PATH);
         let args = Args {
@@ -162,7 +162,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_action_completion() -> JfResult<()> {
         let args = Args {
             completion: Some(clap_complete::Shell::Bash),
@@ -175,7 +175,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_action_list() -> JfResult<()> {
         let args = Args {
             list: true,
@@ -188,7 +188,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_action_validate() -> JfResult<()> {
         let args = Args {
             validate: true,
@@ -201,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_action_description() -> JfResult<()> {
         let args = Args {
             description: true,
@@ -218,7 +218,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_action_description_without_job_name() {
         let args = Args {
             description: true,
@@ -230,7 +230,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_action_run() -> JfResult<()> {
         let args = Args {
             job_name: Some(fixtures::JOB_NAME.to_string()),
@@ -246,7 +246,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_action_help() -> JfResult<()> {
         let args = Args {
             help: true,
@@ -259,7 +259,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn setup_action_version() -> JfResult<()> {
         let args = Args {
             version: true,

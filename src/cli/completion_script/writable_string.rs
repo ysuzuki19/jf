@@ -32,14 +32,14 @@ mod tests {
     use super::*;
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn new() {
         let buf = WritableString::new();
         assert_eq!(buf.to_string(), "");
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn write_flush() {
         let mut buf = WritableString::new();
         buf.write_all("test".as_bytes()).unwrap();

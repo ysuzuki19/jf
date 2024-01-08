@@ -29,20 +29,20 @@ impl CfgPathGen {
 pub mod test {
     use super::*;
 
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     pub fn fixtures_dir() -> PathBuf {
         PathBuf::from(".").join("tests").join("fixtures")
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn test_gen_default() {
         let path = CfgPathGen::new(None).gen();
         assert_eq!(path, PathBuf::from(DEFAULT_CFG_NAME));
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn test_gen_from_dir() {
         let dir = fixtures_dir();
         let path = CfgPathGen::new(Some(dir.clone())).gen();
@@ -50,7 +50,7 @@ pub mod test {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn test_gen_from_cfg() {
         let file_path = fixtures_dir().join(DEFAULT_CFG_NAME);
         let path = CfgPathGen::new(Some(file_path.clone())).gen();

@@ -50,7 +50,7 @@ impl Logger {
     }
 
     #[cfg(test)]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     pub fn level(&self) -> LogLevel {
         self.level
     }
@@ -61,20 +61,20 @@ mod tests {
     use super::*;
 
     impl crate::testutil::Fixture for Logger {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn gen() -> Self {
             Self::new(LogLevel::None)
         }
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn cover() {
         let _ = Logger::new(LogLevel::Info).clone();
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn test_under_info() {
         let logger = Logger::new(LogLevel::Info);
         assert_eq!(logger.level(), LogLevel::Info);
@@ -86,7 +86,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn test_under_error() {
         let logger = Logger::new(LogLevel::Error);
         assert_eq!(logger.level(), LogLevel::Error);
@@ -98,7 +98,7 @@ mod tests {
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn test_under_none() {
         let logger = Logger::new(LogLevel::None);
         assert_eq!(logger.level(), LogLevel::None);

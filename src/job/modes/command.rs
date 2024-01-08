@@ -76,7 +76,7 @@ impl From<Command> for Job {
 mod tests {
     use super::*;
 
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn test_command_factory() -> Command {
         Command::new(CommandParams {
             command: String::from("sleep"),
@@ -85,7 +85,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn run_without_blocking() -> JfResult<()> {
         let command = test_command_factory();
         command.start().await?;
@@ -94,7 +94,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn wait() -> JfResult<()> {
         let command = test_command_factory();
         command.start().await?;
@@ -104,7 +104,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn cancel() -> JfResult<()> {
         let command = test_command_factory();
         command.start().await?.cancel().await?;
@@ -113,7 +113,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn bunshin() -> JfResult<()> {
         let command = test_command_factory().bunshin();
         command.start().await?.cancel().await?;
@@ -122,7 +122,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn is_finished_not_yet_started() -> JfResult<()> {
         let command = test_command_factory();
         assert!(!command.is_finished().await?);

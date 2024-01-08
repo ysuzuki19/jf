@@ -58,7 +58,7 @@ sleep_count = 3
 "#;
 
     impl TryFixture for JobCfg {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn try_gen() -> JfResult<Self> {
             Ok(toml::from_str(CFG_CONTENT)?)
         }

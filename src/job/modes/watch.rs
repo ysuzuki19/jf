@@ -93,7 +93,7 @@ impl From<Watch> for Job {
 
 #[cfg(test)]
 mod fixtures {
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     pub fn watch_list() -> Vec<String> {
         vec!["./tests/dummy_entities/*".to_string()]
     }
@@ -106,7 +106,7 @@ mod test {
     use super::*;
 
     impl Fixture for WatchParams {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn gen() -> Self {
             WatchParams {
                 job: "fast".to_string(),
@@ -116,14 +116,14 @@ mod test {
     }
 
     impl TryFixture for Watch {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn try_gen() -> JfResult<Self> {
             Watch::new(Fixture::gen(), TryFixture::try_gen()?)
         }
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn invalid_new_with_unknown_job() -> JfResult<()> {
         let params = WatchParams {
             job: "unknown".to_string(),
@@ -134,7 +134,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn new() -> JfResult<()> {
         let w = Watch::try_gen()?;
         assert!(!w.is_finished().await?);
@@ -142,7 +142,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn bunshin() -> JfResult<()> {
         let origin = Watch::try_gen()?;
         let bunshin = origin.bunshin();

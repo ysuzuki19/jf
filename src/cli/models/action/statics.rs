@@ -44,21 +44,21 @@ mod tests {
     use super::*;
 
     impl Fixture for Statics {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn gen() -> Self {
             Statics::Help
         }
     }
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn fixture() {
         let s = Statics::gen();
         assert_eq!(s, Statics::Help);
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn completion() -> JfResult<()> {
         let s = Statics::Completion(clap_complete::Shell::Bash);
         s.run(Fixture::gen(), Fixture::gen()).await?;
@@ -66,7 +66,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn help() -> JfResult<()> {
         let s = Statics::Help;
         s.run(Fixture::gen(), Fixture::gen()).await?;
@@ -74,7 +74,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn version() -> JfResult<()> {
         let s = Statics::Version;
         s.run(Fixture::gen(), Fixture::gen()).await?;

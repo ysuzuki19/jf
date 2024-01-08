@@ -68,14 +68,14 @@ mod test {
     use super::*;
 
     impl TryFixture for Jobdef {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn try_gen() -> JfResult<Self> {
             Self::new("fast".into(), TryFixture::try_gen()?)
         }
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn visibility_guard() -> JfResult<()> {
         let jobdef_public = Jobdef::new(
             "dummy".into(),

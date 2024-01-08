@@ -65,7 +65,7 @@ mod test {
     use super::*;
 
     impl Fixture for ShellParams {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn gen() -> Self {
             ShellParams {
                 script: "echo hello".to_string(),
@@ -75,14 +75,14 @@ mod test {
     }
 
     impl Fixture for Shell {
-        #[coverage(off)]
+        #[cfg_attr(coverage, coverage(off))]
         fn gen() -> Self {
             Shell::new(Fixture::gen())
         }
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn run_without_blocking() -> JfResult<()> {
         let shell = Shell::gen();
         shell.start().await?;
@@ -92,7 +92,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn wait() -> JfResult<()> {
         let shell = Shell::gen().start().await?;
         shell.wait().await?;
@@ -102,7 +102,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn cancel() -> JfResult<()> {
         let shell = Shell::gen().start().await?;
         shell.cancel().await?;
@@ -112,7 +112,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn bunshin() -> JfResult<()> {
         let origin = Shell::gen().start().await?;
         origin.cancel().await?;
@@ -123,7 +123,7 @@ mod test {
     }
 
     #[tokio::test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     async fn is_finished_not_yet_started() -> JfResult<()> {
         let shell = Shell::gen();
         assert!(!shell.is_finished().await?);

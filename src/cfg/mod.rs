@@ -26,7 +26,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[coverage(off)]
+    #[cfg_attr(coverage, coverage(off))]
     fn load() -> JfResult<()> {
         Cfg::load(Some(cfg_path_gen::test::fixtures_dir()))?;
         Ok(())
