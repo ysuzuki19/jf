@@ -169,7 +169,10 @@ mod tests {
         };
 
         let action = args.setup_action()?;
-        matches!(action, Action::Statics(Statics::Completion(Shell::Bash)));
+        assert!(matches!(
+            action,
+            Action::Statics(Statics::Completion(Shell::Bash))
+        ));
         Ok(())
     }
 
@@ -182,7 +185,7 @@ mod tests {
         };
 
         let action = args.setup_action()?;
-        matches!(action, Action::Configured(Configured::List));
+        assert!(matches!(action, Action::Configured(Configured::List)));
         Ok(())
     }
 
@@ -195,7 +198,7 @@ mod tests {
         };
 
         let action = args.setup_action()?;
-        matches!(action, Action::Configured(Configured::Validate));
+        assert!(matches!(action, Action::Configured(Configured::Validate)));
         Ok(())
     }
 
@@ -209,10 +212,10 @@ mod tests {
         };
 
         let action = args.setup_action()?;
-        matches!(
+        assert!(matches!(
             action,
             Action::Configured(Configured::Description(jn)) if jn == fixtures::JOB_NAME
-        );
+        ));
         Ok(())
     }
 
@@ -237,10 +240,10 @@ mod tests {
         };
 
         let action = args.setup_action()?;
-        matches!(
+        assert!(matches!(
             action,
             Action::Configured(Configured::Run(jn)) if jn == fixtures::JOB_NAME
-        );
+        ));
         Ok(())
     }
 
@@ -253,7 +256,7 @@ mod tests {
         };
 
         let action = args.setup_action()?;
-        matches!(action, Action::Statics(Statics::Help));
+        assert!(matches!(action, Action::Statics(Statics::Help)));
         Ok(())
     }
 
@@ -266,7 +269,7 @@ mod tests {
         };
 
         let action = args.setup_action()?;
-        matches!(action, Action::Statics(Statics::Version));
+        assert!(matches!(action, Action::Statics(Statics::Version)));
         Ok(())
     }
 }

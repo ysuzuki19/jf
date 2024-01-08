@@ -61,7 +61,7 @@ mod tests {
     fn default() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(modes::fixtures::command::SIMPLE)?;
 
-        matches!(cfg, JobCfg::Command(_));
+        assert!(matches!(cfg, JobCfg::Command(_)));
         Ok(())
     }
 
@@ -72,7 +72,7 @@ mod tests {
             generate_modable_cfg("command", modes::fixtures::command::COMMAND_WITH_ARGS).as_str(),
         )?;
 
-        matches!(cfg, JobCfg::Command(_));
+        assert!(matches!(cfg, JobCfg::Command(_)));
         Ok(())
     }
 
@@ -83,7 +83,7 @@ mod tests {
             generate_modable_cfg("parallel", modes::fixtures::parallel::SIMPLE).as_str(),
         )?;
 
-        matches!(cfg, JobCfg::Parallel(_));
+        assert!(matches!(cfg, JobCfg::Parallel(_)));
         Ok(())
     }
 
@@ -94,7 +94,7 @@ mod tests {
             generate_modable_cfg("sequential", modes::fixtures::sequential::SIMPLE).as_str(),
         )?;
 
-        matches!(cfg, JobCfg::Sequential(_));
+        assert!(matches!(cfg, JobCfg::Sequential(_)));
         Ok(())
     }
 
@@ -104,7 +104,7 @@ mod tests {
         let cfg: JobCfg =
             toml::from_str(generate_modable_cfg("shell", modes::fixtures::shell::SIMPLE).as_str())?;
 
-        matches!(cfg, JobCfg::Shell(_));
+        assert!(matches!(cfg, JobCfg::Shell(_)));
         Ok(())
     }
 
@@ -114,7 +114,7 @@ mod tests {
         let cfg: JobCfg =
             toml::from_str(generate_modable_cfg("watch", modes::fixtures::watch::SIMPLE).as_str())?;
 
-        matches!(cfg, JobCfg::Watch(_));
+        assert!(matches!(cfg, JobCfg::Watch(_)));
         Ok(())
     }
 
@@ -124,7 +124,7 @@ mod tests {
         let cfg: JobCfg =
             toml::from_str(generate_modable_cfg("mock", modes::fixtures::mock::SIMPLE).as_str())?;
 
-        matches!(cfg, JobCfg::Mock(_));
+        assert!(matches!(cfg, JobCfg::Mock(_)));
         Ok(())
     }
 
