@@ -171,7 +171,7 @@ impl From<Mock> for Job {
 
 impl Fixture for MockParams {
     #[cfg_attr(coverage, coverage(off))]
-    fn gen() -> Self {
+    fn fixture() -> Self {
         Self {
             each_sleep_time: 1,
             sleep_count: 3,

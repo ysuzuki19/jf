@@ -107,7 +107,7 @@ mod test {
 
     impl Fixture for WatchParams {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             WatchParams {
                 job: "fast".to_string(),
                 watch_list: fixtures::watch_list(),
@@ -117,8 +117,8 @@ mod test {
 
     impl TryFixture for Watch {
         #[cfg_attr(coverage, coverage(off))]
-        fn try_gen() -> JfResult<Self> {
-            Watch::new(Fixture::gen(), TryFixture::try_gen()?)
+        fn try_fixture() -> JfResult<Self> {
+            Watch::new(Fixture::fixture(), TryFixture::try_fixture()?)
         }
     }
 
@@ -132,7 +132,7 @@ mod test {
                     job: "unknown".to_string(),
                     watch_list: fixtures::watch_list(),
                 };
-                assert!(Watch::new(params, TryFixture::try_gen()?).is_err());
+                assert!(Watch::new(params, TryFixture::try_fixture()?).is_err());
                 Ok(())
             },
         )
@@ -144,7 +144,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let w = Watch::try_gen()?;
+                let w = Watch::try_fixture()?;
                 assert!(!w.is_finished().await?);
                 Ok(())
             },
@@ -157,7 +157,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let origin = Watch::try_gen()?;
+                let origin = Watch::try_fixture()?;
                 let bunshin = origin.bunshin();
                 assert_ne!(origin.job.as_mock().id(), bunshin.job.as_mock().id());
                 Ok(())

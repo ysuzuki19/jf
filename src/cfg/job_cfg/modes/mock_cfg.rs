@@ -22,10 +22,10 @@ mod tests {
 
     impl Fixture for MockCfg {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             Self {
-                common: Fixture::gen(),
-                params: Fixture::gen(),
+                common: Fixture::fixture(),
+                params: Fixture::fixture(),
             }
         }
     }

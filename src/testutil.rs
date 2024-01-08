@@ -1,9 +1,9 @@
 pub trait Fixture {
-    fn gen() -> Self;
+    fn fixture() -> Self;
 }
 
 pub trait TryFixture {
-    fn try_gen() -> crate::error::JfResult<Self>
+    fn try_fixture() -> crate::error::JfResult<Self>
     where
         Self: Sized;
 }

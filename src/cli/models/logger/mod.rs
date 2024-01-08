@@ -62,7 +62,7 @@ mod tests {
 
     impl crate::testutil::Fixture for Logger {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             Self::new(LogLevel::None)
         }
     }

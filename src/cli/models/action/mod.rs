@@ -38,8 +38,8 @@ mod tests {
 
     impl Fixture for Action {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
-            Action::Statics(Fixture::gen())
+        fn fixture() -> Self {
+            Action::Statics(Fixture::fixture())
         }
     }
 
@@ -50,7 +50,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let s = Action::Statics(Statics::Help);
-                s.run(Fixture::gen(), Fixture::gen()).await?;
+                s.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )
@@ -63,7 +63,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let c = Action::Configured(Configured::Run(String::from("test-fixture")));
-                c.run(Fixture::gen(), Fixture::gen()).await?;
+                c.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )

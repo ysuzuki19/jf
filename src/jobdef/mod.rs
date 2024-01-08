@@ -73,8 +73,8 @@ mod test {
 
     impl TryFixture for Jobdef {
         #[cfg_attr(coverage, coverage(off))]
-        fn try_gen() -> JfResult<Self> {
-            Self::new("fast".into(), TryFixture::try_gen()?)
+        fn try_fixture() -> JfResult<Self> {
+            Self::new("fast".into(), TryFixture::try_fixture()?)
         }
     }
 
@@ -88,7 +88,7 @@ mod test {
                     "dummy".into(),
                     JobCfg::Mock(MockCfg {
                         common: CommonCfg::new(Visibility::Public, "".into()),
-                        params: Fixture::gen(),
+                        params: Fixture::fixture(),
                     }),
                 )?;
                 assert!(jobdef_public.visibility_guard(Agent::Job).is_ok());
@@ -98,7 +98,7 @@ mod test {
                     "dummy".into(),
                     JobCfg::Mock(MockCfg {
                         common: CommonCfg::new(Visibility::Private, "".into()),
-                        params: Fixture::gen(),
+                        params: Fixture::fixture(),
                     }),
                 )?;
                 assert!(jobdef_private.visibility_guard(Agent::Job).is_ok());

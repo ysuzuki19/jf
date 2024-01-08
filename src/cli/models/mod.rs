@@ -13,9 +13,9 @@ pub struct Ctx {
 #[cfg(test)]
 impl crate::testutil::Fixture for Ctx {
     #[cfg_attr(coverage, coverage(off))]
-    fn gen() -> Self {
+    fn fixture() -> Self {
         Self {
-            logger: crate::testutil::Fixture::gen(),
+            logger: crate::testutil::Fixture::fixture(),
         }
     }
 }
@@ -28,7 +28,7 @@ pub struct Opts {
 #[cfg(test)]
 impl crate::testutil::Fixture for Opts {
     #[cfg_attr(coverage, coverage(off))]
-    fn gen() -> Self {
+    fn fixture() -> Self {
         let cfg = PathBuf::from(".").join("tests").join("fixtures");
         Opts { cfg: Some(cfg) }
     }

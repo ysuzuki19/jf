@@ -60,7 +60,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let c = Configured::List;
-                c.run(Fixture::gen(), Fixture::gen()).await?;
+                c.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )
@@ -73,7 +73,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let c = Configured::Validate;
-                c.run(Fixture::gen(), Fixture::gen()).await?;
+                c.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )
@@ -86,7 +86,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let c = Configured::Run(fixtures::JOB_NAME.to_owned());
-                c.run(Fixture::gen(), Fixture::gen()).await?;
+                c.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )
@@ -99,7 +99,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let c = Configured::Description(fixtures::JOB_NAME.to_owned());
-                c.run(Fixture::gen(), Fixture::gen()).await?;
+                c.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )

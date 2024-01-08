@@ -107,7 +107,7 @@ mod test {
 
     impl Fixture for SequentialParams {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             Self {
                 jobs: vec!["fast".into(), "fast".into()],
             }
@@ -116,8 +116,8 @@ mod test {
 
     impl TryFixture for Sequential {
         #[cfg_attr(coverage, coverage(off))]
-        fn try_gen() -> JfResult<Self> {
-            Sequential::new(SequentialParams::gen(), TryFixture::try_gen()?)
+        fn try_fixture() -> JfResult<Self> {
+            Sequential::new(SequentialParams::fixture(), TryFixture::try_fixture()?)
         }
     }
 
@@ -125,7 +125,7 @@ mod test {
     #[cfg_attr(coverage, coverage(off))]
     fn invalid_new_with_empty_job() -> JfResult<()> {
         let params = SequentialParams { jobs: vec![] };
-        let must_faile = Sequential::new(params, TryFixture::try_gen()?);
+        let must_faile = Sequential::new(params, TryFixture::try_fixture()?);
         assert!(must_faile.is_err());
         Ok(())
     }
@@ -136,7 +136,7 @@ mod test {
         let params = SequentialParams {
             jobs: vec!["unknown".into()],
         };
-        let must_fail = Sequential::new(params, TryFixture::try_gen()?);
+        let must_fail = Sequential::new(params, TryFixture::try_fixture()?);
         assert!(must_fail.is_err());
         Ok(())
     }
@@ -144,7 +144,7 @@ mod test {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn new() -> JfResult<()> {
-        Sequential::try_gen()?;
+        Sequential::try_fixture()?;
         Ok(())
     }
 
@@ -154,7 +154,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let s = Sequential::try_gen()?.start().await?;
+                let s = Sequential::try_fixture()?.start().await?;
                 assert!(!s.is_finished().await?);
                 for (index, job) in s.jobs.iter().enumerate() {
                     if index == 0 {
@@ -176,7 +176,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let s = Sequential::try_gen()?.start().await?;
+                let s = Sequential::try_fixture()?.start().await?;
                 s.cancel().await?;
                 runner::sleep().await; // sleep for job interval
                 assert!(s.is_cancelled.load(Ordering::Relaxed));
@@ -191,7 +191,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let s = Sequential::try_gen()?.start().await?;
+                let s = Sequential::try_fixture()?.start().await?;
                 s.wait().await?;
                 s.is_finished().await?;
                 for job in s.jobs.iter() {
@@ -208,7 +208,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let origin = Sequential::try_gen()?;
+                let origin = Sequential::try_fixture()?;
                 origin.start().await?.cancel().await?;
 
                 let bunshin = origin.bunshin();
@@ -231,7 +231,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let s = Sequential::try_gen()?;
+                let s = Sequential::try_fixture()?;
                 assert!(!s.is_finished().await?);
                 Ok(())
             },

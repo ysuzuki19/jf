@@ -45,11 +45,11 @@ mod tests {
 
     impl Fixture for Cli {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             Self {
-                ctx: Fixture::gen(),
-                action: Fixture::gen(),
-                opts: Fixture::gen(),
+                ctx: Fixture::fixture(),
+                action: Fixture::fixture(),
+                opts: Fixture::fixture(),
             }
         }
     }
@@ -74,9 +74,9 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let cli = Cli::gen();
-                assert_eq!(cli.ctx(), &Ctx::gen());
-                assert_eq!(cli.action, Action::gen());
+                let cli = Cli::fixture();
+                assert_eq!(cli.ctx(), &Ctx::fixture());
+                assert_eq!(cli.action, Action::fixture());
                 cli.run().await?;
                 Ok(())
             },

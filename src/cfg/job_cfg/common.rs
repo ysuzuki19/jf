@@ -39,7 +39,7 @@ mod tests {
 
     impl Fixture for CommonCfg {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             Self {
                 visibility: Default::default(),
                 description: "".into(),

@@ -106,7 +106,7 @@ mod test {
 
     impl Fixture for ParallelParams {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             Self {
                 jobs: vec!["fast".into(), "fast".into()],
             }
@@ -115,8 +115,8 @@ mod test {
 
     impl TryFixture for Parallel {
         #[cfg_attr(coverage, coverage(off))]
-        fn try_gen() -> JfResult<Self> {
-            Parallel::new(Fixture::gen(), TryFixture::try_gen()?)
+        fn try_fixture() -> JfResult<Self> {
+            Parallel::new(Fixture::fixture(), TryFixture::try_fixture()?)
         }
     }
 
@@ -136,7 +136,7 @@ mod test {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn new() -> JfResult<()> {
-        let p = Parallel::try_gen()?;
+        let p = Parallel::try_fixture()?;
         assert!(p.jobs.len() == 2);
         Ok(())
     }
@@ -147,7 +147,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let p = Parallel::try_gen()?;
+                let p = Parallel::try_fixture()?;
                 p.start().await?;
                 for job in p.jobs {
                     job.as_mock().assert_is_started_eq(true);
@@ -163,7 +163,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let p = Parallel::try_gen()?;
+                let p = Parallel::try_fixture()?;
                 p.start().await?.cancel().await?;
                 for job in p.jobs {
                     job.as_mock()
@@ -181,7 +181,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let p = Parallel::try_gen()?;
+                let p = Parallel::try_fixture()?;
                 p.start().await?.wait().await?;
                 for job in p.jobs {
                     job.as_mock()
@@ -199,7 +199,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let origin = Parallel::try_gen()?;
+                let origin = Parallel::try_fixture()?;
                 origin.start().await?.cancel().await?;
 
                 let bunshin = origin.bunshin();
@@ -221,7 +221,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let p = Parallel::try_gen()?;
+                let p = Parallel::try_fixture()?;
                 assert!(!p.is_finished().await?);
                 Ok(())
             },

@@ -45,7 +45,7 @@ mod tests {
 
     impl Fixture for Statics {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             Statics::Help
         }
     }
@@ -53,7 +53,7 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn fixture() {
-        let s = Statics::gen();
+        let s = Statics::fixture();
         assert_eq!(s, Statics::Help);
     }
 
@@ -64,7 +64,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let s = Statics::Completion(clap_complete::Shell::Bash);
-                s.run(Fixture::gen(), Fixture::gen()).await?;
+                s.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )
@@ -77,7 +77,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let s = Statics::Help;
-                s.run(Fixture::gen(), Fixture::gen()).await?;
+                s.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )
@@ -90,7 +90,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let s = Statics::Version;
-                s.run(Fixture::gen(), Fixture::gen()).await?;
+                s.run(Fixture::fixture(), Fixture::fixture()).await?;
                 Ok(())
             },
         )

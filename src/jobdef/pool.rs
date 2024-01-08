@@ -72,8 +72,8 @@ mod test {
 
     impl TryFixture for JobdefPool {
         #[cfg_attr(coverage, coverage(off))]
-        fn try_gen() -> JfResult<Self> {
-            let jobdef = TryFixture::try_gen()?;
+        fn try_fixture() -> JfResult<Self> {
+            let jobdef = TryFixture::try_fixture()?;
             Ok(Self::new(vec![jobdef]))
         }
     }
@@ -86,21 +86,21 @@ mod test {
                 "job1".into(),
                 JobCfg::Mock(MockCfg {
                     common: CommonCfg::new(Visibility::Public, "job1-desc".into()),
-                    params: Fixture::gen(),
+                    params: Fixture::fixture(),
                 }),
             )?,
             Jobdef::new(
                 "job2".into(),
                 JobCfg::Mock(MockCfg {
                     common: CommonCfg::new(Visibility::Public, "job2-desc".into()),
-                    params: Fixture::gen(),
+                    params: Fixture::fixture(),
                 }),
             )?,
             Jobdef::new(
                 "job3".into(),
                 JobCfg::Mock(MockCfg {
                     common: CommonCfg::new(Visibility::Private, "job3-desc".into()),
-                    params: Fixture::gen(),
+                    params: Fixture::fixture(),
                 }),
             )?,
         ]);
@@ -118,13 +118,13 @@ mod test {
     #[cfg_attr(coverage, coverage(off))]
     fn fail() -> JfResult<()> {
         let pool = JobdefPool::new(vec![
-            Jobdef::new("job1".into(), JobCfg::Mock(Fixture::gen()))?,
-            Jobdef::new("job2".into(), JobCfg::Mock(Fixture::gen()))?,
+            Jobdef::new("job1".into(), JobCfg::Mock(Fixture::fixture()))?,
+            Jobdef::new("job2".into(), JobCfg::Mock(Fixture::fixture()))?,
             Jobdef::new(
                 "job3".into(),
                 JobCfg::Watch(WatchCfg {
                     common: CommonCfg::new(Visibility::Private, "job3-desc".into()),
-                    params: Fixture::gen(),
+                    params: Fixture::fixture(),
                 }),
             )?,
         ]);

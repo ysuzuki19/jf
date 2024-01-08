@@ -66,7 +66,7 @@ mod test {
 
     impl Fixture for ShellParams {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
+        fn fixture() -> Self {
             ShellParams {
                 script: "echo hello".to_string(),
                 args: None,
@@ -76,8 +76,8 @@ mod test {
 
     impl Fixture for Shell {
         #[cfg_attr(coverage, coverage(off))]
-        fn gen() -> Self {
-            Shell::new(Fixture::gen())
+        fn fixture() -> Self {
+            Shell::new(Fixture::fixture())
         }
     }
 
@@ -87,7 +87,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let shell = Shell::gen();
+                let shell = Shell::fixture();
                 shell.start().await?;
                 assert!(!shell.is_finished().await?);
                 assert!(!shell.command.is_finished().await?);
@@ -102,7 +102,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let shell = Shell::gen().start().await?;
+                let shell = Shell::fixture().start().await?;
                 shell.wait().await?;
                 assert!(shell.is_finished().await?);
                 assert!(shell.command.is_finished().await?);
@@ -117,7 +117,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let shell = Shell::gen().start().await?;
+                let shell = Shell::fixture().start().await?;
                 shell.cancel().await?;
                 assert!(shell.is_finished().await?);
                 assert!(shell.command.is_finished().await?);
@@ -132,7 +132,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let origin = Shell::gen().start().await?;
+                let origin = Shell::fixture().start().await?;
                 origin.cancel().await?;
                 assert!(origin.is_finished().await?);
                 let bunshin = origin.bunshin();
@@ -148,7 +148,7 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let shell = Shell::gen();
+                let shell = Shell::fixture();
                 assert!(!shell.is_finished().await?);
                 Ok(())
             },
