@@ -35,7 +35,7 @@ impl Parallel {
             .collect::<JfResult<Vec<Job>>>()?;
         Ok(Self {
             jobs,
-            handles: Arc::new(Mutex::new(Some(Vec::new()))),
+            handles: Arc::new(Mutex::new(None)),
             is_cancelled: Arc::new(AtomicBool::new(false)),
         })
     }
@@ -62,13 +62,10 @@ impl Runner for Parallel {
     }
 
     async fn is_finished(&self) -> JfResult<bool> {
-        if let Some(handles) = self.clone().handles.lock().await.deref_mut() {
-            let all_finished = handles.iter().all(|h| h.is_finished());
-            if !all_finished {
-                return Ok(false);
-            }
+        match self.handles.lock().await.deref_mut() {
+            Some(hs) => Ok(hs.iter().all(|h| h.is_finished())),
+            None => Ok(false), // not started yet
         }
-        Ok(true)
     }
 
     async fn cancel(&self) -> JfResult<()> {
@@ -213,6 +210,19 @@ mod test {
                         .assert_id_ne(origin_job.as_mock().id())
                         .assert_is_started_eq(false);
                 }
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn is_finished_not_yet_started() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let p = Parallel::try_gen()?;
+                assert!(!p.is_finished().await?);
                 Ok(())
             },
         )

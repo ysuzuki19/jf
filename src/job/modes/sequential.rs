@@ -70,10 +70,9 @@ impl Runner for Sequential {
     }
 
     async fn is_finished(&self) -> JfResult<bool> {
-        if let Some(handle) = self.handle.lock().await.deref() {
-            Ok(handle.is_finished())
-        } else {
-            Ok(false) // not yet started
+        match self.handle.lock().await.deref() {
+            Some(handle) => Ok(handle.is_finished()),
+            None => Ok(false), // not started yet
         }
     }
 
