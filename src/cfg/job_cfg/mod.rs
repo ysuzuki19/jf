@@ -8,6 +8,8 @@ pub use self::visibility::Visibility;
 pub use common::CommonCfg;
 #[cfg(test)]
 pub use modes::MockCfg;
+#[cfg(test)]
+pub use modes::WatchCfg;
 
 pub enum JobCfg {
     Command(modes::CommandCfg),

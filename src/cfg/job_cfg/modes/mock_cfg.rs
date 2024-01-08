@@ -16,9 +16,19 @@ sleep_count = 3"#;
 
 #[cfg(test)]
 mod tests {
-    use crate::error::JfResult;
+    use crate::{error::JfResult, testutil::Fixture};
 
     use super::*;
+
+    impl Fixture for MockCfg {
+        #[cfg_attr(coverage, coverage(off))]
+        fn gen() -> Self {
+            Self {
+                common: Fixture::gen(),
+                params: Fixture::gen(),
+            }
+        }
+    }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]

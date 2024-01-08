@@ -33,9 +33,19 @@ impl CommonCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::error::JfResult;
+    use crate::{error::JfResult, testutil::Fixture};
 
     use super::*;
+
+    impl Fixture for CommonCfg {
+        #[cfg_attr(coverage, coverage(off))]
+        fn gen() -> Self {
+            Self {
+                visibility: Default::default(),
+                description: "".into(),
+            }
+        }
+    }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]

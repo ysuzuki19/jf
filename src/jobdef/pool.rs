@@ -63,10 +63,77 @@ impl JobdefPool {
 }
 
 #[cfg(test)]
-impl crate::testutil::TryFixture for JobdefPool {
-    #[cfg_attr(coverage, coverage(off))]
-    fn try_gen() -> JfResult<Self> {
-        let jobdef = crate::testutil::TryFixture::try_gen()?;
-        Ok(Self::new(vec![jobdef]))
+mod test {
+    use super::*;
+    use crate::{
+        cfg::job_cfg::{CommonCfg, JobCfg, MockCfg, Visibility, WatchCfg},
+        testutil::{Fixture, TryFixture},
+    };
+
+    impl TryFixture for JobdefPool {
+        #[cfg_attr(coverage, coverage(off))]
+        fn try_gen() -> JfResult<Self> {
+            let jobdef = TryFixture::try_gen()?;
+            Ok(Self::new(vec![jobdef]))
+        }
+    }
+
+    #[test]
+    fn test() -> JfResult<()> {
+        let pool = JobdefPool::new(vec![
+            Jobdef::new(
+                "job1".into(),
+                JobCfg::Mock(MockCfg {
+                    common: CommonCfg::new(Visibility::Public, "job1-desc".into()),
+                    params: Fixture::gen(),
+                }),
+            )?,
+            Jobdef::new(
+                "job2".into(),
+                JobCfg::Mock(MockCfg {
+                    common: CommonCfg::new(Visibility::Public, "job2-desc".into()),
+                    params: Fixture::gen(),
+                }),
+            )?,
+            Jobdef::new(
+                "job3".into(),
+                JobCfg::Mock(MockCfg {
+                    common: CommonCfg::new(Visibility::Private, "job3-desc".into()),
+                    params: Fixture::gen(),
+                }),
+            )?,
+        ]);
+        assert_eq!(pool.list_public().len(), 2);
+        assert!(pool.validate().is_ok());
+        assert!(pool.build("job1".into(), Agent::Job).is_ok());
+        assert!(pool.build("job1".into(), Agent::Cli).is_ok());
+        assert!(pool.build("job3".into(), Agent::Job).is_ok());
+        assert!(pool.build("job3".into(), Agent::Cli).is_err());
+        assert_eq!(pool.description("job1".into())?, "job1-desc");
+        Ok(())
+    }
+
+    #[test]
+    fn fail() -> JfResult<()> {
+        let pool = JobdefPool::new(vec![
+            Jobdef::new("job1".into(), JobCfg::Mock(Fixture::gen()))?,
+            Jobdef::new("job2".into(), JobCfg::Mock(Fixture::gen()))?,
+            Jobdef::new(
+                "job3".into(),
+                JobCfg::Watch(WatchCfg {
+                    common: CommonCfg::new(Visibility::Private, "job3-desc".into()),
+                    params: Fixture::gen(),
+                }),
+            )?,
+        ]);
+        assert_eq!(pool.list_public().len(), 2);
+        assert!(pool.validate().is_err());
+        assert!(pool.build("job1".into(), Agent::Job).is_ok());
+        assert!(pool.build("job1".into(), Agent::Cli).is_ok());
+        assert!(pool.build("job3".into(), Agent::Job).is_err());
+        assert!(pool.build("job3".into(), Agent::Cli).is_err());
+        assert_eq!(pool.description("job1".into())?, "");
+        assert_eq!(pool.description("job3".into())?, "job3-desc");
+        Ok(())
     }
 }
