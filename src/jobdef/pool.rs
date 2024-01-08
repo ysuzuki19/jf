@@ -79,6 +79,7 @@ mod test {
     }
 
     #[test]
+    #[cfg_attr(coverage, coverage(off))]
     fn test() -> JfResult<()> {
         let pool = JobdefPool::new(vec![
             Jobdef::new(
@@ -114,6 +115,7 @@ mod test {
     }
 
     #[test]
+    #[cfg_attr(coverage, coverage(off))]
     fn fail() -> JfResult<()> {
         let pool = JobdefPool::new(vec![
             Jobdef::new("job1".into(), JobCfg::Mock(Fixture::gen()))?,
