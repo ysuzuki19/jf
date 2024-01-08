@@ -1,7 +1,5 @@
 use std::path::PathBuf;
 
-use clap::Parser;
-
 use crate::error::{InternalError, JfResult};
 
 use super::models::{
@@ -11,7 +9,7 @@ use super::models::{
 
 const AUTHOR: &str = "ysuzuki19";
 
-#[derive(Parser)]
+#[derive(clap::Parser)]
 #[cfg_attr(test, derive(Default))]
 #[command(
     author = AUTHOR,
@@ -23,31 +21,31 @@ const AUTHOR: &str = "ysuzuki19";
 )]
 pub struct Args {
     #[arg(long)]
-    pub version: bool,
+    version: bool,
 
     #[arg(long)]
-    pub help: bool,
+    help: bool,
 
     #[arg(long)]
-    pub validate: bool,
+    validate: bool,
 
     #[arg(long)]
-    pub cfg: Option<PathBuf>,
+    cfg: Option<PathBuf>,
 
     #[arg(long, default_value = "error")]
-    pub log_level: LogLevel,
+    log_level: LogLevel,
 
     #[arg(long)]
-    pub completion: Option<clap_complete::Shell>,
+    completion: Option<clap_complete::Shell>,
 
     #[arg(long)]
-    pub list: bool,
+    list: bool,
 
     #[arg(long)]
-    pub description: bool,
+    description: bool,
 
     #[command()]
-    pub job_name: Option<String>,
+    job_name: Option<String>,
 }
 
 impl Args {
@@ -105,6 +103,7 @@ pub mod fixtures {
 
 #[cfg(test)]
 mod tests {
+    use clap::Parser;
     use clap_complete::Shell;
 
     use super::*;
