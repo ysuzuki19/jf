@@ -21,7 +21,7 @@ async fn main() {
             }
         }
         Err(e) => {
-            eprintln!("Invalid Args or Config: {}", e);
+            eprintln!("Failed to start: {}", e);
             std::process::exit(1);
         }
     }
