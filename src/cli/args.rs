@@ -116,7 +116,7 @@ mod tests {
         assert!(!args.help);
         assert!(!args.validate);
         assert_eq!(args.cfg, None);
-        assert_eq!(args.log_level, LogLevel::Error);
+        assert!(args.log_level == LogLevel::Error);
         assert_eq!(args.completion, None);
         assert!(!args.list);
         assert!(!args.description);
@@ -129,9 +129,9 @@ mod tests {
         let args = Args::default();
 
         let (ctx, action, opts) = args.setup()?;
-        assert_eq!(ctx, args.setup_ctx());
-        assert_eq!(action, args.setup_action()?);
-        assert_eq!(opts, args.setup_opts());
+        assert!(ctx == args.setup_ctx());
+        assert!(action == args.setup_action()?);
+        assert!(opts == args.setup_opts());
         Ok(())
     }
 
@@ -144,7 +144,7 @@ mod tests {
         };
 
         let ctx = args.setup_ctx();
-        assert_eq!(ctx.logger.level(), LogLevel::Error);
+        assert!(ctx.logger.level() == LogLevel::Error);
     }
 
     #[test]

@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 pub use logger::{LogLevel, Logger};
 
-#[cfg_attr(test, derive(Debug, PartialEq, Default))]
+#[cfg_attr(test, derive(PartialEq, Default))]
 pub struct Ctx {
     pub logger: Logger,
 }
@@ -20,7 +20,7 @@ impl crate::testutil::Fixture for Ctx {
     }
 }
 
-#[cfg_attr(test, derive(Debug, PartialEq, Default))]
+#[cfg_attr(test, derive(PartialEq, Default))]
 pub struct Opts {
     pub cfg: Option<PathBuf>,
 }

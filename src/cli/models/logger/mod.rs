@@ -3,7 +3,7 @@ mod log_level;
 pub use self::log_level::LogLevel;
 
 #[derive(Clone)]
-#[cfg_attr(test, derive(Debug, PartialEq, Default))]
+#[cfg_attr(test, derive(PartialEq, Default))]
 pub struct Logger {
     level: LogLevel,
     #[cfg(test)]
@@ -77,7 +77,7 @@ mod tests {
     #[cfg_attr(coverage, coverage(off))]
     fn test_under_info() {
         let logger = Logger::new(LogLevel::Info);
-        assert_eq!(logger.level(), LogLevel::Info);
+        assert!(logger.level() == LogLevel::Info);
         logger.log("log_msg");
         logger.error("error_msg");
         assert_eq!(logger.log.borrow().len(), 2);
@@ -89,7 +89,7 @@ mod tests {
     #[cfg_attr(coverage, coverage(off))]
     fn test_under_error() {
         let logger = Logger::new(LogLevel::Error);
-        assert_eq!(logger.level(), LogLevel::Error);
+        assert!(logger.level() == LogLevel::Error);
         logger.log("log_msg");
         logger.error("error_msg");
         assert_eq!(logger.log.borrow().len(), 2);
@@ -101,7 +101,7 @@ mod tests {
     #[cfg_attr(coverage, coverage(off))]
     fn test_under_none() {
         let logger = Logger::new(LogLevel::None);
-        assert_eq!(logger.level(), LogLevel::None);
+        assert!(logger.level() == LogLevel::None);
         logger.log("log_msg");
         logger.error("error_msg");
         assert_eq!(logger.log.borrow().len(), 1);

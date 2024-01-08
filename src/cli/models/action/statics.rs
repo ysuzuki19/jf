@@ -10,7 +10,7 @@ use crate::{
 use super::{Action, CliAction};
 
 // Action without job configuration
-#[cfg_attr(test, derive(Debug, PartialEq))]
+#[cfg_attr(test, derive(PartialEq))]
 pub enum Statics {
     Completion(clap_complete::Shell),
     Help,
@@ -54,7 +54,7 @@ mod tests {
     #[cfg_attr(coverage, coverage(off))]
     fn fixture() {
         let s = Statics::fixture();
-        assert_eq!(s, Statics::Help);
+        assert!(s == Statics::Help);
     }
 
     #[test]
