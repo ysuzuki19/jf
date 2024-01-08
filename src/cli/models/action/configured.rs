@@ -30,7 +30,7 @@ impl CliAction for Configured {
         let cfg = cfg::Cfg::load(opts.cfg)?;
         let jc = job_controller::JobController::new(cfg)?;
         match self {
-            Configured::List => ctx.logger.log(jc.list().join(" ")),
+            Configured::List => ctx.logger.log(jc.list_public().join(" ")),
             Configured::Validate => jc.validate()?,
             Configured::Run(job_name) => jc.run(job_name).await?,
             Configured::Description(job_name) => ctx.logger.log(jc.description(job_name)?),

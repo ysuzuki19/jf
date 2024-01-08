@@ -34,8 +34,8 @@ impl JobController {
         self.pool.description(job_name)
     }
 
-    pub fn list(&self) -> Vec<String> {
-        let mut job_names = self.pool.list();
+    pub fn list_public(&self) -> Vec<String> {
+        let mut job_names = self.pool.list_public();
         job_names.sort();
         job_names
     }

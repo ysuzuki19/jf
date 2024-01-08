@@ -26,6 +26,10 @@ impl Jobdef {
         })
     }
 
+    fn visibility(&self) -> &Visibility {
+        &self.visibility
+    }
+
     fn visibility_guard(&self, agent: Agent) -> JfResult<()> {
         if self.visibility.is_public() {
             return Ok(());

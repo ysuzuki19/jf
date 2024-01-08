@@ -26,8 +26,17 @@ impl JobdefPool {
             .ok_or(InternalError::JobdefNotFound(job_name).into())
     }
 
-    pub fn list(&self) -> Vec<String> {
-        self.map.keys().cloned().collect()
+    pub fn list_public(&self) -> Vec<String> {
+        self.map
+            .values()
+            .filter_map(|jobdef| {
+                if jobdef.visibility().is_public() {
+                    Some(jobdef.name().to_owned())
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 
     pub fn validate(&self) -> JfResult<()> {
