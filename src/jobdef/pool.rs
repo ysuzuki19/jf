@@ -12,11 +12,8 @@ pub struct JobdefPool {
 }
 
 impl JobdefPool {
-    pub fn new(jobdef_vec: Vec<Jobdef>) -> Self {
-        let mut map = HashMap::new();
-        for jobdef in jobdef_vec {
-            map.insert(jobdef.name().to_owned(), jobdef);
-        }
+    pub fn new(jobdefs: Vec<Jobdef>) -> Self {
+        let map = HashMap::from_iter(jobdefs.into_iter().map(|jd| (jd.name().to_owned(), jd)));
         Self { map: Arc::new(map) }
     }
 
