@@ -7,7 +7,7 @@ use crate::{
     job::{Job, Runner},
 };
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Clone, serde::Deserialize)]
 pub struct CommandParams {
     pub command: String,
     #[serde(default)]
@@ -39,10 +39,9 @@ impl Runner for Command {
     }
 
     async fn is_finished(&self) -> JfResult<bool> {
-        if let Some(ref mut child) = self.child.lock().await.deref_mut() {
-            Ok(child.try_wait()?.is_some())
-        } else {
-            Ok(false) // not yet started
+        match self.child.lock().await.deref_mut() {
+            Some(ref mut child) => Ok(child.try_wait()?.is_some()),
+            None => Ok(false), // not yet started
         }
     }
 

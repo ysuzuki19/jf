@@ -3,7 +3,7 @@ use crate::{
     job::{Job, Runner},
 };
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Clone, serde::Deserialize)]
 pub struct ShellParams {
     pub script: String,
     pub args: Option<Vec<String>>,

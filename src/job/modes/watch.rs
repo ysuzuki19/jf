@@ -11,7 +11,7 @@ use crate::{
     jobdef::{Agent, JobdefPool},
 };
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Clone, serde::Deserialize)]
 pub struct WatchParams {
     pub job: String,
     pub watch_list: Vec<String>,

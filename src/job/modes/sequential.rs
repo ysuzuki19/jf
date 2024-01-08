@@ -14,7 +14,7 @@ use crate::{
     jobdef::{Agent, JobdefPool},
 };
 
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Clone, serde::Deserialize)]
 pub struct SequentialParams {
     pub jobs: Vec<String>,
 }
