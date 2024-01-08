@@ -24,6 +24,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[coverage(off)]
     fn deserialize() -> JfResult<()> {
         let cfg: ShellCfg = toml::from_str(fixtures::SIMPLE)?;
         assert_eq!(cfg.params.script, fixtures::SCRIPT);

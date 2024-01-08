@@ -170,6 +170,7 @@ impl From<Mock> for Job {
 }
 
 impl Fixture for MockParams {
+    #[coverage(off)]
     fn gen() -> Self {
         Self {
             each_sleep_time: 1,
@@ -184,6 +185,7 @@ mod test {
     const MOCK_SLEEP_TIME: u64 = 1;
     const MOCK_SLEEP_COUNT: u8 = 3;
 
+    #[coverage(off)]
     fn test_mock_factory() -> Mock {
         Mock::new(MockParams {
             each_sleep_time: MOCK_SLEEP_TIME,
@@ -192,6 +194,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn new() {
         let mock = test_mock_factory();
 
@@ -202,6 +205,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn run_wait() -> JfResult<()> {
         let mock = test_mock_factory();
         let id = mock.id();
@@ -222,6 +226,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn run_cancel_wait() -> JfResult<()> {
         let mock = test_mock_factory();
         let id = mock.id();
@@ -238,6 +243,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn bunshin() -> JfResult<()> {
         let origin = test_mock_factory();
 
@@ -261,6 +267,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn into_job() {
         let mock = test_mock_factory();
         let id = mock.id();

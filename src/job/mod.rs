@@ -84,6 +84,7 @@ impl Runner for Job {
 #[cfg(test)]
 impl Job {
     #[cfg(test)]
+    #[coverage(off)]
     pub fn as_mock(&self) -> &modes::Mock {
         if let Self::Mock(t) = self {
             t

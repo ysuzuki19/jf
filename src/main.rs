@@ -1,3 +1,4 @@
+#![feature(coverage_attribute)]
 mod cfg;
 mod cli;
 mod error;

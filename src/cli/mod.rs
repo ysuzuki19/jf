@@ -44,6 +44,7 @@ mod tests {
     use super::*;
 
     impl Fixture for Cli {
+        #[coverage(off)]
         fn gen() -> Self {
             Self {
                 ctx: Fixture::gen(),
@@ -54,6 +55,7 @@ mod tests {
     }
 
     #[test]
+    #[coverage(off)]
     fn load() -> JfResult<()> {
         let args = Args::parse_from(args::fixtures::SIMPLE);
         let cli = Cli::load(args)?;
@@ -67,6 +69,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn run() -> JfResult<()> {
         let cli = Cli::gen();
         assert_eq!(cli.ctx(), &Ctx::gen());

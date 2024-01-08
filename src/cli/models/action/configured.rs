@@ -51,6 +51,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[coverage(off)]
     async fn list() -> JfResult<()> {
         let c = Configured::List;
         c.run(Fixture::gen(), Fixture::gen()).await?;
@@ -58,6 +59,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn validate() -> JfResult<()> {
         let c = Configured::Validate;
         c.run(Fixture::gen(), Fixture::gen()).await?;
@@ -65,6 +67,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn run() -> JfResult<()> {
         let c = Configured::Run(fixtures::JOB_NAME.to_owned());
         c.run(Fixture::gen(), Fixture::gen()).await?;
@@ -72,6 +75,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn description() -> JfResult<()> {
         let c = Configured::Description(fixtures::JOB_NAME.to_owned());
         c.run(Fixture::gen(), Fixture::gen()).await?;

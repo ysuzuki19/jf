@@ -19,6 +19,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[coverage(off)]
     fn deserialize() -> JfResult<()> {
         let cfg: SequentialCfg = toml::from_str(fixtures::SIMPLE)?;
 

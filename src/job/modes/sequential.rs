@@ -107,6 +107,7 @@ mod test {
     use super::*;
 
     impl Fixture for SequentialParams {
+        #[coverage(off)]
         fn gen() -> Self {
             Self {
                 jobs: vec!["fast".into(), "fast".into()],
@@ -115,12 +116,14 @@ mod test {
     }
 
     impl TryFixture for Sequential {
+        #[coverage(off)]
         fn try_gen() -> JfResult<Self> {
             Sequential::new(SequentialParams::gen(), TryFixture::try_gen()?)
         }
     }
 
     #[test]
+    #[coverage(off)]
     fn invalid_new_with_empty_job() -> JfResult<()> {
         let params = SequentialParams { jobs: vec![] };
         let must_faile = Sequential::new(params, TryFixture::try_gen()?);
@@ -129,6 +132,7 @@ mod test {
     }
 
     #[test]
+    #[coverage(off)]
     fn invalid_new_with_unknown_job() -> JfResult<()> {
         let params = SequentialParams {
             jobs: vec!["unknown".into()],
@@ -139,12 +143,14 @@ mod test {
     }
 
     #[test]
+    #[coverage(off)]
     fn new() -> JfResult<()> {
         Sequential::try_gen()?;
         Ok(())
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn start() -> JfResult<()> {
         let s = Sequential::try_gen()?.start().await?;
         assert!(!s.is_finished().await?);
@@ -161,6 +167,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn cancel() -> JfResult<()> {
         let s = Sequential::try_gen()?.start().await?;
         s.cancel().await?;
@@ -170,6 +177,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn wait() -> JfResult<()> {
         let s = Sequential::try_gen()?.start().await?;
         s.wait().await?;
@@ -181,6 +189,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn bunshin() -> JfResult<()> {
         let origin = Sequential::try_gen()?;
         origin.start().await?.cancel().await?;
@@ -198,6 +207,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn is_finished_not_yet_started() -> JfResult<()> {
         let s = Sequential::try_gen()?;
         assert!(!s.is_finished().await?);

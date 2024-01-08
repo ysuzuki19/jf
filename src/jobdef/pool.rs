@@ -55,6 +55,7 @@ impl JobdefPool {
 
 #[cfg(test)]
 impl crate::testutil::TryFixture for JobdefPool {
+    #[coverage(off)]
     fn try_gen() -> JfResult<Self> {
         let jobdef = crate::testutil::TryFixture::try_gen()?;
         Ok(Self::new(vec![jobdef]))

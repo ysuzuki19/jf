@@ -108,6 +108,7 @@ mod test {
     use super::*;
 
     impl Fixture for ParallelParams {
+        #[coverage(off)]
         fn gen() -> Self {
             Self {
                 jobs: vec!["fast".into(), "fast".into()],
@@ -116,12 +117,14 @@ mod test {
     }
 
     impl TryFixture for Parallel {
+        #[coverage(off)]
         fn try_gen() -> JfResult<Self> {
             Parallel::new(Fixture::gen(), TryFixture::try_gen()?)
         }
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn invalid_new_with_unknown_job() -> JfResult<()> {
         let must_fail = Parallel::new(
             ParallelParams {
@@ -134,6 +137,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn new() -> JfResult<()> {
         let p = Parallel::try_gen()?;
         assert!(p.jobs.len() == 2);
@@ -141,6 +145,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn start() -> JfResult<()> {
         let p = Parallel::try_gen()?;
         p.start().await?;
@@ -151,6 +156,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn cancel() -> JfResult<()> {
         let p = Parallel::try_gen()?;
         p.start().await?.cancel().await?;
@@ -163,6 +169,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn wait() -> JfResult<()> {
         let p = Parallel::try_gen()?;
         p.start().await?.wait().await?;
@@ -175,6 +182,7 @@ mod test {
     }
 
     #[tokio::test]
+    #[coverage(off)]
     async fn bunshin() -> JfResult<()> {
         let origin = Parallel::try_gen()?;
         origin.start().await?.cancel().await?;

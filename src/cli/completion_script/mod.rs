@@ -32,6 +32,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[coverage(off)]
     fn generate_bash() {
         let script = generate(clap_complete::Shell::Bash);
         // check optimized
@@ -39,6 +40,7 @@ mod tests {
     }
 
     #[test]
+    #[coverage(off)]
     fn generate_others() {
         let script = generate(clap_complete::Shell::Zsh);
         assert!(!script.contains(COMMAND_LIST_WITHOUT_LOG)); // check unoptimized
