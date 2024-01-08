@@ -35,7 +35,7 @@ args = ["+nightly", "llvm-cov", "--lcov", "--output-path", "target/lcov.info"]
 
 [job."live-llvm-cov:html"]
 mode = "parallel"
-jobs = ["serve:llvm-cov:html", "llvm-cov:html:watch"]
+jobs = ["llvm-cov:html:serve", "llvm-cov:html:watch"]
 
 [job."llvm-cov:html:watch"]
 visibility = "private"
