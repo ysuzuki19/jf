@@ -4,10 +4,11 @@ use std::sync::{
 };
 
 use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+use tokio::sync::Mutex;
 
 use crate::{
     error::JfResult,
-    job::{Job, Runner},
+    job::{types::JfHandle, Job, Runner},
     jobdef::{Agent, JobdefPool},
 };
 
@@ -17,20 +18,46 @@ pub struct WatchParams {
     pub watch_list: Vec<String>,
 }
 
+type NotifyPayload = Result<notify::Event, notify::Error>;
+
+struct WatchContainer(RecommendedWatcher);
+impl WatchContainer {
+    pub fn new(
+        watch_list: Vec<String>,
+    ) -> JfResult<(Self, std::sync::mpsc::Receiver<NotifyPayload>)> {
+        let (tx, rx) = std::sync::mpsc::channel();
+        let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
+
+        for watch_item in &watch_list {
+            for entry in glob::glob(watch_item.as_str())? {
+                watcher.watch(entry?.as_path(), RecursiveMode::NonRecursive)?;
+            }
+        }
+
+        Ok((Self(watcher), rx))
+    }
+}
+
 #[derive(Clone)]
 pub struct Watch {
     job: Box<Job>,
+    running_job: Arc<Mutex<Job>>,
     watch_list: Vec<String>,
     is_cancelled: Arc<AtomicBool>,
+    handle: Arc<Mutex<Option<JfHandle>>>,
+    watch_container: Arc<Mutex<Option<WatchContainer>>>,
 }
 
 impl Watch {
     pub fn new(params: WatchParams, pool: JobdefPool) -> JfResult<Self> {
         let job = pool.build(params.job, Agent::Job)?;
         Ok(Self {
-            job: Box::new(job),
+            job: Box::new(job.clone()),
+            running_job: Arc::new(Mutex::new(job)),
             watch_list: params.watch_list,
             is_cancelled: Arc::new(AtomicBool::new(false)),
+            handle: Arc::new(Mutex::new(None)),
+            watch_container: Arc::new(Mutex::new(None)),
         })
     }
 }
@@ -38,49 +65,57 @@ impl Watch {
 #[async_trait::async_trait]
 impl Runner for Watch {
     async fn start(&self) -> JfResult<Self> {
-        let (tx, rx) = std::sync::mpsc::channel();
-        let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
+        let (container, rx) = WatchContainer::new(self.watch_list.clone())?;
+        self.watch_container.lock().await.replace(container);
 
-        for watch_item in self.clone().watch_list {
-            for entry in glob::glob(watch_item.as_str())? {
-                watcher.watch(entry?.as_path(), RecursiveMode::NonRecursive)?;
-            }
-        }
+        let handle = tokio::spawn({
+            let job = self.job.clone();
+            let running_job = self.running_job.clone();
+            let is_cancelled = self.is_cancelled.clone();
 
-        loop {
-            let running_job = self.job.bunshin().start().await?;
+            async move {
+                loop {
+                    *(running_job.lock().await) = job.bunshin().start().await?;
 
-            loop {
-                match rx.recv()??.kind {
-                    EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => {
+                    loop {
+                        match rx.recv()??.kind {
+                            EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => {
+                                break;
+                            }
+                            _ => {}
+                        }
+                    }
+
+                    running_job.lock().await.cancel().await?;
+                    if is_cancelled.load(Ordering::Relaxed) {
                         break;
                     }
-                    _ => {}
                 }
+                Ok(())
             }
-
-            running_job.cancel().await?;
-            if self.is_cancelled.load(Ordering::Relaxed) {
-                break;
-            }
-        }
+        });
+        self.handle.lock().await.replace(handle);
         Ok(self.clone())
     }
 
     async fn is_finished(&self) -> JfResult<bool> {
-        Ok(false)
+        Ok(self.is_cancelled.load(Ordering::Relaxed))
     }
 
     async fn cancel(&self) -> JfResult<()> {
         self.is_cancelled.store(true, Ordering::Relaxed);
+        self.running_job.lock().await.cancel().await?;
         Ok(())
     }
 
     fn bunshin(&self) -> Self {
         Self {
             job: Box::new(self.job.bunshin()),
+            running_job: Arc::new(Mutex::new(self.job.bunshin())),
             watch_list: self.watch_list.clone(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
+            handle: Arc::new(Mutex::new(None)),
+            watch_container: Arc::new(Mutex::new(None)),
         }
     }
 }
@@ -101,7 +136,12 @@ mod fixtures {
 
 #[cfg(test)]
 mod test {
-    use crate::testutil::{async_test, Fixture, TryFixture};
+    use std::io::Write;
+
+    use crate::{
+        job::runner,
+        testutil::{async_test, Fixture, TryFixture},
+    };
 
     use super::*;
 
@@ -146,6 +186,56 @@ mod test {
             async {
                 let w = Watch::try_fixture()?;
                 assert!(!w.is_finished().await?);
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn start() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let w = Watch::try_fixture()?;
+                w.start().await?;
+                assert!(!w.is_finished().await?);
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn watch() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let w = Watch::try_fixture()?;
+                w.start().await?;
+                assert!(!w.is_finished().await?);
+                let id = w.running_job.lock().await.as_mock().id();
+                std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
+                runner::sleep().await;
+                let id2 = w.running_job.lock().await.as_mock().id();
+                assert_ne!(id, id2);
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn cancel() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let w = Watch::try_fixture()?;
+                assert!(w.start().await.is_ok());
+                assert!(w.cancel().await.is_ok());
+                runner::sleep().await; // for cover breaking loop
+                w.wait().await?;
+                assert!(w.is_finished().await?);
                 Ok(())
             },
         )
