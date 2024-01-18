@@ -47,4 +47,12 @@ mod tests {
         buf.flush().unwrap();
         assert_eq!(buf.to_string(), "test");
     }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn error() {
+        let mut buf = WritableString::new();
+        let result = buf.write_all(&[0, 159, 146, 150]);
+        assert!(result.is_err());
+    }
 }
