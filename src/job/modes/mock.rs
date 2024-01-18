@@ -2,6 +2,8 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicUsize;
 use std::sync::{atomic::Ordering, Arc};
 
+use tokio::sync::Mutex;
+
 use crate::error::JfResult;
 use crate::job::Job;
 use crate::job::Runner;
@@ -24,6 +26,7 @@ pub struct Mock {
     is_running: Arc<AtomicBool>,
     is_finished: Arc<AtomicBool>,
     is_cancelled: Arc<AtomicBool>,
+    handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
 }
 
 impl Mock {
@@ -126,7 +129,7 @@ impl Runner for Mock {
     async fn start(&self) -> JfResult<Self> {
         self.is_started.store(true, Ordering::Relaxed);
         self.is_running.store(true, Ordering::Relaxed);
-        tokio::spawn({
+        let handle = tokio::spawn({
             let each_sleep_time = self.each_sleep_time;
             let sleep_count = self.sleep_count;
             let is_running = self.is_running.clone();
@@ -143,6 +146,7 @@ impl Runner for Mock {
                 is_finished.store(true, Ordering::Relaxed);
             }
         });
+        self.handle.lock().await.replace(handle);
         Ok(self.clone())
     }
 
@@ -152,6 +156,11 @@ impl Runner for Mock {
 
     async fn cancel(&self) -> JfResult<()> {
         self.is_cancelled.store(true, Ordering::Relaxed);
+        if let Some(handle) = self.handle.lock().await.take() {
+            handle.abort();
+        }
+        self.is_finished.store(true, Ordering::Relaxed);
+        self.is_running.store(false, Ordering::Relaxed);
         Ok(())
     }
 
@@ -265,8 +274,8 @@ mod test {
                 origin.start().await?.cancel().await?;
                 origin
                     .assert_is_started_eq(true)
-                    .assert_is_running_eq(true)
-                    .assert_is_finished_eq(false)
+                    .assert_is_running_eq(false)
+                    .assert_is_finished_eq(true)
                     .assert_is_cancelled_eq(true);
 
                 let bunshin = origin.bunshin();
