@@ -1,9 +1,11 @@
+mod watcher_container;
+
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
 };
 
-use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::EventKind;
 use tokio::sync::Mutex;
 
 use crate::{
@@ -12,33 +14,12 @@ use crate::{
     jobdef::{Agent, JobdefPool},
 };
 
+use self::watcher_container::WatcherContainer;
+
 #[derive(Clone, serde::Deserialize)]
 pub struct WatchParams {
     pub job: String,
     pub watch_list: Vec<String>,
-}
-
-type NotifyPayload = Result<notify::Event, notify::Error>;
-
-struct WatchContainer {
-    _rw: RecommendedWatcher,
-}
-
-impl WatchContainer {
-    pub fn new(
-        watch_list: Vec<String>,
-    ) -> JfResult<(Self, std::sync::mpsc::Receiver<NotifyPayload>)> {
-        let (tx, rx) = std::sync::mpsc::channel();
-        let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
-
-        for watch_item in &watch_list {
-            for entry in glob::glob(watch_item.as_str())? {
-                watcher.watch(entry?.as_path(), RecursiveMode::NonRecursive)?;
-            }
-        }
-
-        Ok((Self { _rw: watcher }, rx))
-    }
 }
 
 #[derive(Clone)]
@@ -48,7 +29,7 @@ pub struct Watch {
     watch_list: Vec<String>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<JfHandle>>>,
-    watch_container: Arc<Mutex<Option<WatchContainer>>>,
+    watcher_container: Arc<Mutex<Option<WatcherContainer>>>,
 }
 
 impl Watch {
@@ -60,7 +41,7 @@ impl Watch {
             watch_list: params.watch_list,
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
-            watch_container: Arc::new(Mutex::new(None)),
+            watcher_container: Arc::new(Mutex::new(None)),
         })
     }
 }
@@ -68,8 +49,8 @@ impl Watch {
 #[async_trait::async_trait]
 impl Runner for Watch {
     async fn start(&self) -> JfResult<Self> {
-        let (container, rx) = WatchContainer::new(self.watch_list.clone())?;
-        self.watch_container.lock().await.replace(container);
+        let (container, rx) = WatcherContainer::new(&self.watch_list)?;
+        self.watcher_container.lock().await.replace(container);
 
         let handle = tokio::spawn({
             let job = self.job.clone();
@@ -118,7 +99,7 @@ impl Runner for Watch {
             watch_list: self.watch_list.clone(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
-            watch_container: Arc::new(Mutex::new(None)),
+            watcher_container: Arc::new(Mutex::new(None)),
         }
     }
 }
