@@ -45,7 +45,7 @@ impl Runner for Command {
         }
     }
 
-    async fn cancel(&self) -> JfResult<()> {
+    async fn cancel(&self) -> JfResult<Self> {
         if let Some(ref mut child) = self.child.lock().await.deref_mut() {
             if let Err(e) = child.kill().await {
                 match e.kind() {
@@ -54,7 +54,7 @@ impl Runner for Command {
                 }
             }
         }
-        Ok(())
+        Ok(self.clone())
     }
 
     fn bunshin(&self) -> Self {

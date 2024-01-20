@@ -38,9 +38,9 @@ impl Runner for Shell {
         self.command.is_finished().await
     }
 
-    async fn cancel(&self) -> JfResult<()> {
+    async fn cancel(&self) -> JfResult<Self> {
         self.command.cancel().await?;
-        Ok(())
+        Ok(self.clone())
     }
 
     fn bunshin(&self) -> Self {
@@ -117,8 +117,8 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let shell = Shell::fixture().start().await?;
-                shell.cancel().await?;
+                let shell = Shell::fixture();
+                shell.start().await?.cancel().await?;
                 assert!(shell.is_finished().await?);
                 assert!(shell.command.is_finished().await?);
                 Ok(())
@@ -132,8 +132,8 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let origin = Shell::fixture().start().await?;
-                origin.cancel().await?;
+                let origin = Shell::fixture();
+                origin.start().await?.cancel().await?;
                 assert!(origin.is_finished().await?);
                 let bunshin = origin.bunshin();
                 assert!(!bunshin.is_finished().await?);

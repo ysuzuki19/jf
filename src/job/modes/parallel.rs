@@ -68,14 +68,14 @@ impl Runner for Parallel {
         }
     }
 
-    async fn cancel(&self) -> JfResult<()> {
+    async fn cancel(&self) -> JfResult<Self> {
         self.is_cancelled.store(true, Ordering::SeqCst);
         if let Some(handles) = self.handles.lock().await.deref_mut() {
             for handle in handles {
                 let _ = handle.await?;
             }
         }
-        Ok(())
+        Ok(self.clone())
     }
 
     fn bunshin(&self) -> Self {

@@ -16,7 +16,7 @@ where
 {
     async fn start(&self) -> JfResult<Self>;
     async fn is_finished(&self) -> JfResult<bool>;
-    async fn cancel(&self) -> JfResult<()>;
+    async fn cancel(&self) -> JfResult<Self>;
     fn bunshin(&self) -> Self;
 
     async fn wait(&self) -> JfResult<()> {

@@ -154,14 +154,14 @@ impl Runner for Mock {
         Ok(self.is_finished.load(Ordering::Relaxed))
     }
 
-    async fn cancel(&self) -> JfResult<()> {
+    async fn cancel(&self) -> JfResult<Self> {
         self.is_cancelled.store(true, Ordering::Relaxed);
         if let Some(handle) = self.handle.lock().await.take() {
             handle.abort();
         }
         self.is_finished.store(true, Ordering::Relaxed);
         self.is_running.store(false, Ordering::Relaxed);
-        Ok(())
+        Ok(self.clone())
     }
 
     fn bunshin(&self) -> Self {
@@ -250,9 +250,11 @@ mod test {
                 let mock = test_mock_factory();
                 let id = mock.id();
 
-                mock.start().await?.cancel().await?;
-                mock.assert_is_cancelled_eq(true);
-
+                mock.start()
+                    .await?
+                    .cancel()
+                    .await?
+                    .assert_is_cancelled_eq(true);
                 mock.wait().await?;
                 mock.assert_id_eq(id)
                     .assert_is_running_eq(false)

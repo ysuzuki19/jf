@@ -56,16 +56,16 @@ impl Runner for Job {
         }
     }
 
-    async fn cancel(&self) -> JfResult<()> {
-        match self {
-            Self::Command(t) => t.cancel().await,
-            Self::Parallel(t) => t.cancel().await,
-            Self::Sequential(t) => t.cancel().await,
-            Self::Shell(t) => t.cancel().await,
-            Self::Watch(t) => t.cancel().await,
+    async fn cancel(&self) -> JfResult<Self> {
+        Ok(match self {
+            Self::Command(t) => t.cancel().await?.into(),
+            Self::Parallel(t) => t.cancel().await?.into(),
+            Self::Sequential(t) => t.cancel().await?.into(),
+            Self::Shell(t) => t.cancel().await?.into(),
+            Self::Watch(t) => t.cancel().await?.into(),
             #[cfg(test)]
-            Self::Mock(t) => t.cancel().await,
-        }
+            Self::Mock(t) => t.cancel().await?.into(),
+        })
     }
 
     fn bunshin(&self) -> Self {

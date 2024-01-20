@@ -86,10 +86,10 @@ impl Runner for Watch {
         Ok(self.is_cancelled.load(Ordering::Relaxed))
     }
 
-    async fn cancel(&self) -> JfResult<()> {
+    async fn cancel(&self) -> JfResult<Self> {
         self.is_cancelled.store(true, Ordering::Relaxed);
         self.running_job.lock().await.cancel().await?;
-        Ok(())
+        Ok(self.clone())
     }
 
     fn bunshin(&self) -> Self {
@@ -215,8 +215,7 @@ mod test {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let w = Watch::try_fixture()?;
-                assert!(w.start().await.is_ok());
-                assert!(w.cancel().await.is_ok());
+                w.start().await?.cancel().await?;
                 runner::sleep().await; // for cover breaking loop
                 w.wait().await?;
                 assert!(w.is_finished().await?);

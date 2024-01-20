@@ -76,9 +76,9 @@ impl Runner for Sequential {
         }
     }
 
-    async fn cancel(&self) -> JfResult<()> {
+    async fn cancel(&self) -> JfResult<Self> {
         self.is_cancelled.store(true, Ordering::Relaxed);
-        Ok(())
+        Ok(self.clone())
     }
 
     fn bunshin(&self) -> Self {
