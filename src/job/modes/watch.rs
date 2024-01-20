@@ -20,7 +20,10 @@ pub struct WatchParams {
 
 type NotifyPayload = Result<notify::Event, notify::Error>;
 
-struct WatchContainer(RecommendedWatcher);
+struct WatchContainer {
+    _rw: RecommendedWatcher,
+}
+
 impl WatchContainer {
     pub fn new(
         watch_list: Vec<String>,
@@ -34,7 +37,7 @@ impl WatchContainer {
             }
         }
 
-        Ok((Self(watcher), rx))
+        Ok((Self { _rw: watcher }, rx))
     }
 }
 
