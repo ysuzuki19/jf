@@ -27,7 +27,8 @@ impl JobController {
             .start()
             .await?
             .wait()
-            .await
+            .await?;
+        Ok(())
     }
 
     pub fn description(&self, job_name: String) -> JfResult<&String> {

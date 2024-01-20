@@ -102,8 +102,8 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let shell = Shell::fixture().start().await?;
-                shell.wait().await?;
+                let shell = Shell::fixture();
+                shell.start().await?.wait().await?;
                 assert!(shell.is_finished().await?);
                 assert!(shell.command.is_finished().await?);
                 Ok(())

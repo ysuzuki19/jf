@@ -191,12 +191,12 @@ mod test {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let s = Sequential::try_fixture()?.start().await?;
-                s.wait().await?;
-                s.is_finished().await?;
-                for job in s.jobs.iter() {
+                let s = Sequential::try_fixture()?;
+                s.start().await?.wait().await?;
+                assert!(s.is_finished().await?);
+                s.jobs.into_iter().for_each(|job| {
                     job.as_mock().assert_is_finished_eq(true);
-                }
+                });
                 Ok(())
             },
         )

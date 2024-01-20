@@ -182,12 +182,17 @@ mod test {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let p = Parallel::try_fixture()?;
-                p.start().await?.wait().await?;
-                for job in p.jobs {
-                    job.as_mock()
-                        .assert_is_started_eq(true)
-                        .assert_is_finished_eq(true);
-                }
+                p.start()
+                    .await?
+                    .wait()
+                    .await?
+                    .jobs
+                    .into_iter()
+                    .for_each(|job| {
+                        job.as_mock()
+                            .assert_is_started_eq(true)
+                            .assert_is_finished_eq(true);
+                    });
                 Ok(())
             },
         )

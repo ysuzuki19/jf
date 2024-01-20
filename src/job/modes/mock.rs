@@ -224,13 +224,14 @@ mod test {
                 let mock = test_mock_factory();
                 let id = mock.id();
 
-                mock.start().await?;
-                mock.assert_is_started_eq(true)
+                mock.start()
+                    .await?
+                    .assert_is_started_eq(true)
                     .assert_is_running_eq(true)
-                    .assert_is_cancelled_eq(false);
-
-                mock.wait().await?;
-                mock.assert_id_eq(id) // not changed mock instance
+                    .assert_is_cancelled_eq(false)
+                    .wait()
+                    .await?
+                    .assert_id_eq(id) // not changed mock instance
                     .assert_is_started_eq(true)
                     .assert_is_running_eq(false)
                     .assert_is_finished_eq(true)
@@ -254,9 +255,10 @@ mod test {
                     .await?
                     .cancel()
                     .await?
-                    .assert_is_cancelled_eq(true);
-                mock.wait().await?;
-                mock.assert_id_eq(id)
+                    .assert_is_cancelled_eq(true)
+                    .wait()
+                    .await?
+                    .assert_id_eq(id)
                     .assert_is_running_eq(false)
                     .assert_is_finished_eq(true);
 

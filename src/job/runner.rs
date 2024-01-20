@@ -19,7 +19,7 @@ where
     async fn cancel(&self) -> JfResult<Self>;
     fn bunshin(&self) -> Self;
 
-    async fn wait(&self) -> JfResult<()> {
+    async fn wait(&self) -> JfResult<Self> {
         loop {
             if self.is_finished().await? {
                 break;
@@ -27,7 +27,7 @@ where
 
             sleep().await;
         }
-        Ok(())
+        Ok(self.clone())
     }
 
     async fn wait_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> JfResult<()> {
