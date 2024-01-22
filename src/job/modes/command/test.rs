@@ -1,13 +1,16 @@
-use crate::testutil::async_test;
+use crate::testutil::*;
 
 use super::*;
 
-#[cfg_attr(coverage, coverage(off))]
-fn test_command_factory() -> Command {
-    Command::new(CommandParams {
-        command: String::from("sleep"),
-        args: vec![String::from("1")],
-    })
+impl Fixture for Command {
+    #[cfg_attr(coverage, coverage(off))]
+    fn fixture() -> Self {
+        let params = CommandParams {
+            command: String::from("sleep"),
+            args: vec![String::from("1")],
+        };
+        Command::new(params)
+    }
 }
 
 #[test]
@@ -16,7 +19,7 @@ fn run_without_blocking() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = test_command_factory();
+            let command = Command::fixture();
             command.start().await?;
             assert!(!command.is_finished().await?);
             Ok(())
@@ -30,7 +33,7 @@ fn wait() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = test_command_factory();
+            let command = Command::fixture();
             command.start().await?;
             command.wait().await?;
             assert!(command.is_finished().await?);
@@ -45,7 +48,7 @@ fn cancel() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = test_command_factory();
+            let command = Command::fixture();
             command.start().await?.cancel().await?;
             assert!(command.is_finished().await?);
             Ok(())
@@ -59,7 +62,7 @@ fn bunshin() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = test_command_factory().bunshin();
+            let command = Command::fixture().bunshin();
             command.start().await?.cancel().await?;
             assert!(command.is_finished().await?);
             Ok(())
@@ -73,7 +76,7 @@ fn is_finished_not_yet_started() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = test_command_factory();
+            let command = Command::fixture();
             assert!(!command.is_finished().await?);
             Ok(())
         },

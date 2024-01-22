@@ -2,20 +2,14 @@ use crate::testutil::*;
 
 use super::*;
 
-impl Fixture for ShellParams {
-    #[cfg_attr(coverage, coverage(off))]
-    fn fixture() -> Self {
-        ShellParams {
-            script: "echo hello".to_string(),
-            args: None,
-        }
-    }
-}
-
 impl Fixture for Shell {
     #[cfg_attr(coverage, coverage(off))]
     fn fixture() -> Self {
-        Shell::new(Fixture::fixture())
+        let params = ShellParams {
+            script: "echo hello".to_string(),
+            args: None,
+        };
+        Shell::new(params)
     }
 }
 

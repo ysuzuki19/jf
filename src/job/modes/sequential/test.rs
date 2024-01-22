@@ -3,19 +3,13 @@ use crate::testutil::*;
 
 use super::*;
 
-impl Fixture for SequentialParams {
-    #[cfg_attr(coverage, coverage(off))]
-    fn fixture() -> Self {
-        Self {
-            jobs: vec!["fast".into(), "fast".into()],
-        }
-    }
-}
-
 impl TryFixture for Sequential {
     #[cfg_attr(coverage, coverage(off))]
     fn try_fixture() -> JfResult<Self> {
-        Sequential::new(SequentialParams::fixture(), TryFixture::try_fixture()?)
+        let params = SequentialParams {
+            jobs: vec!["fast".into(), "fast".into()],
+        };
+        Sequential::new(params, TryFixture::try_fixture()?)
     }
 }
 

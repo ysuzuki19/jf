@@ -1,22 +1,24 @@
-use crate::testutil::async_test;
+use crate::testutil::*;
 
 use super::*;
 
 const MOCK_SLEEP_TIME: u64 = 1;
 const MOCK_SLEEP_COUNT: u8 = 3;
 
-#[cfg_attr(coverage, coverage(off))]
-fn test_mock_factory() -> Mock {
-    Mock::new(MockParams {
-        each_sleep_time: MOCK_SLEEP_TIME,
-        sleep_count: MOCK_SLEEP_COUNT,
-    })
+impl Fixture for Mock {
+    #[cfg_attr(coverage, coverage(off))]
+    fn fixture() -> Self {
+        Self::new(MockParams {
+            each_sleep_time: MOCK_SLEEP_TIME,
+            sleep_count: MOCK_SLEEP_COUNT,
+        })
+    }
 }
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
 fn new() {
-    let mock = test_mock_factory();
+    let mock = Mock::fixture();
 
     mock.assert_is_started_eq(false)
         .assert_is_running_eq(false)
@@ -30,7 +32,7 @@ fn run_wait() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let mock = test_mock_factory();
+            let mock = Mock::fixture();
             let id = mock.id();
 
             mock.start()
@@ -57,7 +59,7 @@ fn run_cancel_wait() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let mock = test_mock_factory();
+            let mock = Mock::fixture();
             let id = mock.id();
 
             mock.start()
@@ -82,7 +84,7 @@ fn bunshin() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let origin = test_mock_factory();
+            let origin = Mock::fixture();
 
             origin.start().await?.cancel().await?;
             origin
@@ -108,7 +110,7 @@ fn bunshin() -> JfResult<()> {
 #[test]
 #[cfg_attr(coverage, coverage(off))]
 fn into_job() {
-    let mock = test_mock_factory();
+    let mock = Mock::fixture();
     let id = mock.id();
 
     if let Job::Mock(mock) = mock.into() {

@@ -3,19 +3,13 @@ use crate::{error::JfResult, job::Runner, jobdef::JobdefPool};
 
 use super::*;
 
-impl Fixture for ParallelParams {
-    #[cfg_attr(coverage, coverage(off))]
-    fn fixture() -> Self {
-        Self {
-            jobs: vec!["fast".into(), "fast".into()],
-        }
-    }
-}
-
 impl TryFixture for Parallel {
     #[cfg_attr(coverage, coverage(off))]
     fn try_fixture() -> JfResult<Self> {
-        Parallel::new(Fixture::fixture(), TryFixture::try_fixture()?)
+        let params = ParallelParams {
+            jobs: vec!["fast".into(), "fast".into()],
+        };
+        Parallel::new(params, TryFixture::try_fixture()?)
     }
 }
 
