@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod test;
+mod tests;
 mod watcher_container;
 
 use std::sync::{

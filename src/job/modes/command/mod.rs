@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod test;
+mod tests;
 
 use std::{ops::DerefMut, sync::Arc};
 

@@ -1,4 +1,4 @@
-mod test;
+mod tests;
 
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicUsize;
