@@ -9,26 +9,31 @@ pub struct Ctx<LR: logger::LogWriter> {
     pub logger: logger::Logger<LR>,
 }
 
-#[cfg(test)]
-impl crate::testutil::Fixture for Ctx<logger::MockLogWriter> {
-    #[cfg_attr(coverage, coverage(off))]
-    fn fixture() -> Self {
-        Self {
-            logger: crate::testutil::Fixture::fixture(),
-        }
-    }
-}
-
 #[cfg_attr(test, derive(PartialEq, Default))]
 pub struct Opts {
     pub cfg: Option<PathBuf>,
 }
 
 #[cfg(test)]
-impl crate::testutil::Fixture for Opts {
-    #[cfg_attr(coverage, coverage(off))]
-    fn fixture() -> Self {
-        let cfg = PathBuf::from(".").join("tests").join("fixtures");
-        Opts { cfg: Some(cfg) }
+mod tests {
+    use crate::testutil::Fixture;
+
+    use super::*;
+
+    impl Fixture for Ctx<logger::MockLogWriter> {
+        #[cfg_attr(coverage, coverage(off))]
+        fn fixture() -> Self {
+            Self {
+                logger: Fixture::fixture(),
+            }
+        }
+    }
+
+    impl Fixture for Opts {
+        #[cfg_attr(coverage, coverage(off))]
+        fn fixture() -> Self {
+            let cfg = PathBuf::from(".").join("tests").join("fixtures");
+            Opts { cfg: Some(cfg) }
+        }
     }
 }
