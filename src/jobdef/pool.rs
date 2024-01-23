@@ -63,7 +63,7 @@ impl JobdefPool {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use crate::{
         cfg::job_cfg::{CommonCfg, JobCfg, MockCfg, Visibility, WatchCfg},

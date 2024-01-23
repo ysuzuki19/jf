@@ -26,7 +26,7 @@ impl CfgPathGen {
 }
 
 #[cfg(test)]
-pub mod test {
+pub mod tests {
     use super::*;
 
     #[cfg_attr(coverage, coverage(off))]

@@ -63,7 +63,7 @@ impl TryFrom<(String, JobCfg)> for Jobdef {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::{
         cfg::job_cfg::{CommonCfg, MockCfg},
         testutil::{async_test, Fixture, TryFixture},

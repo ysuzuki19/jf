@@ -14,7 +14,7 @@ pub trait LogWriter: Send {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::testutil::async_test;
 
     use super::*;

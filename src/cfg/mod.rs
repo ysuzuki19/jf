@@ -30,14 +30,14 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn load() -> JfResult<()> {
-        Cfg::load(Some(cfg_path_gen::test::fixtures_dir()))?;
+        Cfg::load(Some(cfg_path_gen::tests::fixtures_dir()))?;
         Ok(())
     }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn load_unexist() -> JfResult<()> {
-        let must_fail = Cfg::load(Some(cfg_path_gen::test::unexist_dir()));
+        let must_fail = Cfg::load(Some(cfg_path_gen::tests::unexist_dir()));
         assert!(must_fail.is_err());
         assert!(matches!(must_fail.err().unwrap(), JfError::IoError(_)));
         Ok(())
