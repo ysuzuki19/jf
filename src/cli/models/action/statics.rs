@@ -1,6 +1,6 @@
 use crate::{
     cli::{
-        completion_script,
+        completion_script, logger,
         models::{Ctx, Opts},
         Args,
     },
@@ -25,14 +25,14 @@ impl From<Statics> for Action {
 
 #[async_trait::async_trait]
 impl CliAction for Statics {
-    async fn run(self, ctx: Ctx, _: Opts) -> JfResult<()> {
+    async fn run<LR: logger::LogWriter>(self, mut ctx: Ctx<LR>, _: Opts) -> JfResult<()> {
         let mut cmd = <Args as clap::CommandFactory>::command();
         let s = match self {
             Statics::Completion(shell) => completion_script::generate(shell),
             Statics::Help => cmd.render_help().to_string(),
             Statics::Version => cmd.render_version().to_string(),
         };
-        ctx.logger.log(s);
+        ctx.logger.force(s).await?;
         Ok(())
     }
 }

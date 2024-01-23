@@ -12,11 +12,11 @@ use clap::Parser;
 #[tokio::main]
 async fn main() {
     let args = cli::Args::parse();
-    match cli::Cli::load(args) {
+    match cli::Cli::<tokio::io::Stdout>::load(args) {
         Ok(cli) => {
-            let logger = cli.ctx().logger.clone();
+            let mut logger = cli.ctx().logger.clone();
             if let Err(e) = cli.run().await {
-                logger.error(e.to_string());
+                let _ = logger.error(e.to_string()).await;
                 std::process::exit(1);
             }
         }

@@ -1,17 +1,16 @@
 pub mod action;
-mod logger;
 
 use std::path::PathBuf;
 
-pub use logger::{LogLevel, Logger};
+use super::logger;
 
 #[cfg_attr(test, derive(PartialEq, Default))]
-pub struct Ctx {
-    pub logger: Logger,
+pub struct Ctx<LR: logger::LogWriter> {
+    pub logger: logger::Logger<LR>,
 }
 
 #[cfg(test)]
-impl crate::testutil::Fixture for Ctx {
+impl crate::testutil::Fixture for Ctx<logger::MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
     fn fixture() -> Self {
         Self {

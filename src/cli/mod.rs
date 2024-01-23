@@ -1,6 +1,7 @@
 mod args;
 mod completion_script;
 mod job_controller;
+mod logger;
 mod models;
 
 use crate::error::JfResult;
@@ -11,19 +12,19 @@ use self::models::{
     Ctx, Opts,
 };
 
-pub struct Cli {
-    ctx: Ctx,
+pub struct Cli<LR: logger::LogWriter> {
+    ctx: Ctx<LR>,
     action: Action,
     opts: Opts,
 }
 
-impl Cli {
+impl<LR: logger::LogWriter> Cli<LR> {
     pub fn load(args: Args) -> JfResult<Self> {
         let (ctx, action, opts) = args.setup()?;
         Ok(Self { ctx, action, opts })
     }
 
-    pub fn ctx(&self) -> &Ctx {
+    pub fn ctx(&self) -> &Ctx<LR> {
         &self.ctx
     }
 
@@ -43,7 +44,7 @@ mod tests {
 
     use super::*;
 
-    impl Fixture for Cli {
+    impl Fixture for Cli<logger::MockLogWriter> {
         #[cfg_attr(coverage, coverage(off))]
         fn fixture() -> Self {
             Self {
@@ -58,8 +59,8 @@ mod tests {
     #[cfg_attr(coverage, coverage(off))]
     fn load() -> JfResult<()> {
         let args = Args::parse_from(args::fixtures::SIMPLE);
-        let cli = Cli::load(args)?;
-        assert!(cli.ctx() == &Ctx::default());
+        let cli = Cli::<logger::MockLogWriter>::load(args)?;
+        assert!(cli.ctx() == &Ctx::fixture());
         assert!(cli.action == Configured::Run(fixtures::JOB_NAME.into()).into());
         assert!(cli.opts == Opts::default());
         Ok(())
