@@ -4,6 +4,9 @@ mod job_controller;
 mod logger;
 mod models;
 
+#[cfg(test)]
+pub use logger::MockLogWriter;
+
 use crate::error::JfResult;
 
 pub use self::args::Args;
@@ -37,14 +40,12 @@ impl<LR: logger::LogWriter> Cli<LR> {
 mod tests {
     use clap::Parser;
 
-    use crate::{
-        cli::{args::fixtures, models::action::Configured},
-        testutil::{async_test, Fixture},
-    };
+    use crate::cli::{args::fixtures, models::action::Configured};
+    use crate::testutil::*;
 
     use super::*;
 
-    impl Fixture for Cli<logger::MockLogWriter> {
+    impl Fixture for Cli<MockLogWriter> {
         #[cfg_attr(coverage, coverage(off))]
         fn fixture() -> Self {
             Self {
@@ -59,7 +60,7 @@ mod tests {
     #[cfg_attr(coverage, coverage(off))]
     fn load() -> JfResult<()> {
         let args = Args::parse_from(args::fixtures::SIMPLE);
-        let cli = Cli::<logger::MockLogWriter>::load(args)?;
+        let cli = Cli::<MockLogWriter>::load(args)?;
         assert!(cli.ctx() == &Ctx::fixture());
         assert!(cli.action == Configured::Run(fixtures::JOB_NAME.into()).into());
         assert!(cli.opts == Opts::default());

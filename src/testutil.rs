@@ -1,3 +1,5 @@
+pub use crate::cli::MockLogWriter;
+
 pub trait Fixture {
     fn fixture() -> Self;
 }

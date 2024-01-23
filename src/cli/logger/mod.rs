@@ -76,8 +76,6 @@ impl<LR: LogWriter> Logger<LR> {
 mod tests {
     use crate::testutil::*;
 
-    use self::log_writer::MockLogWriter;
-
     use super::*;
 
     impl Fixture for Logger<MockLogWriter> {

@@ -16,11 +16,11 @@ pub struct Opts {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::Fixture;
+    use crate::testutil::*;
 
     use super::*;
 
-    impl Fixture for Ctx<logger::MockLogWriter> {
+    impl Fixture for Ctx<MockLogWriter> {
         #[cfg_attr(coverage, coverage(off))]
         fn fixture() -> Self {
             Self {

@@ -106,7 +106,8 @@ pub mod fixtures {
 mod tests {
     use clap::Parser;
     use clap_complete::Shell;
-    use logger::MockLogWriter;
+
+    use crate::testutil::*;
 
     use super::*;
 
@@ -130,7 +131,7 @@ mod tests {
     fn setup() -> JfResult<()> {
         let args = Args::default();
 
-        let (ctx, action, opts) = args.setup::<logger::MockLogWriter>()?;
+        let (ctx, action, opts) = args.setup::<MockLogWriter>()?;
         assert!(ctx == args.setup_ctx());
         assert!(action == args.setup_action()?);
         assert!(opts == args.setup_opts());
