@@ -6,10 +6,11 @@ use clap::ValueEnum;
 pub enum LogLevel {
     /// No log output
     None,
-    #[default]
     Error,
     Warn,
+    #[default]
     Info,
+    Debug,
 }
 
 impl ValueEnum for LogLevel {
@@ -19,6 +20,7 @@ impl ValueEnum for LogLevel {
             LogLevel::Error,
             LogLevel::Warn,
             LogLevel::Info,
+            LogLevel::Debug,
         ]
     }
 
@@ -28,6 +30,14 @@ impl ValueEnum for LogLevel {
             LogLevel::Error => PossibleValue::new("error"),
             LogLevel::Warn => PossibleValue::new("warn"),
             LogLevel::Info => PossibleValue::new("info"),
+            LogLevel::Debug => PossibleValue::new("debug"),
         })
+    }
+}
+
+#[cfg(test)]
+impl crate::testutil::Fixture for LogLevel {
+    fn fixture() -> Self {
+        Self::Debug
     }
 }

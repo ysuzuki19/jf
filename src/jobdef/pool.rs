@@ -2,6 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use super::{Agent, Jobdef};
 use crate::{
+    ctx::logger::{JfStdout, LogWriter},
     error::{InternalError, JfError, JfResult},
     job::Job,
 };
@@ -34,7 +35,7 @@ impl JobdefPool {
         let errs = self
             .map
             .values()
-            .map(|jobdef| jobdef.build(self.clone(), Agent::Job))
+            .map(|jobdef| jobdef.build::<JfStdout>(self.clone(), Agent::Job))
             .filter_map(|res| match res {
                 Ok(_) => None,
                 Err(e) => Some(e),
@@ -53,7 +54,7 @@ impl JobdefPool {
             .ok_or(InternalError::JobdefNotFound(job_name).into())
     }
 
-    pub fn build(&self, job_name: String, agent: Agent) -> JfResult<Job> {
+    pub fn build<LR: LogWriter>(&self, job_name: String, agent: Agent) -> JfResult<Job<LR>> {
         self.get(job_name)?.build(self.clone(), agent)
     }
 
@@ -106,10 +107,10 @@ mod tests {
         ]);
         assert_eq!(pool.list_public().len(), 2);
         assert!(pool.validate().is_ok());
-        assert!(pool.build("job1".into(), Agent::Job).is_ok());
-        assert!(pool.build("job1".into(), Agent::Cli).is_ok());
-        assert!(pool.build("job3".into(), Agent::Job).is_ok());
-        assert!(pool.build("job3".into(), Agent::Cli).is_err());
+        assert!(pool.build::<JfStdout>("job1".into(), Agent::Job).is_ok());
+        assert!(pool.build::<JfStdout>("job1".into(), Agent::Cli).is_ok());
+        assert!(pool.build::<JfStdout>("job3".into(), Agent::Job).is_ok());
+        assert!(pool.build::<JfStdout>("job3".into(), Agent::Cli).is_err());
         assert_eq!(pool.description("job1".into())?, "job1-desc");
         Ok(())
     }
@@ -130,10 +131,10 @@ mod tests {
         ]);
         assert_eq!(pool.list_public().len(), 2);
         assert!(pool.validate().is_err());
-        assert!(pool.build("job1".into(), Agent::Job).is_ok());
-        assert!(pool.build("job1".into(), Agent::Cli).is_ok());
-        assert!(pool.build("job3".into(), Agent::Job).is_err());
-        assert!(pool.build("job3".into(), Agent::Cli).is_err());
+        assert!(pool.build::<JfStdout>("job1".into(), Agent::Job).is_ok());
+        assert!(pool.build::<JfStdout>("job1".into(), Agent::Cli).is_ok());
+        assert!(pool.build::<JfStdout>("job3".into(), Agent::Job).is_err());
+        assert!(pool.build::<JfStdout>("job3".into(), Agent::Cli).is_err());
         assert_eq!(pool.description("job1".into())?, "");
         assert_eq!(pool.description("job3".into())?, "job3-desc");
         Ok(())

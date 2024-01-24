@@ -1,9 +1,7 @@
 use crate::{
     cfg,
-    cli::{
-        job_controller, logger,
-        models::{Ctx, Opts},
-    },
+    cli::{job_controller, models::Opts},
+    ctx::{logger::LogWriter, Ctx},
     error::JfResult,
 };
 
@@ -26,13 +24,13 @@ pub enum Configured {
 
 #[async_trait::async_trait]
 impl CliAction for Configured {
-    async fn run<LR: logger::LogWriter>(self, mut ctx: Ctx<LR>, opts: Opts) -> JfResult<()> {
+    async fn run<LR: LogWriter>(self, mut ctx: Ctx<LR>, opts: Opts) -> JfResult<()> {
         let cfg = cfg::Cfg::load(opts.cfg)?;
         let jc = job_controller::JobController::new(cfg)?;
         match self {
             Configured::List => ctx.logger.force(jc.list_public().join(" ")).await?,
             Configured::Validate => jc.validate()?,
-            Configured::Run(name) => jc.run(name).await?,
+            Configured::Run(name) => jc.run(ctx, name).await?,
             Configured::Description(name) => ctx.logger.force(jc.description(name)?).await?,
         }
         Ok(())

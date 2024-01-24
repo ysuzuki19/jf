@@ -4,11 +4,12 @@ mod stdout;
 
 #[cfg(test)]
 pub use mock_writer::MockLogWriter;
+pub use stdout::JfStdout;
 
 use crate::error::JfResult;
 
 #[async_trait::async_trait]
-pub trait LogWriter: Send {
+pub trait LogWriter: Send + Sync + Clone + 'static {
     fn initialize() -> Self;
     async fn write(&mut self, str: &str) -> JfResult<()>;
 }
@@ -22,7 +23,7 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn initialize() {
-        let _ = tokio::io::Stdout::initialize();
+        let _ = JfStdout::initialize();
         let _ = MockLogWriter::initialize();
     }
 

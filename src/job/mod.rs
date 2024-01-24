@@ -3,20 +3,25 @@ mod runner;
 mod types;
 
 pub use self::runner::Runner;
-use crate::{cfg::job_cfg::JobCfg, error::JfResult, jobdef::JobdefPool};
+use crate::{
+    cfg::job_cfg::JobCfg,
+    ctx::{logger::LogWriter, Ctx},
+    error::JfResult,
+    jobdef::JobdefPool,
+};
 
 #[derive(Clone)]
-pub enum Job {
-    Command(modes::Command),
-    Parallel(modes::Parallel),
-    Sequential(modes::Sequential),
-    Shell(modes::Shell),
-    Watch(modes::Watch),
+pub enum Job<LR: LogWriter> {
+    Command(modes::Command<LR>),
+    Parallel(modes::Parallel<LR>),
+    Sequential(modes::Sequential<LR>),
+    Shell(modes::Shell<LR>),
+    Watch(modes::Watch<LR>),
     #[cfg(test)]
-    Mock(modes::Mock),
+    Mock(modes::Mock<LR>),
 }
 
-impl Job {
+impl<LR: LogWriter> Job<LR> {
     pub fn new(job_cfg: &JobCfg, pool: JobdefPool) -> JfResult<Self> {
         Ok(match job_cfg {
             JobCfg::Command(c) => modes::Command::new(c.params.clone()).into(),
@@ -31,16 +36,16 @@ impl Job {
 }
 
 #[async_trait::async_trait]
-impl Runner for Job {
-    async fn start(&self) -> JfResult<Self> {
+impl<LR: LogWriter> Runner<LR> for Job<LR> {
+    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         Ok(match self {
-            Self::Command(t) => t.start().await?.into(),
-            Self::Parallel(t) => t.start().await?.into(),
-            Self::Sequential(t) => t.start().await?.into(),
-            Self::Shell(t) => t.start().await?.into(),
-            Self::Watch(t) => t.start().await?.into(),
+            Self::Command(t) => t.start(ctx).await?.into(),
+            Self::Parallel(t) => t.start(ctx).await?.into(),
+            Self::Sequential(t) => t.start(ctx).await?.into(),
+            Self::Shell(t) => t.start(ctx).await?.into(),
+            Self::Watch(t) => t.start(ctx).await?.into(),
             #[cfg(test)]
-            Self::Mock(t) => t.start().await?.into(),
+            Self::Mock(t) => t.start(ctx).await?.into(),
         })
     }
 
@@ -82,10 +87,9 @@ impl Runner for Job {
 }
 
 #[cfg(test)]
-impl Job {
-    #[cfg(test)]
+impl Job<crate::ctx::logger::MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
-    pub fn as_mock(&self) -> &modes::Mock {
+    pub fn as_mock(&self) -> &modes::Mock<crate::ctx::logger::MockLogWriter> {
         if let Self::Mock(t) = self {
             t
         } else {

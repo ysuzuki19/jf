@@ -46,4 +46,10 @@ pub enum InternalError {
 
     #[error("mode={0} must have at least one job")]
     MustHaveAtLeastOneJob(String),
+
+    #[error("Failed to handle stdout for {0}")]
+    FailedToHandleStdout(String),
+
+    #[error("")]
+    UnitError,
 }

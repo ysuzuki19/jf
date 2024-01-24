@@ -53,9 +53,9 @@ impl<LR: LogWriter> Logger<LR> {
         self.log_writer.write(msg.as_ref()).await
     }
 
-    // pub fn info<S: AsRef<str>>(&self, msg: S) {
-    //     self.write_with_guard(LogLevel::Info, msg)
-    // }
+    pub async fn info<S: AsRef<str>>(&mut self, msg: S) -> JfResult<()> {
+        self.write_with_guard(LogLevel::Info, msg).await
+    }
 
     // pub fn warn<S: AsRef<str>>(&self, msg: S) {
     //     self.write_with_guard(LogLevel::Warn, msg)
@@ -81,14 +81,22 @@ mod tests {
     impl Fixture for Logger<MockLogWriter> {
         #[cfg_attr(coverage, coverage(off))]
         fn fixture() -> Self {
-            Self::new(Default::default())
+            Self::new(Fixture::fixture())
+        }
+    }
+
+    #[cfg(test)]
+    impl<LR: LogWriter> Logger<LR> {
+        #[cfg_attr(coverage, coverage(off))]
+        pub fn log_writer(&self) -> &LR {
+            &self.log_writer
         }
     }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn initialize() {
-        let _ = Logger::<tokio::io::Stdout>::new(LogLevel::Info).clone();
+        let _ = Logger::<JfStdout>::new(LogLevel::Info).clone();
         let _ = Logger::<MockLogWriter>::new(LogLevel::Info).clone();
     }
 

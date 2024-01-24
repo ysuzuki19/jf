@@ -3,7 +3,7 @@ use crate::testutil::*;
 
 use super::*;
 
-impl TryFixture for Sequential {
+impl TryFixture for Sequential<MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
     fn try_fixture() -> JfResult<Self> {
         let params = SequentialParams {
@@ -17,7 +17,7 @@ impl TryFixture for Sequential {
 #[cfg_attr(coverage, coverage(off))]
 fn invalid_new_with_empty_job() -> JfResult<()> {
     let params = SequentialParams { jobs: vec![] };
-    let must_faile = Sequential::new(params, TryFixture::try_fixture()?);
+    let must_faile = Sequential::<MockLogWriter>::new(params, TryFixture::try_fixture()?);
     assert!(must_faile.is_err());
     Ok(())
 }
@@ -28,7 +28,7 @@ fn invalid_new_with_unknown_job() -> JfResult<()> {
     let params = SequentialParams {
         jobs: vec!["unknown".into()],
     };
-    let must_fail = Sequential::new(params, TryFixture::try_fixture()?);
+    let must_fail = Sequential::<MockLogWriter>::new(params, TryFixture::try_fixture()?);
     assert!(must_fail.is_err());
     Ok(())
 }
@@ -46,7 +46,7 @@ fn start() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let s = Sequential::try_fixture()?.start().await?;
+            let s = Sequential::try_fixture()?.start(Fixture::fixture()).await?;
             assert!(!s.is_finished().await?);
             for (index, job) in s.jobs.iter().enumerate() {
                 if index == 0 {
@@ -68,7 +68,7 @@ fn cancel() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let s = Sequential::try_fixture()?.start().await?;
+            let s = Sequential::try_fixture()?.start(Fixture::fixture()).await?;
             s.cancel().await?;
             runner::sleep().await; // sleep for job interval
             assert!(s.is_cancelled.load(Ordering::Relaxed));
@@ -84,7 +84,7 @@ fn wait() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let s = Sequential::try_fixture()?;
-            s.start().await?.wait().await?;
+            s.start(Fixture::fixture()).await?.wait().await?;
             assert!(s.is_finished().await?);
             s.jobs.into_iter().for_each(|job| {
                 job.as_mock().assert_is_finished_eq(true);
@@ -101,7 +101,7 @@ fn bunshin() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let origin = Sequential::try_fixture()?;
-            origin.start().await?.cancel().await?;
+            origin.start(Fixture::fixture()).await?.cancel().await?;
 
             let bunshin = origin.bunshin();
             assert_eq!(origin.jobs.len(), bunshin.jobs.len());

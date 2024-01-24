@@ -3,18 +3,21 @@ use std::sync::{
     Arc,
 };
 
-use crate::error::JfResult;
+use crate::{
+    ctx::{logger::LogWriter, Ctx},
+    error::JfResult,
+};
 
 pub async fn sleep() {
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 }
 
 #[async_trait::async_trait]
-pub trait Runner
+pub trait Runner<LR: LogWriter>
 where
     Self: Sized + Clone,
 {
-    async fn start(&self) -> JfResult<Self>;
+    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self>;
     async fn is_finished(&self) -> JfResult<bool>;
     async fn cancel(&self) -> JfResult<Self>;
     fn bunshin(&self) -> Self;

@@ -5,7 +5,7 @@ use super::*;
 const MOCK_SLEEP_TIME: u64 = 1;
 const MOCK_SLEEP_COUNT: u8 = 3;
 
-impl Fixture for Mock {
+impl Fixture for Mock<MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
     fn fixture() -> Self {
         Self::new(MockParams {
@@ -35,7 +35,7 @@ fn run_wait() -> JfResult<()> {
             let mock = Mock::fixture();
             let id = mock.id();
 
-            mock.start()
+            mock.start(Fixture::fixture())
                 .await?
                 .assert_is_started_eq(true)
                 .assert_is_running_eq(true)
@@ -62,7 +62,7 @@ fn run_cancel_wait() -> JfResult<()> {
             let mock = Mock::fixture();
             let id = mock.id();
 
-            mock.start()
+            mock.start(Fixture::fixture())
                 .await?
                 .cancel()
                 .await?
@@ -86,7 +86,7 @@ fn bunshin() -> JfResult<()> {
         async {
             let origin = Mock::fixture();
 
-            origin.start().await?.cancel().await?;
+            origin.start(Fixture::fixture()).await?.cancel().await?;
             origin
                 .assert_is_started_eq(true)
                 .assert_is_running_eq(false)

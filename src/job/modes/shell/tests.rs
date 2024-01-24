@@ -2,7 +2,7 @@ use crate::testutil::*;
 
 use super::*;
 
-impl Fixture for Shell {
+impl Fixture for Shell<MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
     fn fixture() -> Self {
         let params = ShellParams {
@@ -20,7 +20,7 @@ fn run_without_blocking() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let shell = Shell::fixture();
-            shell.start().await?;
+            shell.start(Fixture::fixture()).await?;
             assert!(!shell.is_finished().await?);
             assert!(!shell.command.is_finished().await?);
             Ok(())
@@ -35,7 +35,7 @@ fn wait() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let shell = Shell::fixture();
-            shell.start().await?.wait().await?;
+            shell.start(Fixture::fixture()).await?.wait().await?;
             assert!(shell.is_finished().await?);
             assert!(shell.command.is_finished().await?);
             Ok(())
@@ -50,7 +50,7 @@ fn cancel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let shell = Shell::fixture();
-            shell.start().await?.cancel().await?;
+            shell.start(Fixture::fixture()).await?.cancel().await?;
             assert!(shell.is_finished().await?);
             assert!(shell.command.is_finished().await?);
             Ok(())
@@ -65,7 +65,7 @@ fn bunshin() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let origin = Shell::fixture();
-            origin.start().await?.cancel().await?;
+            origin.start(Fixture::fixture()).await?.cancel().await?;
             assert!(origin.is_finished().await?);
             let bunshin = origin.bunshin();
             assert!(!bunshin.is_finished().await?);

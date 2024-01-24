@@ -12,6 +12,7 @@ use std::{
 use tokio::sync::Mutex;
 
 use crate::{
+    ctx::{logger::LogWriter, Ctx},
     error::JfResult,
     job::{runner::Runner, types::JfHandle, Job},
     jobdef::{Agent, JobdefPool},
@@ -23,19 +24,19 @@ pub struct ParallelParams {
 }
 
 #[derive(Clone)]
-pub struct Parallel {
-    jobs: Vec<Job>,
+pub struct Parallel<LR: LogWriter> {
+    jobs: Vec<Job<LR>>,
     handles: Arc<Mutex<Option<Vec<JfHandle>>>>,
     is_cancelled: Arc<AtomicBool>,
 }
 
-impl Parallel {
+impl<LR: LogWriter> Parallel<LR> {
     pub fn new(params: ParallelParams, pool: JobdefPool) -> JfResult<Self> {
         let jobs = params
             .jobs
             .into_iter()
             .map(|job_name| pool.build(job_name, Agent::Job))
-            .collect::<JfResult<Vec<Job>>>()?;
+            .collect::<JfResult<Vec<Job<LR>>>>()?;
         Ok(Self {
             jobs,
             handles: Arc::new(Mutex::new(None)),
@@ -45,13 +46,13 @@ impl Parallel {
 }
 
 #[async_trait::async_trait]
-impl Runner for Parallel {
-    async fn start(&self) -> JfResult<Self> {
+impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
+    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         let mut handles = Vec::new();
         for job in self.jobs.clone() {
             let handle: JfHandle = tokio::spawn({
                 let is_cancelled = self.is_cancelled.clone();
-                job.start().await?;
+                job.start(ctx.clone()).await?;
                 async move {
                     job.wait_with_cancel(is_cancelled).await?;
                     Ok(())
@@ -90,8 +91,8 @@ impl Runner for Parallel {
     }
 }
 
-impl From<Parallel> for Job {
-    fn from(value: Parallel) -> Self {
+impl<LR: LogWriter> From<Parallel<LR>> for Job<LR> {
+    fn from(value: Parallel<LR>) -> Self {
         Self::Parallel(value)
     }
 }

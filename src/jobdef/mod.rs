@@ -5,6 +5,7 @@ pub use self::agent::Agent;
 pub use self::pool::JobdefPool;
 use crate::{
     cfg::job_cfg::{JobCfg, Visibility},
+    ctx::logger::LogWriter,
     error::{InternalError, JfError, JfResult},
     job::Job,
 };
@@ -40,7 +41,7 @@ impl Jobdef {
         }
     }
 
-    fn build(&self, pool: JobdefPool, agent: Agent) -> JfResult<Job> {
+    fn build<LR: LogWriter>(&self, pool: JobdefPool, agent: Agent) -> JfResult<Job<LR>> {
         self.visibility_guard(agent)?;
         Job::new(&self.job_cfg, pool)
     }

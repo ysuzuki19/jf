@@ -2,7 +2,7 @@ use crate::error::JfResult;
 
 use super::LogWriter;
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct MockLogWriter {
     pub lines: Vec<String>,
 }

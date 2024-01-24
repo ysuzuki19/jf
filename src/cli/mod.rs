@@ -1,18 +1,17 @@
 mod args;
 mod completion_script;
 mod job_controller;
-mod logger;
 mod models;
 
-#[cfg(test)]
-pub use logger::MockLogWriter;
-
-use crate::error::JfResult;
+use crate::{
+    ctx::{logger, Ctx},
+    error::JfResult,
+};
 
 pub use self::args::Args;
 use self::models::{
     action::{Action, CliAction},
-    Ctx, Opts,
+    Opts,
 };
 
 pub struct Cli<LR: logger::LogWriter> {
@@ -61,7 +60,7 @@ mod tests {
     fn load() -> JfResult<()> {
         let args = Args::parse_from(args::fixtures::SIMPLE);
         let cli = Cli::<MockLogWriter>::load(args)?;
-        assert!(cli.ctx() == &Ctx::fixture());
+        assert!(cli.ctx() == &Ctx::new(logger::LogLevel::Info));
         assert!(cli.action == Configured::Run(fixtures::JOB_NAME.into()).into());
         assert!(cli.opts == Opts::default());
         Ok(())

@@ -3,7 +3,7 @@ use crate::{error::JfResult, job::Runner, jobdef::JobdefPool};
 
 use super::*;
 
-impl TryFixture for Parallel {
+impl TryFixture for Parallel<MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
     fn try_fixture() -> JfResult<Self> {
         let params = ParallelParams {
@@ -16,7 +16,7 @@ impl TryFixture for Parallel {
 #[test]
 #[cfg_attr(coverage, coverage(off))]
 fn invalid_new_with_unknown_job() -> JfResult<()> {
-    let must_fail = Parallel::new(
+    let must_fail = Parallel::<MockLogWriter>::new(
         ParallelParams {
             jobs: vec!["mock".into(), "mock".into()],
         },
@@ -41,7 +41,7 @@ fn start() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_fixture()?;
-            p.start().await?;
+            p.start(Fixture::fixture()).await?;
             for job in p.jobs {
                 job.as_mock().assert_is_started_eq(true);
             }
@@ -57,7 +57,7 @@ fn cancel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_fixture()?;
-            p.start().await?.cancel().await?;
+            p.start(Fixture::fixture()).await?.cancel().await?;
             for job in p.jobs {
                 job.as_mock()
                     .assert_is_started_eq(true)
@@ -75,7 +75,7 @@ fn wait() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_fixture()?;
-            p.start()
+            p.start(Fixture::fixture())
                 .await?
                 .wait()
                 .await?
@@ -98,7 +98,7 @@ fn bunshin() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let origin = Parallel::try_fixture()?;
-            origin.start().await?.cancel().await?;
+            origin.start(Fixture::fixture()).await?.cancel().await?;
 
             let bunshin = origin.bunshin();
             assert_eq!(origin.jobs.len(), bunshin.jobs.len());

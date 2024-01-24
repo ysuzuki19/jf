@@ -11,6 +11,7 @@ use notify::EventKind;
 use tokio::sync::Mutex;
 
 use crate::{
+    ctx::{logger::LogWriter, Ctx},
     error::JfResult,
     job::{types::JfHandle, Job, Runner},
     jobdef::{Agent, JobdefPool},
@@ -25,16 +26,16 @@ pub struct WatchParams {
 }
 
 #[derive(Clone)]
-pub struct Watch {
-    job: Box<Job>,
-    running_job: Arc<Mutex<Job>>,
+pub struct Watch<LR: LogWriter> {
+    job: Box<Job<LR>>,
+    running_job: Arc<Mutex<Job<LR>>>,
     watch_list: Vec<String>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<JfHandle>>>,
     watcher_container: Arc<Mutex<Option<WatcherContainer>>>,
 }
 
-impl Watch {
+impl<LR: LogWriter> Watch<LR> {
     pub fn new(params: WatchParams, pool: JobdefPool) -> JfResult<Self> {
         let job = pool.build(params.job, Agent::Job)?;
         Ok(Self {
@@ -49,19 +50,20 @@ impl Watch {
 }
 
 #[async_trait::async_trait]
-impl Runner for Watch {
-    async fn start(&self) -> JfResult<Self> {
+impl<LR: LogWriter> Runner<LR> for Watch<LR> {
+    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         let (container, rx) = WatcherContainer::new(&self.watch_list)?;
         self.watcher_container.lock().await.replace(container);
 
         let handle = tokio::spawn({
+            let ctx = ctx.clone();
             let job = self.job.clone();
             let running_job = self.running_job.clone();
             let is_cancelled = self.is_cancelled.clone();
 
             async move {
                 loop {
-                    *(running_job.lock().await) = job.bunshin().start().await?;
+                    *(running_job.lock().await) = job.bunshin().start(ctx.clone()).await?;
 
                     loop {
                         match rx.recv()??.kind {
@@ -106,8 +108,8 @@ impl Runner for Watch {
     }
 }
 
-impl From<Watch> for Job {
-    fn from(value: Watch) -> Self {
+impl<LR: LogWriter> From<Watch<LR>> for Job<LR> {
+    fn from(value: Watch<LR>) -> Self {
         Self::Watch(value)
     }
 }

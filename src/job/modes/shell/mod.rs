@@ -2,6 +2,7 @@
 mod tests;
 
 use crate::{
+    ctx::{logger::LogWriter, Ctx},
     error::JfResult,
     job::{Job, Runner},
 };
@@ -13,12 +14,12 @@ pub struct ShellParams {
 }
 
 #[derive(Clone)]
-pub struct Shell {
+pub struct Shell<LR: LogWriter> {
     params: ShellParams,
-    command: super::Command,
+    command: super::Command<LR>,
 }
 
-impl Shell {
+impl<LR: LogWriter> Shell<LR> {
     pub fn new(params: ShellParams) -> Self {
         let mut args = params.args.clone().unwrap_or_default();
         args.extend(vec!["-c".to_string(), params.script.clone()]);
@@ -31,9 +32,9 @@ impl Shell {
 }
 
 #[async_trait::async_trait]
-impl Runner for Shell {
-    async fn start(&self) -> JfResult<Self> {
-        self.command.start().await?;
+impl<LR: LogWriter> Runner<LR> for Shell<LR> {
+    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
+        self.command.start(ctx).await?;
         Ok(self.clone())
     }
 
@@ -55,8 +56,8 @@ impl Runner for Shell {
     }
 }
 
-impl From<Shell> for Job {
-    fn from(value: Shell) -> Self {
+impl<LR: LogWriter> From<Shell<LR>> for Job<LR> {
+    fn from(value: Shell<LR>) -> Self {
         Self::Shell(value)
     }
 }

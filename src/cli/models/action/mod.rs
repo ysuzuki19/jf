@@ -1,16 +1,17 @@
 mod configured;
 mod statics;
 
-use crate::error::JfResult;
+use crate::ctx::Ctx;
+use crate::{ctx::logger::LogWriter, error::JfResult};
 
 pub use self::configured::Configured;
 pub use self::statics::Statics;
 
-use super::{logger, Ctx, Opts};
+use super::Opts;
 
 #[async_trait::async_trait]
 pub trait CliAction {
-    async fn run<LR: logger::LogWriter>(self, ctx: Ctx<LR>, opts: Opts) -> JfResult<()>;
+    async fn run<LR: LogWriter>(self, ctx: Ctx<LR>, opts: Opts) -> JfResult<()>;
 }
 
 #[cfg_attr(test, derive(PartialEq))]
@@ -21,7 +22,7 @@ pub enum Action {
 
 #[async_trait::async_trait]
 impl CliAction for Action {
-    async fn run<LR: logger::LogWriter>(self, ctx: Ctx<LR>, opts: Opts) -> JfResult<()> {
+    async fn run<LR: LogWriter>(self, ctx: Ctx<LR>, opts: Opts) -> JfResult<()> {
         match self {
             Action::Statics(s) => s.run(ctx, opts).await,
             Action::Configured(c) => c.run(ctx, opts).await,

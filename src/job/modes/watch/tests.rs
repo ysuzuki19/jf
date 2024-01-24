@@ -23,7 +23,7 @@ impl Fixture for WatchParams {
     }
 }
 
-impl TryFixture for Watch {
+impl TryFixture for Watch<MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
     fn try_fixture() -> JfResult<Self> {
         Watch::new(Fixture::fixture(), TryFixture::try_fixture()?)
@@ -40,7 +40,7 @@ fn invalid_new_with_unknown_job() -> JfResult<()> {
                 job: "unknown".to_string(),
                 watch_list: fixtures::watch_list(),
             };
-            assert!(Watch::new(params, TryFixture::try_fixture()?).is_err());
+            assert!(Watch::<MockLogWriter>::new(params, TryFixture::try_fixture()?).is_err());
             Ok(())
         },
     )
@@ -66,7 +66,7 @@ fn start() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let w = Watch::try_fixture()?;
-            w.start().await?;
+            w.start(Fixture::fixture()).await?;
             assert!(!w.is_finished().await?);
             Ok(())
         },
@@ -80,7 +80,7 @@ fn watch() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let w = Watch::try_fixture()?;
-            w.start().await?;
+            w.start(Fixture::fixture()).await?;
             assert!(!w.is_finished().await?);
             let id = w.running_job.lock().await.as_mock().id();
             std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
@@ -99,7 +99,7 @@ fn cancel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let w = Watch::try_fixture()?;
-            w.start().await?.cancel().await?;
+            w.start(Fixture::fixture()).await?.cancel().await?;
             runner::sleep().await; // for cover breaking loop
             w.wait().await?;
             assert!(w.is_finished().await?);

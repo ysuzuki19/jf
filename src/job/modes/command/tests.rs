@@ -2,7 +2,7 @@ use crate::testutil::*;
 
 use super::*;
 
-impl Fixture for Command {
+impl Fixture for Command<MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
     fn fixture() -> Self {
         let params = CommandParams {
@@ -20,7 +20,7 @@ fn run_without_blocking() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let command = Command::fixture();
-            command.start().await?;
+            command.start(Fixture::fixture()).await?;
             assert!(!command.is_finished().await?);
             Ok(())
         },
@@ -34,7 +34,7 @@ fn wait() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let command = Command::fixture();
-            command.start().await?;
+            command.start(Fixture::fixture()).await?;
             command.wait().await?;
             assert!(command.is_finished().await?);
             Ok(())
@@ -49,7 +49,7 @@ fn cancel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let command = Command::fixture();
-            command.start().await?.cancel().await?;
+            command.start(Fixture::fixture()).await?.cancel().await?;
             assert!(command.is_finished().await?);
             Ok(())
         },
@@ -62,9 +62,12 @@ fn bunshin() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = Command::fixture().bunshin();
-            command.start().await?.cancel().await?;
-            assert!(command.is_finished().await?);
+            let origin = Command::fixture();
+            origin.start(Fixture::fixture()).await?;
+            origin.wait().await?;
+            assert!(origin.is_finished().await?);
+            let bunshin = origin.bunshin();
+            assert!(!bunshin.is_finished().await?);
             Ok(())
         },
     )

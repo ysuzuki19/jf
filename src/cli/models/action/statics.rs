@@ -1,9 +1,6 @@
 use crate::{
-    cli::{
-        completion_script, logger,
-        models::{Ctx, Opts},
-        Args,
-    },
+    cli::{completion_script, models::Opts, Args},
+    ctx::{logger::LogWriter, Ctx},
     error::JfResult,
 };
 
@@ -25,7 +22,7 @@ impl From<Statics> for Action {
 
 #[async_trait::async_trait]
 impl CliAction for Statics {
-    async fn run<LR: logger::LogWriter>(self, mut ctx: Ctx<LR>, _: Opts) -> JfResult<()> {
+    async fn run<LR: LogWriter>(self, mut ctx: Ctx<LR>, _: Opts) -> JfResult<()> {
         let mut cmd = <Args as clap::CommandFactory>::command();
         let s = match self {
             Statics::Completion(shell) => completion_script::generate(shell),

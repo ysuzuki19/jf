@@ -1,4 +1,4 @@
-pub use crate::cli::MockLogWriter;
+pub use crate::ctx::logger::MockLogWriter;
 
 pub trait Fixture {
     fn fixture() -> Self;

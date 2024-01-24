@@ -1,6 +1,7 @@
 #![cfg_attr(coverage, feature(coverage_attribute))]
 mod cfg;
 mod cli;
+mod ctx;
 mod error;
 mod job;
 mod jobdef;
@@ -12,7 +13,7 @@ use clap::Parser;
 #[tokio::main]
 async fn main() {
     let args = cli::Args::parse();
-    match cli::Cli::<tokio::io::Stdout>::load(args) {
+    match cli::Cli::<ctx::logger::JfStdout>::load(args) {
         Ok(cli) => {
             let mut logger = cli.ctx().logger.clone();
             if let Err(e) = cli.run().await {

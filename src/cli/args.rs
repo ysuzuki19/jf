@@ -1,11 +1,13 @@
 use std::path::PathBuf;
 
-use crate::error::{InternalError, JfResult};
+use crate::{
+    ctx::{logger, Ctx},
+    error::{InternalError, JfResult},
+};
 
-use super::logger::{self, LogLevel, Logger};
 use super::models::{
     action::{Action, Configured, Statics},
-    Ctx, Opts,
+    Opts,
 };
 
 const AUTHOR: &str = "ysuzuki19";
@@ -33,8 +35,8 @@ pub struct Args {
     #[arg(long)]
     cfg: Option<PathBuf>,
 
-    #[arg(long, default_value = "error")]
-    log_level: LogLevel,
+    #[arg(long, default_value = "info")]
+    log_level: logger::LogLevel,
 
     #[arg(long)]
     completion: Option<clap_complete::Shell>,
@@ -59,7 +61,7 @@ impl Args {
 
     fn setup_ctx<LR: logger::LogWriter>(&self) -> Ctx<LR> {
         Ctx {
-            logger: Logger::new(self.log_level),
+            logger: logger::Logger::new(self.log_level),
         }
     }
 
@@ -119,7 +121,7 @@ mod tests {
         assert!(!args.help);
         assert!(!args.validate);
         assert_eq!(args.cfg, None);
-        assert!(args.log_level == LogLevel::Error);
+        assert!(args.log_level == logger::LogLevel::Info);
         assert_eq!(args.completion, None);
         assert!(!args.list);
         assert!(!args.description);
@@ -144,7 +146,7 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--log-level", "error"]);
 
         let ctx = args.setup_ctx::<MockLogWriter>();
-        assert!(ctx.logger.level() == LogLevel::Error);
+        assert!(ctx.logger.level() == logger::LogLevel::Error);
     }
 
     #[test]

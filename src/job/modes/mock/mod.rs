@@ -6,6 +6,8 @@ use std::sync::{atomic::Ordering, Arc};
 
 use tokio::sync::Mutex;
 
+use crate::ctx::logger::LogWriter;
+use crate::ctx::Ctx;
 use crate::error::JfResult;
 use crate::job::Job;
 use crate::job::Runner;
@@ -19,8 +21,8 @@ pub struct MockParams {
     pub sleep_count: u8,
 }
 
-#[derive(Clone, Default)]
-pub struct Mock {
+#[derive(Clone)]
+pub struct Mock<LR: LogWriter> {
     each_sleep_time: u64,
     sleep_count: u8,
     id: usize,
@@ -29,15 +31,21 @@ pub struct Mock {
     is_finished: Arc<AtomicBool>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
+    _phantom: std::marker::PhantomData<LR>,
 }
 
-impl Mock {
+impl<LR: LogWriter> Mock<LR> {
     pub fn new(params: MockParams) -> Self {
         Self {
             each_sleep_time: params.each_sleep_time,
             sleep_count: params.sleep_count,
             id: MOCK_ID_COUNTER.fetch_add(1, Ordering::Relaxed),
-            ..Default::default()
+            is_started: Arc::new(AtomicBool::new(false)),
+            is_running: Arc::new(AtomicBool::new(false)),
+            is_finished: Arc::new(AtomicBool::new(false)),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
+            handle: Arc::new(Mutex::new(None)),
+            _phantom: std::marker::PhantomData,
         }
     }
 
@@ -127,8 +135,8 @@ impl Mock {
 }
 
 #[async_trait::async_trait]
-impl Runner for Mock {
-    async fn start(&self) -> JfResult<Self> {
+impl<LR: LogWriter> Runner<LR> for Mock<LR> {
+    async fn start(&self, _: Ctx<LR>) -> JfResult<Self> {
         self.is_started.store(true, Ordering::Relaxed);
         self.is_running.store(true, Ordering::Relaxed);
         let handle = tokio::spawn({
@@ -174,8 +182,8 @@ impl Runner for Mock {
     }
 }
 
-impl From<Mock> for Job {
-    fn from(value: Mock) -> Self {
+impl<LR: LogWriter> From<Mock<LR>> for Job<LR> {
+    fn from(value: Mock<LR>) -> Self {
         Self::Mock(value)
     }
 }
