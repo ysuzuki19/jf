@@ -7,7 +7,7 @@ use tokio::{
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::{InternalError, JfResult},
+    error::{IntoJfError, JfResult},
     job::types::JfHandle,
 };
 
@@ -28,7 +28,7 @@ impl<LR: LogWriter> LogDriver<LR> {
                 self.start(stdout);
                 Ok(())
             }
-            None => Err(InternalError::UnitError.into()),
+            None => Err("".into_jf_error()),
         }
     }
 

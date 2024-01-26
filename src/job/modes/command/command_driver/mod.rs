@@ -2,7 +2,7 @@ mod log_driver;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::{InternalError, JfResult},
+    error::{IntoJfError, JfResult},
 };
 
 pub struct CommandDriver<LR: LogWriter> {
@@ -23,7 +23,7 @@ impl<LR: LogWriter> CommandDriver<LR> {
             Ok(_) => Ok(Self { child, log_driver }),
             Err(_) => {
                 child.kill().await?;
-                Err(InternalError::FailedToHandleStdout(command.to_owned()).into())
+                Err(format!("Failed to handle stdout for {0}", command.to_owned()).into_jf_error())
             }
         }
     }

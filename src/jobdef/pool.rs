@@ -3,7 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use super::{Agent, Jobdef};
 use crate::{
     ctx::logger::{JfStdout, LogWriter},
-    error::{InternalError, JfError, JfResult},
+    error::{IntoJfError, JfError, JfResult},
     job::Job,
 };
 
@@ -51,7 +51,7 @@ impl JobdefPool {
     fn get(&self, job_name: String) -> JfResult<&Jobdef> {
         self.map
             .get(&job_name)
-            .ok_or(InternalError::JobdefNotFound(job_name).into())
+            .ok_or(format!("Jobdef(name={}) not found", job_name).into_jf_error())
     }
 
     pub fn build<LR: LogWriter>(&self, job_name: String, agent: Agent) -> JfResult<Job<LR>> {

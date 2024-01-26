@@ -13,7 +13,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::{InternalError, JfResult},
+    error::{IntoJfError, JfResult},
     job::{types::JfHandle, Job, Runner},
     jobdef::{Agent, JobdefPool},
 };
@@ -33,7 +33,7 @@ pub struct Sequential<LR: LogWriter> {
 impl<LR: LogWriter> Sequential<LR> {
     pub fn new(params: SequentialParams, pool: JobdefPool) -> JfResult<Self> {
         if params.jobs.is_empty() {
-            return Err(InternalError::MustHaveAtLeastOneJob("sequential".into()).into());
+            return Err("mode=sequential must have at least one job".into_jf_error());
         }
         let jobs = params
             .jobs

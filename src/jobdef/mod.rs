@@ -6,7 +6,7 @@ pub use self::pool::JobdefPool;
 use crate::{
     cfg::job_cfg::{JobCfg, Visibility},
     ctx::logger::LogWriter,
-    error::{InternalError, JfError, JfResult},
+    error::{IntoJfError, JfError, JfResult},
     job::Job,
 };
 
@@ -36,7 +36,12 @@ impl Jobdef {
             return Ok(());
         }
         match agent {
-            Agent::Cli => Err(InternalError::UnexpectedVisibilityPrivate(self.name.clone()).into()),
+            Agent::Cli => Err(format!(
+                "job.{0} is private\nPlease remove `visibility = \"private\"` if you run",
+                self.name
+            )
+            .into_jf_error()),
+
             _ => Ok(()),
         }
     }

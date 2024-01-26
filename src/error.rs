@@ -4,25 +4,18 @@ pub type JfResult<T> = Result<T, JfError>;
 pub enum JfError {
     #[error("IO error occurred: {0}")]
     IoError(#[from] std::io::Error),
-
     #[error("SerdeJsonError occurred: {0}")]
     MpscRecvError(#[from] std::sync::mpsc::RecvError),
-
     #[error("GlobError occurred: {0}")]
     GlobError(#[from] glob::GlobError),
-
     #[error("Toml Deserialize error occurred: {0}")]
     TomlDeError(#[from] toml::de::Error),
-
     #[error("TokioJoinError occurred: {0}")]
     TokioJoinError(#[from] tokio::task::JoinError),
-
     #[error("TokioTryLockError occurred: {0}")]
     TokioTryLockError(#[from] tokio::sync::TryLockError),
-
     #[error("NotifyError occurred: {0}")]
     NotifyError(#[from] notify::Error),
-
     #[error("GlobPatternError occurred: {0}")]
     GlobPatternError(#[from] glob::PatternError),
 
@@ -30,26 +23,15 @@ pub enum JfError {
     Multi(Vec<JfError>),
 
     #[error("{0}")]
-    InternalError(#[from] InternalError),
+    Custom(String),
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum InternalError {
-    #[error("Jobdef(name={0}) not found")]
-    JobdefNotFound(String),
+pub trait IntoJfError {
+    fn into_jf_error(self) -> JfError;
+}
 
-    #[error("Please input <JOB_NAME> to use --description")]
-    NeedJobNameForDescription,
-
-    #[error("job.{0} is private\nPlease remove `visibility = \"private\"` if you run")]
-    UnexpectedVisibilityPrivate(String),
-
-    #[error("mode={0} must have at least one job")]
-    MustHaveAtLeastOneJob(String),
-
-    #[error("Failed to handle stdout for {0}")]
-    FailedToHandleStdout(String),
-
-    #[error("")]
-    UnitError,
+impl<S: AsRef<str>> IntoJfError for S {
+    fn into_jf_error(self) -> JfError {
+        JfError::Custom(self.as_ref().to_string())
+    }
 }

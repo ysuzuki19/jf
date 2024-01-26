@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     ctx::{logger, Ctx},
-    error::{InternalError, JfResult},
+    error::{IntoJfError, JfResult},
 };
 
 use super::models::{
@@ -86,7 +86,7 @@ impl Args {
             if let Some(job_name) = self.job_name.clone() {
                 Ok(Configured::Description(job_name).into())
             } else {
-                Err(InternalError::NeedJobNameForDescription.into())
+                Err("Please input <JOB_NAME> to use --description".into_jf_error())
             }
         } else if let Some(job_name) = self.job_name.clone() {
             Ok(Configured::Run(job_name).into())
