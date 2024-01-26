@@ -1,7 +1,7 @@
-use clap::builder::PossibleValue;
 use clap::ValueEnum;
 
-#[derive(Clone, Default, Copy, PartialEq, PartialOrd)]
+#[derive(Clone, Default, Copy, PartialEq, PartialOrd, ValueEnum)]
+#[cfg_attr(test, derive(Debug))]
 #[non_exhaustive]
 pub enum LogLevel {
     /// No log output
@@ -13,31 +13,34 @@ pub enum LogLevel {
     Debug,
 }
 
-impl ValueEnum for LogLevel {
-    fn value_variants<'a>() -> &'a [Self] {
-        &[
-            LogLevel::None,
-            LogLevel::Error,
-            LogLevel::Warn,
-            LogLevel::Info,
-            LogLevel::Debug,
-        ]
-    }
-
-    fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
-        Some(match self {
-            LogLevel::None => PossibleValue::new("none"),
-            LogLevel::Error => PossibleValue::new("error"),
-            LogLevel::Warn => PossibleValue::new("warn"),
-            LogLevel::Info => PossibleValue::new("info"),
-            LogLevel::Debug => PossibleValue::new("debug"),
-        })
-    }
-}
-
 #[cfg(test)]
-impl crate::testutil::Fixture for LogLevel {
-    fn fixture() -> Self {
-        Self::Debug
+mod tests {
+    use super::*;
+    use crate::testutil::*;
+
+    impl Fixture for LogLevel {
+        fn fixture() -> Self {
+            Self::Debug
+        }
+    }
+
+    #[test]
+    fn test_log_level() {
+        assert_eq!(LogLevel::None, LogLevel::from_str("none", false).unwrap());
+        assert_eq!(LogLevel::Error, LogLevel::from_str("error", false).unwrap());
+        assert_eq!(LogLevel::Warn, LogLevel::from_str("warn", false).unwrap());
+        assert_eq!(LogLevel::Info, LogLevel::from_str("info", false).unwrap());
+        assert_eq!(LogLevel::Debug, LogLevel::from_str("debug", false).unwrap());
+        assert!(LogLevel::from_str("anything", false).is_err());
+    }
+
+    #[test]
+    fn test_log_level_default() {
+        assert_eq!(LogLevel::Info, LogLevel::default());
+    }
+
+    #[test]
+    fn test_log_level_fixture() {
+        assert_eq!(LogLevel::Debug, LogLevel::fixture());
     }
 }
