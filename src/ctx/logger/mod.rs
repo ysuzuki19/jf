@@ -15,7 +15,7 @@ impl<LR: LogWriter> Clone for Logger<LR> {
     fn clone(&self) -> Self {
         Self {
             level: self.level,
-            log_writer: LR::initialize(),
+            log_writer: LR::init(),
         }
     }
 }
@@ -36,7 +36,7 @@ impl<LR: LogWriter> Logger<LR> {
     pub fn new(level: LogLevel) -> Self {
         Self {
             level,
-            log_writer: LR::initialize(),
+            log_writer: LR::init(),
         }
     }
 
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn initialize() {
+    fn init() {
         let _ = Logger::<JfStdout>::new(LogLevel::Info).clone();
         let _ = Logger::<MockLogWriter>::new(LogLevel::Info).clone();
     }

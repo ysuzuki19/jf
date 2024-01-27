@@ -9,7 +9,7 @@ pub struct MockLogWriter {
 
 #[async_trait::async_trait]
 impl LogWriter for MockLogWriter {
-    fn initialize() -> Self {
+    fn init() -> Self {
         Self { lines: vec![] }
     }
 

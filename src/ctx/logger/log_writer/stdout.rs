@@ -14,7 +14,7 @@ impl Clone for JfStdout {
 
 #[async_trait::async_trait]
 impl LogWriter for JfStdout {
-    fn initialize() -> Self {
+    fn init() -> Self {
         Self(tokio::io::stdout())
     }
 
@@ -36,7 +36,7 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn instance() {
-        let js = JfStdout::initialize();
+        let js = JfStdout::init();
         let _ = js.clone();
     }
 }
