@@ -50,9 +50,10 @@ impl<LR: LogWriter> LogDriver<LR> {
 
     pub async fn join(&mut self) -> JfResult<()> {
         if let Some(handle) = self.handle.take() {
-            handle.await??;
+            handle.await?
+        } else {
+            Ok(())
         }
-        Ok(())
     }
 }
 
@@ -63,6 +64,7 @@ mod tests {
     use super::*;
 
     impl Fixture for LogDriver<MockLogWriter> {
+        #[cfg_attr(coverage, coverage(off))]
         fn fixture() -> Self {
             Self::new(Fixture::fixture())
         }
@@ -70,11 +72,41 @@ mod tests {
 
     impl LogDriver<MockLogWriter> {
         async fn log_writer(&self) -> MockLogWriter {
+            #[cfg_attr(coverage, coverage(off))]
             self.ctx.lock().await.logger.log_writer().clone()
         }
     }
 
     #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn fail_to_mount() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let ctx = Fixture::fixture();
+                let mut log_driver = LogDriver::new(ctx);
+                assert!(log_driver.mount(None).is_err());
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn empty_join() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let ctx = Fixture::fixture();
+                let mut log_driver = LogDriver::new(ctx);
+                assert!(log_driver.join().await.is_ok());
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
     fn test_log_driver() -> JfResult<()> {
         async_test(
             #[cfg_attr(coverage, coverage(off))]

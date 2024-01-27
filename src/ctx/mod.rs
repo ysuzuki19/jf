@@ -1,7 +1,7 @@
 pub mod logger;
 
 #[derive(Clone)]
-#[cfg_attr(test, derive(PartialEq, Default))]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct Ctx<LR: logger::LogWriter> {
     pub logger: logger::Logger<LR>,
 }
