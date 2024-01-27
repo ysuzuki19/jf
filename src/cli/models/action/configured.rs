@@ -14,7 +14,7 @@ impl From<Configured> for Action {
 }
 
 // Action with job configuration
-#[cfg_attr(test, derive(PartialEq))]
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub enum Configured {
     List,
     Validate,
@@ -50,6 +50,13 @@ mod tests {
     };
 
     use super::*;
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn cover() -> JfResult<()> {
+        println!("{:?}", Configured::List); // Cover derive(Debug)
+        Ok(())
+    }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]

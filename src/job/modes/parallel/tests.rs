@@ -30,7 +30,7 @@ fn invalid_new_with_unknown_job() -> JfResult<()> {
 #[cfg_attr(coverage, coverage(off))]
 fn new() -> JfResult<()> {
     let p = Parallel::try_fixture()?;
-    assert!(p.jobs.len() == 2);
+    assert_eq!(p.jobs.len(), 2);
     Ok(())
 }
 

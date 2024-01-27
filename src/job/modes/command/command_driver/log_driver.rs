@@ -72,7 +72,6 @@ mod tests {
 
     impl LogDriver<MockLogWriter> {
         async fn log_writer(&self) -> MockLogWriter {
-            #[cfg_attr(coverage, coverage(off))]
             self.ctx.lock().await.logger.log_writer().clone()
         }
     }

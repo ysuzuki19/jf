@@ -19,19 +19,32 @@ impl LogWriter for JfStdout {
     }
 
     #[cfg_attr(coverage, coverage(off))]
-    async fn write(&mut self, str: &str) -> JfResult<()> {
-        self.0.write_all(str.as_bytes()).await?;
-        self.0.write_all(b"\n").await?;
-        #[cfg(test)]
-        unreachable!("JfStdout::write should not be called in tests");
+    async fn write(&mut self, s: &str) -> JfResult<()> {
+        self.0.write_all(s.as_bytes()).await?;
         #[cfg(not(test))]
+        self.0.write_all(b"\n").await?;
         Ok(())
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::testutil::async_test;
+
     use super::*;
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn cover() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async move {
+                let mut js = JfStdout::init();
+                js.write("").await?;
+                Ok(())
+            },
+        )
+    }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]

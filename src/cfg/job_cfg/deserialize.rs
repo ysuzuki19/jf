@@ -60,7 +60,6 @@ mod tests {
     #[cfg_attr(coverage, coverage(off))]
     fn default() -> JfResult<()> {
         let cfg: JobCfg = toml::from_str(modes::fixtures::command::SIMPLE)?;
-
         assert!(matches!(cfg, JobCfg::Command(_)));
         Ok(())
     }
@@ -71,7 +70,6 @@ mod tests {
         let cfg: JobCfg = toml::from_str(
             generate_modable_cfg("command", modes::fixtures::command::COMMAND_WITH_ARGS).as_str(),
         )?;
-
         assert!(matches!(cfg, JobCfg::Command(_)));
         Ok(())
     }
@@ -82,7 +80,6 @@ mod tests {
         let cfg: JobCfg = toml::from_str(
             generate_modable_cfg("parallel", modes::fixtures::parallel::SIMPLE).as_str(),
         )?;
-
         assert!(matches!(cfg, JobCfg::Parallel(_)));
         Ok(())
     }
@@ -93,7 +90,6 @@ mod tests {
         let cfg: JobCfg = toml::from_str(
             generate_modable_cfg("sequential", modes::fixtures::sequential::SIMPLE).as_str(),
         )?;
-
         assert!(matches!(cfg, JobCfg::Sequential(_)));
         Ok(())
     }
@@ -103,7 +99,6 @@ mod tests {
     fn shell() -> JfResult<()> {
         let cfg: JobCfg =
             toml::from_str(generate_modable_cfg("shell", modes::fixtures::shell::SIMPLE).as_str())?;
-
         assert!(matches!(cfg, JobCfg::Shell(_)));
         Ok(())
     }
@@ -113,7 +108,6 @@ mod tests {
     fn watch() -> JfResult<()> {
         let cfg: JobCfg =
             toml::from_str(generate_modable_cfg("watch", modes::fixtures::watch::SIMPLE).as_str())?;
-
         assert!(matches!(cfg, JobCfg::Watch(_)));
         Ok(())
     }
@@ -123,7 +117,6 @@ mod tests {
     fn mock() -> JfResult<()> {
         let cfg: JobCfg =
             toml::from_str(generate_modable_cfg("mock", modes::fixtures::mock::SIMPLE).as_str())?;
-
         assert!(matches!(cfg, JobCfg::Mock(_)));
         Ok(())
     }

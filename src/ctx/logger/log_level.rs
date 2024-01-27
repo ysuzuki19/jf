@@ -2,7 +2,6 @@ use clap::ValueEnum;
 
 #[derive(Clone, Default, Copy, PartialEq, PartialOrd, ValueEnum)]
 #[cfg_attr(test, derive(Debug))]
-#[non_exhaustive]
 pub enum LogLevel {
     /// No log output
     None,

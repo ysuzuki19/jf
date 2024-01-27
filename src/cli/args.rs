@@ -121,7 +121,7 @@ mod tests {
         assert!(!args.help);
         assert!(!args.validate);
         assert_eq!(args.cfg, None);
-        assert!(args.log_level == logger::LogLevel::Info);
+        assert_eq!(args.log_level, logger::LogLevel::Info);
         assert_eq!(args.completion, None);
         assert!(!args.list);
         assert!(!args.description);
@@ -134,9 +134,9 @@ mod tests {
         let args = Args::default();
 
         let (ctx, action, opts) = args.setup::<MockLogWriter>()?;
-        assert!(ctx == args.setup_ctx());
-        assert!(action == args.setup_action()?);
-        assert!(opts == args.setup_opts());
+        assert_eq!(ctx, args.setup_ctx());
+        assert_eq!(action, args.setup_action()?);
+        assert_eq!(opts, args.setup_opts());
         Ok(())
     }
 
@@ -146,7 +146,7 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--log-level", "error"]);
 
         let ctx = args.setup_ctx::<MockLogWriter>();
-        assert!(ctx.logger.level() == logger::LogLevel::Error);
+        assert_eq!(ctx.logger.level(), logger::LogLevel::Error);
     }
 
     #[test]
@@ -164,10 +164,7 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--completion", "bash"]);
 
         let action = args.setup_action()?;
-        assert!(matches!(
-            action,
-            Action::Statics(Statics::Completion(Shell::Bash))
-        ));
+        assert_eq!(action, Action::Statics(Statics::Completion(Shell::Bash)));
         Ok(())
     }
 
@@ -177,7 +174,7 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--list"]);
 
         let action = args.setup_action()?;
-        assert!(matches!(action, Action::Configured(Configured::List)));
+        assert_eq!(action, Action::Configured(Configured::List));
         Ok(())
     }
 
@@ -187,7 +184,7 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--validate"]);
 
         let action = args.setup_action()?;
-        assert!(matches!(action, Action::Configured(Configured::Validate)));
+        assert_eq!(action, Action::Configured(Configured::Validate));
         Ok(())
     }
 
@@ -197,10 +194,10 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--description", fixtures::JOB_NAME]);
 
         let action = args.setup_action()?;
-        assert!(matches!(
+        assert_eq!(
             action,
-            Action::Configured(Configured::Description(jn)) if jn == fixtures::JOB_NAME
-        ));
+            Action::Configured(Configured::Description(fixtures::JOB_NAME.to_owned()))
+        );
         Ok(())
     }
 
@@ -219,10 +216,10 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, fixtures::JOB_NAME]);
 
         let action = args.setup_action()?;
-        assert!(matches!(
+        assert_eq!(
             action,
-            Action::Configured(Configured::Run(jn)) if jn == fixtures::JOB_NAME
-        ));
+            Action::Configured(Configured::Run(fixtures::JOB_NAME.to_owned()))
+        );
         Ok(())
     }
 
@@ -232,7 +229,7 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--help"]);
 
         let action = args.setup_action()?;
-        assert!(matches!(action, Action::Statics(Statics::Help)));
+        assert_eq!(action, Action::Statics(Statics::Help));
         Ok(())
     }
 
@@ -242,7 +239,7 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--version"]);
 
         let action = args.setup_action()?;
-        assert!(matches!(action, Action::Statics(Statics::Version)));
+        assert_eq!(action, Action::Statics(Statics::Version));
         Ok(())
     }
 }

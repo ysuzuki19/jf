@@ -6,6 +6,7 @@ use crate::error::JfResult;
 pub use self::log_level::LogLevel;
 pub use log_writer::*;
 
+#[cfg_attr(test, derive(Debug))]
 pub struct Logger<LR: LogWriter> {
     level: LogLevel,
     log_writer: LR,
@@ -108,7 +109,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let mut logger = Logger::<MockLogWriter>::new(LogLevel::Info);
-                assert!(logger.level() == LogLevel::Info);
+                assert_eq!(logger.level(), LogLevel::Info);
                 logger.force("log_msg").await?;
                 assert_eq!(logger.log_writer.lines.len(), 1);
                 assert_eq!(logger.log_writer.lines[0], "log_msg");
@@ -130,7 +131,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let mut logger = Logger::<MockLogWriter>::new(LogLevel::Error);
-                assert!(logger.level() == LogLevel::Error);
+                assert_eq!(logger.level(), LogLevel::Error);
                 logger.force("log_msg").await?;
                 assert_eq!(logger.log_writer.lines.len(), 1);
                 assert_eq!(logger.log_writer.lines[0], "log_msg");
@@ -151,7 +152,7 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let mut logger = Logger::<MockLogWriter>::new(LogLevel::None);
-                assert!(logger.level() == LogLevel::None);
+                assert_eq!(logger.level(), LogLevel::None);
 
                 logger.force("log_msg").await?;
                 assert_eq!(logger.log_writer.lines.len(), 1); // logger.log() is forced to display

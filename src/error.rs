@@ -35,3 +35,27 @@ impl<S: AsRef<str>> IntoJfError for S {
         JfError::Custom(self.as_ref().to_string())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn cover() {
+        let err = JfError::Custom("test".into());
+        assert_eq!(err.to_string(), "test");
+        println!("{:?}", err)
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn multi() {
+        let err = JfError::Multi(vec![
+            JfError::Custom("test1".into()),
+            JfError::Custom("test2".into()),
+        ]);
+
+        assert_eq!(err.to_string(), "[Custom(\"test1\"), Custom(\"test2\")]");
+    }
+}

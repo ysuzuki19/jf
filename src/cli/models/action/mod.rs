@@ -14,7 +14,7 @@ pub trait CliAction {
     async fn run<LR: LogWriter>(self, ctx: Ctx<LR>, opts: Opts) -> JfResult<()>;
 }
 
-#[cfg_attr(test, derive(PartialEq))]
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub enum Action {
     Statics(Statics),
     Configured(Configured),

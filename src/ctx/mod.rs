@@ -1,7 +1,7 @@
 pub mod logger;
 
 #[derive(Clone)]
-#[cfg_attr(test, derive(PartialEq))]
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub struct Ctx<LR: logger::LogWriter> {
     pub logger: logger::Logger<LR>,
 }
@@ -28,5 +28,12 @@ mod tests {
                 logger: Fixture::fixture(),
             }
         }
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn cover() {
+        let ctx = Ctx::<MockLogWriter>::fixture();
+        println!("{:?}", ctx); // Cover derive(Debug)
     }
 }

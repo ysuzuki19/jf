@@ -60,9 +60,12 @@ mod tests {
     fn load() -> JfResult<()> {
         let args = Args::parse_from(args::fixtures::SIMPLE);
         let cli = Cli::<MockLogWriter>::load(args)?;
-        assert!(cli.ctx() == &Ctx::new(logger::LogLevel::Info));
-        assert!(cli.action == Configured::Run(fixtures::JOB_NAME.into()).into());
-        assert!(cli.opts == Opts::default());
+        assert_eq!(cli.ctx(), &Ctx::new(logger::LogLevel::Info));
+        assert_eq!(
+            cli.action,
+            Configured::Run(fixtures::JOB_NAME.into()).into()
+        );
+        assert_eq!(cli.opts, Opts::default());
         Ok(())
     }
 
@@ -73,8 +76,8 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let cli = Cli::fixture();
-                assert!(cli.ctx() == &Ctx::fixture());
-                assert!(cli.action == Action::fixture());
+                assert_eq!(cli.ctx(), &Ctx::fixture());
+                assert_eq!(cli.action, Action::fixture());
                 cli.run().await?;
                 Ok(())
             },
