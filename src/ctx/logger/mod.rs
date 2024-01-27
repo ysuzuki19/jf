@@ -110,10 +110,14 @@ mod tests {
                 let mut logger = Logger::<MockLogWriter>::new(LogLevel::Info);
                 assert!(logger.level() == LogLevel::Info);
                 logger.force("log_msg").await?;
+                assert_eq!(logger.log_writer.lines.len(), 1);
+                assert_eq!(logger.log_writer.lines[0], "log_msg");
                 logger.error("error_msg").await?;
                 assert_eq!(logger.log_writer.lines.len(), 2);
-                assert_eq!(logger.log_writer.lines[0], "log_msg");
                 assert_eq!(logger.log_writer.lines[1], "error_msg");
+                logger.error("info_msg").await?;
+                assert_eq!(logger.log_writer.lines.len(), 3);
+                assert_eq!(logger.log_writer.lines[2], "info_msg");
                 Ok(())
             },
         )
@@ -128,10 +132,13 @@ mod tests {
                 let mut logger = Logger::<MockLogWriter>::new(LogLevel::Error);
                 assert!(logger.level() == LogLevel::Error);
                 logger.force("log_msg").await?;
+                assert_eq!(logger.log_writer.lines.len(), 1);
+                assert_eq!(logger.log_writer.lines[0], "log_msg");
                 logger.error("error_msg").await?;
                 assert_eq!(logger.log_writer.lines.len(), 2);
-                assert_eq!(logger.log_writer.lines[0], "log_msg");
                 assert_eq!(logger.log_writer.lines[1], "error_msg");
+                logger.info("info_msg").await?;
+                assert_eq!(logger.log_writer.lines.len(), 2);
                 Ok(())
             },
         )
@@ -148,6 +155,8 @@ mod tests {
 
                 logger.force("log_msg").await?;
                 assert_eq!(logger.log_writer.lines.len(), 1); // logger.log() is forced to display
+                logger.info("info_msg").await?;
+                assert_eq!(logger.log_writer.lines.len(), 1); // guard by log level
                 logger.error("").await?;
                 assert_eq!(logger.log_writer.lines.len(), 1); // guard by log level
                 Ok(())
