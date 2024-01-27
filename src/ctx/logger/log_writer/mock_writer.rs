@@ -28,15 +28,9 @@ mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn cover() {
-        let writer = MockLogWriter::init();
-        println!("{:?}", writer);
-    }
-
-    #[test]
-    #[cfg_attr(coverage, coverage(off))]
     fn init() {
         let writer = MockLogWriter::init();
+        assert_eq!(writer, LogWriter::init());
         assert_eq!(writer.lines, Vec::<String>::new());
     }
 
