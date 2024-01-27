@@ -98,6 +98,7 @@ mod tests {
     fn init() {
         let _ = Logger::<JfStdout>::new(LogLevel::Info).clone();
         let _ = Logger::<MockLogWriter>::new(LogLevel::Info).clone();
+        assert_eq!(Logger::<JfStdout>::default().level(), LogLevel::default());
     }
 
     #[test]
