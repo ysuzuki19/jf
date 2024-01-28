@@ -87,13 +87,87 @@ impl<LR: LogWriter> Runner<LR> for Job<LR> {
 }
 
 #[cfg(test)]
-impl Job<crate::ctx::logger::MockLogWriter> {
-    #[cfg_attr(coverage, coverage(off))]
-    pub fn as_mock(&self) -> &modes::Mock<crate::ctx::logger::MockLogWriter> {
-        if let Self::Mock(t) = self {
-            t
-        } else {
-            panic!("invalid job type expected Mock");
+mod tests {
+    use crate::testutil::*;
+
+    use self::modes::Command;
+
+    use super::*;
+
+    impl Job<MockLogWriter> {
+        #[cfg_attr(coverage, coverage(off))]
+        pub fn as_mock(&self) -> &modes::Mock<MockLogWriter> {
+            if let Self::Mock(t) = self {
+                t
+            } else {
+                panic!("invalid job type expected Mock");
+            }
         }
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn cover() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let job: Job<_> = Command::fixture().into();
+                job.start(Ctx::fixture())
+                    .await?
+                    .cancel()
+                    .await?
+                    .wait()
+                    .await?;
+                assert!(job.is_finished().await?);
+                let job = job.bunshin();
+                assert!(!job.is_finished().await?);
+
+                let job: Job<_> = modes::Parallel::try_fixture()?.into();
+                job.start(Ctx::fixture())
+                    .await?
+                    .cancel()
+                    .await?
+                    .wait()
+                    .await?;
+                assert!(job.is_finished().await?);
+                let job = job.bunshin();
+                assert!(!job.is_finished().await?);
+
+                let job: Job<_> = modes::Sequential::try_fixture()?.into();
+                job.start(Ctx::fixture())
+                    .await?
+                    .cancel()
+                    .await?
+                    .wait()
+                    .await?;
+                assert!(job.is_finished().await?);
+                let job = job.bunshin();
+                assert!(!job.is_finished().await?);
+
+                let job: Job<_> = modes::Shell::fixture().into();
+                job.start(Ctx::fixture())
+                    .await?
+                    .cancel()
+                    .await?
+                    .wait()
+                    .await?;
+                assert!(job.is_finished().await?);
+                let job = job.bunshin();
+                assert!(!job.is_finished().await?);
+
+                let job: Job<_> = modes::Watch::try_fixture()?.into();
+                job.start(Ctx::fixture())
+                    .await?
+                    .cancel()
+                    .await?
+                    .wait()
+                    .await?;
+                assert!(job.is_finished().await?);
+                let job = job.bunshin();
+                assert!(!job.is_finished().await?);
+
+                Ok(())
+            },
+        )
     }
 }
