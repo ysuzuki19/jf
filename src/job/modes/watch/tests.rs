@@ -83,10 +83,10 @@ fn watch() -> JfResult<()> {
             let w = Watch::try_fixture()?;
             w.start(Fixture::fixture()).await?;
             assert!(!w.is_finished().await?);
-            let id = w.running_job.lock().await.as_mock().id();
+            let id = w.running_job.lock().await.clone().unwrap().as_mock().id();
             std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
             runner::sleep().await;
-            let id2 = w.running_job.lock().await.as_mock().id();
+            let id2 = w.running_job.lock().await.clone().unwrap().as_mock().id();
             assert_ne!(id, id2);
             w.cancel().await?;
             Ok(())

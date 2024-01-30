@@ -25,7 +25,7 @@ pub struct WatchParams {
 #[derive(Clone)]
 pub struct Watch<LR: LogWriter> {
     job: Box<Job<LR>>,
-    running_job: Arc<Mutex<Job<LR>>>,
+    running_job: Arc<Mutex<Option<Job<LR>>>>,
     watch_list: Vec<String>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<JfHandle>>>,
@@ -36,7 +36,7 @@ impl<LR: LogWriter> Watch<LR> {
         let job = pool.build(params.job, Agent::Job)?;
         Ok(Self {
             job: Box::new(job.clone()),
-            running_job: Arc::new(Mutex::new(job)),
+            running_job: Arc::new(Mutex::new(None)),
             watch_list: params.watch_list,
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
@@ -53,17 +53,26 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
             let job = self.job.clone();
             let running_job = self.running_job.clone();
             let is_cancelled = self.is_cancelled.clone();
+            running_job
+                .lock()
+                .await
+                .replace(job.bunshin().start(ctx.clone()).await?);
 
             async move {
                 loop {
-                    *(running_job.lock().await) = job.bunshin().start(ctx.clone()).await?;
-
                     watcher.wait()?;
 
-                    running_job.lock().await.cancel().await?;
+                    if let Some(running_job) = running_job.lock().await.take() {
+                        running_job.cancel().await?;
+                    }
                     if is_cancelled.load(Ordering::Relaxed) {
                         break;
                     }
+
+                    running_job
+                        .lock()
+                        .await
+                        .replace(job.bunshin().start(ctx.clone()).await?);
                 }
                 Ok(())
             }
@@ -79,14 +88,16 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
 
     async fn cancel(&self) -> JfResult<Self> {
         self.is_cancelled.store(true, Ordering::Relaxed);
-        self.running_job.lock().await.cancel().await?;
+        if let Some(running_job) = self.running_job.lock().await.take() {
+            running_job.cancel().await?;
+        }
         Ok(self.clone())
     }
 
     fn bunshin(&self) -> Self {
         Self {
             job: Box::new(self.job.bunshin()),
-            running_job: Arc::new(Mutex::new(self.job.bunshin())),
+            running_job: Arc::new(Mutex::new(None)),
             watch_list: self.watch_list.clone(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
