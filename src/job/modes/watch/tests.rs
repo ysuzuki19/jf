@@ -68,7 +68,7 @@ fn start() -> JfResult<()> {
             let w = Watch::try_fixture()?;
             w.start(Fixture::fixture()).await?;
             assert!(!w.is_finished().await?);
-            w.cancel().await?.wait().await?;
+            w.cancel().await?.join().await?;
             Ok(())
         },
     )
@@ -103,7 +103,7 @@ fn cancel() -> JfResult<()> {
             let w = Watch::try_fixture()?;
             w.start(Fixture::fixture()).await?.cancel().await?;
             runner::sleep().await; // for cover breaking loop
-            w.wait().await?;
+            w.join().await?;
             assert!(w.is_finished().await?);
             Ok(())
         },

@@ -22,7 +22,7 @@ where
     async fn cancel(&self) -> JfResult<Self>;
     fn bunshin(&self) -> Self;
 
-    async fn wait(&self) -> JfResult<Self> {
+    async fn join(&self) -> JfResult<Self> {
         loop {
             if self.is_finished().await? {
                 break;

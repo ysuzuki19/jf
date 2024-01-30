@@ -116,7 +116,7 @@ mod tests {
                     .await?
                     .cancel()
                     .await?
-                    .wait()
+                    .join()
                     .await?;
                 assert!(job.is_finished().await?);
                 let job = job.bunshin();
@@ -127,7 +127,7 @@ mod tests {
                     .await?
                     .cancel()
                     .await?
-                    .wait()
+                    .join()
                     .await?;
                 assert!(job.is_finished().await?);
                 let job = job.bunshin();
@@ -138,7 +138,7 @@ mod tests {
                     .await?
                     .cancel()
                     .await?
-                    .wait()
+                    .join()
                     .await?;
                 assert!(job.is_finished().await?);
                 let job = job.bunshin();
@@ -149,7 +149,7 @@ mod tests {
                     .await?
                     .cancel()
                     .await?
-                    .wait()
+                    .join()
                     .await?;
                 assert!(job.is_finished().await?);
                 let job = job.bunshin();
@@ -160,7 +160,7 @@ mod tests {
                     .await?
                     .cancel()
                     .await?
-                    .wait()
+                    .join()
                     .await?;
                 assert!(job.is_finished().await?);
                 let job = job.bunshin();

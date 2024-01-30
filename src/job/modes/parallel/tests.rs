@@ -70,14 +70,14 @@ fn cancel() -> JfResult<()> {
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
-fn wait() -> JfResult<()> {
+fn join() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_fixture()?;
             p.start(Fixture::fixture())
                 .await?
-                .wait()
+                .join()
                 .await?
                 .jobs
                 .into_iter()

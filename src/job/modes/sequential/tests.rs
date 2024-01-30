@@ -79,12 +79,12 @@ fn cancel() -> JfResult<()> {
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
-fn wait() -> JfResult<()> {
+fn join() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
             let s = Sequential::try_fixture()?;
-            s.start(Fixture::fixture()).await?.wait().await?;
+            s.start(Fixture::fixture()).await?.join().await?;
             assert!(s.is_finished().await?);
             s.jobs.into_iter().for_each(|job| {
                 job.as_mock().assert_is_finished_eq(true);

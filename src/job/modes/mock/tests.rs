@@ -28,7 +28,7 @@ fn new() {
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
-fn run_wait() -> JfResult<()> {
+fn run_join() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
@@ -40,7 +40,7 @@ fn run_wait() -> JfResult<()> {
                 .assert_is_started_eq(true)
                 .assert_is_running_eq(true)
                 .assert_is_cancelled_eq(false)
-                .wait()
+                .join()
                 .await?
                 .assert_id_eq(id) // not changed mock instance
                 .assert_is_started_eq(true)
@@ -55,7 +55,7 @@ fn run_wait() -> JfResult<()> {
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
-fn run_cancel_wait() -> JfResult<()> {
+fn run_cancel_join() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
@@ -67,7 +67,7 @@ fn run_cancel_wait() -> JfResult<()> {
                 .cancel()
                 .await?
                 .assert_is_cancelled_eq(true)
-                .wait()
+                .join()
                 .await?
                 .assert_id_eq(id)
                 .assert_is_running_eq(false)

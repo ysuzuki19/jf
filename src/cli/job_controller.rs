@@ -27,7 +27,7 @@ impl JobController {
             .build::<LR>(job_name, Agent::Cli)?
             .start(ctx)
             .await?
-            .wait()
+            .join()
             .await?;
         Ok(())
     }

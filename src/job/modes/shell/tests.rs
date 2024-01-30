@@ -30,12 +30,12 @@ fn run_without_blocking() -> JfResult<()> {
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
-fn wait() -> JfResult<()> {
+fn join() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
             let shell = Shell::fixture();
-            shell.start(Fixture::fixture()).await?.wait().await?;
+            shell.start(Fixture::fixture()).await?.join().await?;
             assert!(shell.is_finished().await?);
             assert!(shell.command.is_finished().await?);
             Ok(())
