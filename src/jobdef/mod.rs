@@ -6,8 +6,8 @@ pub use self::pool::JobdefPool;
 use crate::{
     cfg::job_cfg::{JobCfg, Visibility},
     ctx::logger::LogWriter,
-    error::{IntoJfError, JfError, JfResult},
     job::Job,
+    util::error::{IntoJfError, JfError, JfResult},
 };
 
 pub struct Jobdef {
@@ -72,7 +72,7 @@ impl TryFrom<(String, JobCfg)> for Jobdef {
 mod tests {
     use crate::{
         cfg::job_cfg::{CommonCfg, MockCfg},
-        testutil::{async_test, Fixture, TryFixture},
+        util::testutil::*,
     };
 
     use super::*;

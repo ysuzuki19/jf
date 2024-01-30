@@ -33,7 +33,7 @@ impl CommonCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::{error::JfResult, testutil::Fixture};
+    use crate::util::{error::JfResult, testutil::Fixture};
 
     use super::*;
 

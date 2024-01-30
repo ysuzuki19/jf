@@ -5,7 +5,7 @@ mod models;
 
 use crate::{
     ctx::{logger, Ctx},
-    error::JfResult,
+    util::error::JfResult,
 };
 
 pub use self::args::Args;
@@ -40,7 +40,7 @@ mod tests {
     use clap::Parser;
 
     use crate::cli::{args::fixtures, models::action::Configured};
-    use crate::testutil::*;
+    use crate::util::testutil::*;
 
     use super::*;
 

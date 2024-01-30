@@ -11,9 +11,9 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::JfResult,
     job::{types::JfHandle, Job, Runner},
     jobdef::{Agent, JobdefPool},
+    util::error::JfResult,
 };
 
 #[derive(Clone, serde::Deserialize)]

@@ -1,7 +1,8 @@
 use std::io::Write;
 
+use crate::ctx::logger::MockLogWriter;
 use crate::job::runner;
-use crate::testutil::*;
+use crate::util::testutil::*;
 
 use super::*;
 

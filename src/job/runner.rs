@@ -5,7 +5,7 @@ use std::sync::{
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::JfResult,
+    util::error::JfResult,
 };
 
 pub async fn sleep() {

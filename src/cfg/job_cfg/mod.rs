@@ -49,7 +49,7 @@ impl JobCfg {
 
 #[cfg(test)]
 mod fixtures {
-    use crate::{error::JfResult, testutil::TryFixture};
+    use crate::util::{error::JfResult, testutil::TryFixture};
 
     use super::*;
 

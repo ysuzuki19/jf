@@ -16,7 +16,7 @@ jobs = ["test-job1", "test-job2"]"#;
 
 #[cfg(test)]
 mod tests {
-    use crate::error::JfResult;
+    use crate::util::error::JfResult;
 
     use super::*;
 

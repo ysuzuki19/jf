@@ -2,11 +2,9 @@
 mod cfg;
 mod cli;
 mod ctx;
-mod error;
 mod job;
 mod jobdef;
-#[cfg(test)]
-mod testutil;
+mod util;
 
 use clap::Parser;
 

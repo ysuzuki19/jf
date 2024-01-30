@@ -1,5 +1,8 @@
-use crate::testutil::*;
-use crate::{error::JfResult, job::Runner, jobdef::JobdefPool};
+use crate::{
+    job::Runner,
+    jobdef::JobdefPool,
+    util::{error::JfResult, testutil::*},
+};
 
 use super::*;
 

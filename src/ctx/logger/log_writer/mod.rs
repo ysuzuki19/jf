@@ -6,7 +6,7 @@ mod stdout;
 pub use mock_writer::MockLogWriter;
 pub use stdout::JfStdout;
 
-use crate::error::JfResult;
+use crate::util::error::JfResult;
 
 #[async_trait::async_trait]
 pub trait LogWriter: Send + Sync + Clone + 'static {
@@ -16,7 +16,7 @@ pub trait LogWriter: Send + Sync + Clone + 'static {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::async_test;
+    use crate::util::testutil::async_test;
 
     use super::*;
 

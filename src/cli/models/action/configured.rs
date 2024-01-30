@@ -2,7 +2,7 @@ use crate::{
     cfg,
     cli::{job_controller, models::Opts},
     ctx::{logger::LogWriter, Ctx},
-    error::JfResult,
+    util::error::JfResult,
 };
 
 use super::{Action, CliAction};
@@ -44,10 +44,7 @@ mod fixtures {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        error::JfResult,
-        testutil::{async_test, Fixture},
-    };
+    use crate::util::{error::JfResult, testutil::*};
 
     use super::*;
 

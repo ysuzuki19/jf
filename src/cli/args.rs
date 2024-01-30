@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     ctx::{logger, Ctx},
-    error::{IntoJfError, JfResult},
+    util::error::{IntoJfError, JfResult},
 };
 
 use super::models::{
@@ -109,7 +109,7 @@ mod tests {
     use clap::Parser;
     use clap_complete::Shell;
 
-    use crate::testutil::*;
+    use crate::util::testutil::*;
 
     use super::*;
 

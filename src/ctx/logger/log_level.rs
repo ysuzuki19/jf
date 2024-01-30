@@ -15,7 +15,7 @@ pub enum LogLevel {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::testutil::*;
+    use crate::util::testutil::*;
 
     impl Fixture for LogLevel {
         fn fixture() -> Self {

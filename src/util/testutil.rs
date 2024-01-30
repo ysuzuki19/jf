@@ -5,7 +5,7 @@ pub trait Fixture {
 }
 
 pub trait TryFixture {
-    fn try_fixture() -> crate::error::JfResult<Self>
+    fn try_fixture() -> crate::util::error::JfResult<Self>
     where
         Self: Sized;
 }

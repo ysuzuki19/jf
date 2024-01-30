@@ -3,8 +3,8 @@ mod tests;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::JfResult,
     job::{Job, Runner},
+    util::error::JfResult,
 };
 
 #[derive(Clone, serde::Deserialize)]

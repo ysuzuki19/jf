@@ -17,7 +17,7 @@ impl Ctx<logger::MockLogWriter> {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::*;
+    use crate::util::testutil::*;
 
     use super::*;
 

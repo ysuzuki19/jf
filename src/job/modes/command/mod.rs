@@ -8,8 +8,8 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::JfResult,
     job::{Job, Runner},
+    util::error::JfResult,
 };
 
 use self::command_driver::CommandDriver;

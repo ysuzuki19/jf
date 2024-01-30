@@ -8,10 +8,10 @@ use tokio::sync::Mutex;
 
 use crate::ctx::logger::LogWriter;
 use crate::ctx::Ctx;
-use crate::error::JfResult;
 use crate::job::Job;
 use crate::job::Runner;
-use crate::testutil::Fixture;
+use crate::util::error::JfResult;
+use crate::util::testutil::Fixture;
 
 static MOCK_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 

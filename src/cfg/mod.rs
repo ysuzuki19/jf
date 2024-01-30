@@ -5,7 +5,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use serde::Deserialize;
 
-use crate::error::JfResult;
+use crate::util::error::JfResult;
 
 #[derive(Deserialize)]
 pub struct Cfg {
@@ -23,7 +23,7 @@ impl Cfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::error::JfError;
+    use crate::util::error::JfError;
 
     use super::*;
 

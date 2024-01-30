@@ -44,7 +44,7 @@ impl<'de> serde::Deserialize<'de> for JobCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::{cfg::job_cfg::modes, error::JfResult};
+    use crate::{cfg::job_cfg::modes, util::error::JfResult};
 
     use super::*;
 

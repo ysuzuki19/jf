@@ -5,7 +5,7 @@ use std::sync::{
 
 use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
-use crate::error::JfResult;
+use crate::util::error::JfResult;
 
 type NotifyPayload = Result<notify::Event, notify::Error>;
 

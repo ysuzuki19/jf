@@ -2,7 +2,7 @@ mod configured;
 mod statics;
 
 use crate::ctx::Ctx;
-use crate::{ctx::logger::LogWriter, error::JfResult};
+use crate::{ctx::logger::LogWriter, util::error::JfResult};
 
 pub use self::configured::Configured;
 pub use self::statics::Statics;
@@ -32,8 +32,7 @@ impl CliAction for Action {
 
 #[cfg(test)]
 mod tests {
-
-    use crate::testutil::{async_test, Fixture};
+    use crate::util::testutil::*;
 
     use super::*;
 

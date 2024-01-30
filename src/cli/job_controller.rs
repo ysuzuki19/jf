@@ -1,9 +1,9 @@
 use crate::{
     cfg::Cfg,
     ctx::{logger, Ctx},
-    error::JfResult,
     job::Runner,
     jobdef::{Agent, JobdefPool},
+    util::error::JfResult,
 };
 
 pub struct JobController {

@@ -1,6 +1,6 @@
 use tokio::io::AsyncWriteExt;
 
-use crate::error::JfResult;
+use crate::util::error::JfResult;
 
 use super::LogWriter;
 
@@ -29,7 +29,7 @@ impl LogWriter for JfStdout {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::async_test;
+    use crate::util::testutil::async_test;
 
     use super::*;
 

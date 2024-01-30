@@ -6,8 +6,8 @@ pub use self::runner::Runner;
 use crate::{
     cfg::job_cfg::JobCfg,
     ctx::{logger::LogWriter, Ctx},
-    error::JfResult,
     jobdef::JobdefPool,
+    util::error::JfResult,
 };
 
 #[derive(Clone)]
@@ -88,7 +88,7 @@ impl<LR: LogWriter> Runner<LR> for Job<LR> {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::*;
+    use crate::util::testutil::*;
 
     use self::modes::Command;
 

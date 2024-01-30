@@ -1,7 +1,7 @@
 mod log_level;
 mod log_writer;
 
-use crate::error::JfResult;
+use crate::util::error::JfResult;
 
 pub use self::log_level::LogLevel;
 pub use log_writer::*;
@@ -79,7 +79,7 @@ impl<LR: LogWriter> Logger<LR> {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::*;
+    use crate::util::testutil::*;
 
     use super::*;
 

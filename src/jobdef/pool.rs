@@ -3,8 +3,8 @@ use std::{collections::HashMap, sync::Arc};
 use super::{Agent, Jobdef};
 use crate::{
     ctx::logger::{JfStdout, LogWriter},
-    error::{IntoJfError, JfError, JfResult},
     job::Job,
+    util::error::{IntoJfError, JfError, JfResult},
 };
 
 #[derive(Clone)]
@@ -68,7 +68,7 @@ mod tests {
     use super::*;
     use crate::{
         cfg::job_cfg::{CommonCfg, JobCfg, MockCfg, Visibility, WatchCfg},
-        testutil::{Fixture, TryFixture},
+        util::testutil::*,
     };
 
     impl TryFixture for JobdefPool {

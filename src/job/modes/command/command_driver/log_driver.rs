@@ -7,8 +7,8 @@ use tokio::{
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::{IntoJfError, JfResult},
     job::types::JfHandle,
+    util::error::{IntoJfError, JfResult},
 };
 
 pub(super) struct LogDriver<LR: LogWriter> {
@@ -59,7 +59,7 @@ impl<LR: LogWriter> LogDriver<LR> {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::*;
+    use crate::util::testutil::*;
 
     use super::*;
 

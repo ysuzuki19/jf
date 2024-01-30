@@ -1,7 +1,7 @@
 use crate::{
     cli::{completion_script, models::Opts, Args},
     ctx::{logger::LogWriter, Ctx},
-    error::JfResult,
+    util::error::JfResult,
 };
 
 use super::{Action, CliAction};
@@ -36,7 +36,7 @@ impl CliAction for Statics {
 
 #[cfg(test)]
 mod tests {
-    use crate::testutil::{async_test, Fixture};
+    use crate::util::testutil::*;
 
     use super::*;
 

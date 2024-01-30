@@ -2,7 +2,7 @@ mod log_driver;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    error::{IntoJfError, JfResult},
+    util::error::{IntoJfError, JfResult},
 };
 
 pub struct CommandDriver<LR: LogWriter> {
