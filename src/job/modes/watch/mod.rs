@@ -48,7 +48,7 @@ impl<LR: LogWriter> Watch<LR> {
 impl<LR: LogWriter> Runner<LR> for Watch<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         let handle = tokio::spawn({
-            let watcher = watcher::JfWatcher::new(&self.watch_list)?;
+            let watcher = watcher::JfWatcher::new(&self.watch_list, self.is_cancelled.clone())?;
             let ctx = ctx.clone();
             let job = self.job.clone();
             let running_job = self.running_job.clone();
@@ -58,7 +58,7 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
                 loop {
                     *(running_job.lock().await) = job.bunshin().start(ctx.clone()).await?;
 
-                    watcher.wait_event_with_cancel(is_cancelled.clone())?;
+                    watcher.wait()?;
 
                     running_job.lock().await.cancel().await?;
                     if is_cancelled.load(Ordering::Relaxed) {

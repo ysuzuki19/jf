@@ -12,10 +12,11 @@ type NotifyPayload = Result<notify::Event, notify::Error>;
 pub struct JfWatcher {
     _watcher: RecommendedWatcher, // not used but needed to keep the watcher alive
     rx: std::sync::mpsc::Receiver<NotifyPayload>,
+    is_cancelled: Arc<AtomicBool>,
 }
 
 impl JfWatcher {
-    pub fn new(watch_list: &Vec<String>) -> JfResult<Self> {
+    pub fn new(watch_list: &Vec<String>, parent_cancelled: Arc<AtomicBool>) -> JfResult<Self> {
         let (tx, rx) = std::sync::mpsc::channel();
         let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
 
@@ -28,12 +29,13 @@ impl JfWatcher {
         Ok(Self {
             _watcher: watcher,
             rx,
+            is_cancelled: parent_cancelled,
         })
     }
 
-    pub fn wait_event_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> JfResult<()> {
+    pub fn wait(&self) -> JfResult<()> {
         loop {
-            if is_cancelled.load(Ordering::Relaxed) {
+            if self.is_cancelled.load(Ordering::Relaxed) {
                 break;
             }
             match self.rx.recv_timeout(std::time::Duration::from_millis(100)) {
