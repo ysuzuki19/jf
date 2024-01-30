@@ -33,7 +33,7 @@ where
         Ok(self.clone())
     }
 
-    async fn wait_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> JfResult<()> {
+    async fn join_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> JfResult<()> {
         loop {
             if self.is_finished().await? {
                 break;

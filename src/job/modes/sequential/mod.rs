@@ -61,14 +61,14 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
             let is_cancelled = self.is_cancelled.clone();
 
             async move {
-                job.wait_with_cancel(is_cancelled.clone()).await?;
+                job.join_with_cancel(is_cancelled.clone()).await?;
                 for job in jobs.iter().skip(1) {
                     if is_cancelled.load(Ordering::Relaxed) {
                         job.cancel().await?;
                         continue;
                     }
                     job.start(ctx.clone()).await?;
-                    job.wait_with_cancel(is_cancelled.clone()).await?;
+                    job.join_with_cancel(is_cancelled.clone()).await?;
                 }
                 Ok(())
             }

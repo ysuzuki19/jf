@@ -54,7 +54,7 @@ impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
                 let is_cancelled = self.is_cancelled.clone();
                 job.start(ctx.clone()).await?;
                 async move {
-                    job.wait_with_cancel(is_cancelled).await?;
+                    job.join_with_cancel(is_cancelled).await?;
                     Ok(())
                 }
             });
