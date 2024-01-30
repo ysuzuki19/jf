@@ -68,7 +68,7 @@ impl<LR: LogWriter> Runner<LR> for Command<LR> {
         Ok(self.clone())
     }
 
-    fn bunshin(&self) -> Self {
+    async fn bunshin(&self) -> Self {
         Self {
             params: self.params.clone(),
             command_driver: Arc::new(Mutex::new(None)),

@@ -118,7 +118,7 @@ fn bunshin() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let origin = Watch::try_fixture()?;
-            let bunshin = origin.bunshin();
+            let bunshin = origin.bunshin().await;
             assert_ne!(
                 origin.job.read().as_mock().id(),
                 bunshin.job.read().as_mock().id()

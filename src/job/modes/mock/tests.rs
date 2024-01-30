@@ -93,7 +93,7 @@ fn bunshin() -> JfResult<()> {
                 .assert_is_finished_eq(true)
                 .assert_is_cancelled_eq(true);
 
-            let bunshin = origin.bunshin();
+            let bunshin = origin.bunshin().await;
             bunshin
                 .assert_id_ne(origin.id) // check new mock job creation
                 .assert_each_sleep_time_eq(origin.each_sleep_time)

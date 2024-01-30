@@ -50,8 +50,8 @@ impl<LR: LogWriter> Runner<LR> for Shell<LR> {
         Ok(self.clone())
     }
 
-    fn bunshin(&self) -> Self {
-        let command = self.command.bunshin();
+    async fn bunshin(&self) -> Self {
+        let command = self.command.bunshin().await;
         Self {
             params: self.params.clone(),
             command,

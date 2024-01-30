@@ -182,7 +182,7 @@ impl<LR: LogWriter> Runner<LR> for Mock<LR> {
         Ok(self.clone())
     }
 
-    fn bunshin(&self) -> Self {
+    async fn bunshin(&self) -> Self {
         Self::new(MockParams {
             each_sleep_time: self.each_sleep_time,
             sleep_count: self.sleep_count,

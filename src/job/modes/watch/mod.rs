@@ -56,6 +56,7 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
             running_job.lock().await.replace(
                 job.read()
                     .bunshin()
+                    .await
                     .link_cancel(is_cancelled.clone())
                     .start(ctx.clone())
                     .await?,
@@ -75,7 +76,7 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
                     running_job
                         .lock()
                         .await
-                        .replace(job.read().bunshin().start(ctx.clone()).await?);
+                        .replace(job.read().bunshin().await.start(ctx.clone()).await?);
                 }
                 Ok(())
             }
@@ -97,9 +98,9 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
         Ok(self.clone())
     }
 
-    fn bunshin(&self) -> Self {
+    async fn bunshin(&self) -> Self {
         Self {
-            job: Box::new(self.job.read().bunshin().into()),
+            job: Box::new(self.job.read().bunshin().await.into()),
             running_job: Arc::new(Mutex::new(None)),
             watch_list: self.watch_list.clone(),
             is_cancelled: Arc::new(AtomicBool::new(false)),

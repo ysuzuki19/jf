@@ -9,6 +9,7 @@ use std::{
     },
 };
 
+use futures::{stream, StreamExt};
 use tokio::sync::Mutex;
 
 use crate::{
@@ -96,15 +97,12 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
         Ok(self.clone())
     }
 
-    fn bunshin(&self) -> Self {
+    async fn bunshin(&self) -> Self {
         Self {
-            jobs: self
-                .jobs
-                .clone()
-                .unwrap()
-                .into_iter()
-                .map(|job| job.bunshin())
-                .collect::<Vec<_>>()
+            jobs: stream::iter(self.jobs.clone().unwrap().into_iter())
+                .then(|j| async move { j.bunshin().await })
+                .collect::<Vec<Job<LR>>>()
+                .await
                 .into(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),

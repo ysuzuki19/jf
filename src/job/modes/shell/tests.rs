@@ -67,7 +67,7 @@ fn bunshin() -> JfResult<()> {
             let origin = Shell::fixture();
             origin.start(Fixture::fixture()).await?.cancel().await?;
             assert!(origin.is_finished().await?);
-            let bunshin = origin.bunshin();
+            let bunshin = origin.bunshin().await;
             assert!(!bunshin.is_finished().await?);
             Ok(())
         },

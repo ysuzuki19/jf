@@ -73,15 +73,15 @@ impl<LR: LogWriter> Runner<LR> for Job<LR> {
         })
     }
 
-    fn bunshin(&self) -> Self {
+    async fn bunshin(&self) -> Self {
         match self {
-            Self::Command(t) => Self::Command(t.bunshin()),
-            Self::Parallel(t) => Self::Parallel(t.bunshin()),
-            Self::Sequential(t) => Self::Sequential(t.bunshin()),
-            Self::Shell(t) => Self::Shell(t.bunshin()),
-            Self::Watch(t) => Self::Watch(t.bunshin()),
+            Self::Command(t) => Self::Command(t.bunshin().await),
+            Self::Parallel(t) => Self::Parallel(t.bunshin().await),
+            Self::Sequential(t) => Self::Sequential(t.bunshin().await),
+            Self::Shell(t) => Self::Shell(t.bunshin().await),
+            Self::Watch(t) => Self::Watch(t.bunshin().await),
             #[cfg(test)]
-            Self::Mock(t) => Self::Mock(t.bunshin()),
+            Self::Mock(t) => Self::Mock(t.bunshin().await),
         }
     }
 }
@@ -119,7 +119,7 @@ mod tests {
                     .join()
                     .await?;
                 assert!(job.is_finished().await?);
-                let job = job.bunshin();
+                let job = job.bunshin().await;
                 assert!(!job.is_finished().await?);
 
                 let job: Job<_> = modes::Parallel::try_fixture()?.into();
@@ -130,7 +130,7 @@ mod tests {
                     .join()
                     .await?;
                 assert!(job.is_finished().await?);
-                let job = job.bunshin();
+                let job = job.bunshin().await;
                 assert!(!job.is_finished().await?);
 
                 let job: Job<_> = modes::Sequential::try_fixture()?.into();
@@ -141,7 +141,7 @@ mod tests {
                     .join()
                     .await?;
                 assert!(job.is_finished().await?);
-                let job = job.bunshin();
+                let job = job.bunshin().await;
                 assert!(!job.is_finished().await?);
 
                 let job: Job<_> = modes::Shell::fixture().into();
@@ -152,7 +152,7 @@ mod tests {
                     .join()
                     .await?;
                 assert!(job.is_finished().await?);
-                let job = job.bunshin();
+                let job = job.bunshin().await;
                 assert!(!job.is_finished().await?);
 
                 let job: Job<_> = modes::Watch::try_fixture()?.into();
@@ -163,7 +163,7 @@ mod tests {
                     .join()
                     .await?;
                 assert!(job.is_finished().await?);
-                let job = job.bunshin();
+                let job = job.bunshin().await;
                 assert!(!job.is_finished().await?);
 
                 Ok(())

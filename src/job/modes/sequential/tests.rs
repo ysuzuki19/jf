@@ -103,7 +103,7 @@ fn bunshin() -> JfResult<()> {
             let origin = Sequential::try_fixture()?;
             origin.start(Fixture::fixture()).await?.cancel().await?;
 
-            let bunshin = origin.bunshin();
+            let bunshin = origin.bunshin().await;
             assert_eq!(origin.jobs.read().len(), bunshin.jobs.read().len());
             for (bunshin_job, origin_job) in bunshin.jobs.read().iter().zip(origin.jobs.read()) {
                 bunshin_job
