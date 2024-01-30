@@ -4,7 +4,7 @@ mod tests;
 use crate::{
     ctx::{logger::LogWriter, Ctx},
     job::{Job, Runner},
-    util::error::JfResult,
+    util::{error::JfResult, ReadOnly},
 };
 
 #[derive(Clone, serde::Deserialize)]
@@ -15,7 +15,7 @@ pub struct ShellParams {
 
 #[derive(Clone)]
 pub struct Shell<LR: LogWriter> {
-    params: ShellParams,
+    params: ReadOnly<ShellParams>,
     command: super::Command<LR>,
 }
 
@@ -27,7 +27,10 @@ impl<LR: LogWriter> Shell<LR> {
             command: "sh".to_string(),
             args,
         });
-        Self { params, command }
+        Self {
+            params: params.into(),
+            command,
+        }
     }
 }
 

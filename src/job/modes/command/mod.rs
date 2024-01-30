@@ -9,7 +9,7 @@ use tokio::sync::Mutex;
 use crate::{
     ctx::{logger::LogWriter, Ctx},
     job::{Job, Runner},
-    util::error::JfResult,
+    util::{error::JfResult, ReadOnly},
 };
 
 use self::command_driver::CommandDriver;
@@ -23,14 +23,14 @@ pub struct CommandParams {
 
 #[derive(Clone)]
 pub struct Command<LR: LogWriter> {
-    params: CommandParams,
+    params: ReadOnly<CommandParams>,
     command_driver: Arc<Mutex<Option<CommandDriver<LR>>>>,
 }
 
 impl<LR: LogWriter> Command<LR> {
     pub fn new(params: CommandParams) -> Self {
         Self {
-            params,
+            params: params.into(),
             command_driver: Arc::new(Mutex::new(None)),
         }
     }
@@ -39,10 +39,9 @@ impl<LR: LogWriter> Command<LR> {
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Command<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
-        self.command_driver
-            .lock()
-            .await
-            .replace(CommandDriver::spawn(ctx, &self.params.command, &self.params.args).await?);
+        let cd = CommandDriver::spawn(ctx, &self.params.read().command, &self.params.read().args)
+            .await?;
+        self.command_driver.lock().await.replace(cd);
 
         Ok(self.clone())
     }

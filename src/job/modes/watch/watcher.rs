@@ -5,12 +5,12 @@ use std::sync::{
 
 use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
-use crate::util::error::JfResult;
+use crate::util::{error::JfResult, ReadOnly};
 
 type NotifyPayload = Result<notify::Event, notify::Error>;
 
 pub struct JfWatcher {
-    _watcher: RecommendedWatcher, // not used but needed to keep the watcher alive
+    _watcher: ReadOnly<RecommendedWatcher>, // not used but needed to keep the watcher alive
     rx: std::sync::mpsc::Receiver<NotifyPayload>,
     is_cancelled: Arc<AtomicBool>,
 }
@@ -27,7 +27,7 @@ impl JfWatcher {
         }
 
         Ok(Self {
-            _watcher: watcher,
+            _watcher: watcher.into(),
             rx,
             is_cancelled: parent_cancelled,
         })

@@ -119,7 +119,10 @@ fn bunshin() -> JfResult<()> {
         async {
             let origin = Watch::try_fixture()?;
             let bunshin = origin.bunshin();
-            assert_ne!(origin.job.as_mock().id(), bunshin.job.as_mock().id());
+            assert_ne!(
+                origin.job.read().as_mock().id(),
+                bunshin.job.read().as_mock().id()
+            );
             Ok(())
         },
     )

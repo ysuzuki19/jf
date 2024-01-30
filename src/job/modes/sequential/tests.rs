@@ -48,7 +48,7 @@ fn start() -> JfResult<()> {
         async {
             let s = Sequential::try_fixture()?.start(Fixture::fixture()).await?;
             assert!(!s.is_finished().await?);
-            for (index, job) in s.jobs.iter().enumerate() {
+            for (index, job) in s.jobs.read().iter().enumerate() {
                 if index == 0 {
                     // first job is started immediately
                     job.as_mock().assert_is_started_eq(true);
@@ -86,7 +86,7 @@ fn join() -> JfResult<()> {
             let s = Sequential::try_fixture()?;
             s.start(Fixture::fixture()).await?.join().await?;
             assert!(s.is_finished().await?);
-            s.jobs.into_iter().for_each(|job| {
+            s.jobs.read().iter().for_each(|job| {
                 job.as_mock().assert_is_finished_eq(true);
             });
             Ok(())
@@ -104,8 +104,8 @@ fn bunshin() -> JfResult<()> {
             origin.start(Fixture::fixture()).await?.cancel().await?;
 
             let bunshin = origin.bunshin();
-            assert_eq!(origin.jobs.len(), bunshin.jobs.len());
-            for (bunshin_job, origin_job) in bunshin.jobs.iter().zip(origin.jobs) {
+            assert_eq!(origin.jobs.read().len(), bunshin.jobs.read().len());
+            for (bunshin_job, origin_job) in bunshin.jobs.read().iter().zip(origin.jobs.read()) {
                 bunshin_job
                     .as_mock()
                     .assert_id_ne(origin_job.as_mock().id())

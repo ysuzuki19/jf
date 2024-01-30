@@ -15,7 +15,10 @@ use crate::{
     ctx::{logger::LogWriter, Ctx},
     job::{types::JfHandle, Job, Runner},
     jobdef::{Agent, JobdefPool},
-    util::error::{IntoJfError, JfResult},
+    util::{
+        error::{IntoJfError, JfResult},
+        ReadOnly,
+    },
 };
 
 #[derive(Clone, serde::Deserialize)]
@@ -25,7 +28,7 @@ pub struct SequentialParams {
 
 #[derive(Clone)]
 pub struct Sequential<LR: LogWriter> {
-    jobs: Vec<Job<LR>>,
+    jobs: ReadOnly<Vec<Job<LR>>>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<JfHandle>>>,
 }
@@ -41,7 +44,7 @@ impl<LR: LogWriter> Sequential<LR> {
             .map(|job_name| pool.build(job_name, Agent::Job))
             .collect::<JfResult<Vec<Job<LR>>>>()?;
         Ok(Self {
-            jobs,
+            jobs: jobs.into(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         })
@@ -53,8 +56,8 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         let handle: JfHandle = tokio::spawn({
             let ctx = ctx.clone();
-            let job = self.jobs[0].start(ctx.clone()).await?; // start first job immediately
-            let jobs = self.jobs.clone();
+            let jobs = self.jobs.clone().unwrap();
+            let job = jobs[0].start(ctx.clone()).await?; // start first job immediately
             let is_cancelled = self.is_cancelled.clone();
 
             async move {
@@ -88,7 +91,14 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
 
     fn bunshin(&self) -> Self {
         Self {
-            jobs: self.jobs.iter().map(|job| job.bunshin()).collect(),
+            jobs: self
+                .jobs
+                .clone()
+                .unwrap()
+                .into_iter()
+                .map(|job| job.bunshin())
+                .collect::<Vec<_>>()
+                .into(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         }
