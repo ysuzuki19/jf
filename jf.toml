@@ -8,6 +8,15 @@ cargo install cargo-binstall
 cargo binstall cargo-llvm-cov
 """
 
+[job.ci]
+mode = "shell"
+script = """
+cargo fmt -- --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test --verbose
+cargo build --verbose
+"""
+
 [job.install]
 command = "cargo"
 args = ["install", "--path", "."]
