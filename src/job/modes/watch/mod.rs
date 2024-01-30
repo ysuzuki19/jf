@@ -53,10 +53,13 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
             let job = self.job.clone();
             let running_job = self.running_job.clone();
             let is_cancelled = self.is_cancelled.clone();
-            running_job
-                .lock()
-                .await
-                .replace(job.read().bunshin().start(ctx.clone()).await?);
+            running_job.lock().await.replace(
+                job.read()
+                    .bunshin()
+                    .link_cancel(is_cancelled.clone())
+                    .start(ctx.clone())
+                    .await?,
+            );
 
             async move {
                 loop {
@@ -102,6 +105,11 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         }
+    }
+
+    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
+        self.is_cancelled = is_cancelled;
+        self.clone()
     }
 }
 

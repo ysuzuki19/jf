@@ -2,7 +2,13 @@ mod command_driver;
 #[cfg(test)]
 mod tests;
 
-use std::{ops::DerefMut, sync::Arc};
+use std::{
+    ops::DerefMut,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+};
 
 use tokio::sync::Mutex;
 
@@ -25,6 +31,7 @@ pub struct CommandParams {
 pub struct Command<LR: LogWriter> {
     params: ReadOnly<CommandParams>,
     command_driver: Arc<Mutex<Option<CommandDriver<LR>>>>,
+    is_cancelled: Arc<AtomicBool>,
 }
 
 impl<LR: LogWriter> Command<LR> {
@@ -32,6 +39,7 @@ impl<LR: LogWriter> Command<LR> {
         Self {
             params: params.into(),
             command_driver: Arc::new(Mutex::new(None)),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
         }
     }
 }
@@ -64,7 +72,24 @@ impl<LR: LogWriter> Runner<LR> for Command<LR> {
         Self {
             params: self.params.clone(),
             command_driver: Arc::new(Mutex::new(None)),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
         }
+    }
+
+    async fn pre_join(&self) -> JfResult<()> {
+        if let Some(command_driver) = self.command_driver.lock().await.deref_mut() {
+            command_driver.join().await?;
+        }
+        Ok(())
+    }
+
+    fn is_cancelled(&self) -> bool {
+        self.is_cancelled.load(Ordering::Relaxed)
+    }
+
+    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
+        self.is_cancelled = is_cancelled;
+        self.clone()
     }
 }
 

@@ -42,4 +42,9 @@ impl<LR: LogWriter> CommandDriver<LR> {
         self.log_driver.join().await?;
         Ok(())
     }
+
+    pub async fn join(&mut self) -> JfResult<()> {
+        self.log_driver.join().await?;
+        Ok(())
+    }
 }

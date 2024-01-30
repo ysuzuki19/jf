@@ -1,7 +1,4 @@
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-};
+use std::sync::{atomic::AtomicBool, Arc};
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
@@ -22,30 +19,32 @@ where
     async fn cancel(&self) -> JfResult<Self>;
     fn bunshin(&self) -> Self;
 
+    fn is_cancelled(&self) -> bool {
+        false
+    }
+
+    fn link_cancel(&mut self, _: Arc<AtomicBool>) -> Self {
+        self.clone()
+    }
+
+    async fn pre_join(&self) -> JfResult<()> {
+        Ok(())
+    }
     async fn join(&self) -> JfResult<Self> {
         loop {
             if self.is_finished().await? {
                 break;
             }
 
+            if self.is_cancelled() {
+                self.cancel().await?;
+                self.pre_join().await?;
+                self.join().await?;
+                break;
+            }
+
             sleep().await;
         }
         Ok(self.clone())
-    }
-
-    async fn join_with_cancel(&self, is_cancelled: Arc<AtomicBool>) -> JfResult<()> {
-        loop {
-            if self.is_finished().await? {
-                break;
-            }
-
-            if is_cancelled.load(Ordering::Relaxed) {
-                self.cancel().await?;
-                break;
-            }
-
-            sleep().await;
-        }
-        Ok(())
     }
 }

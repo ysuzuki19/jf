@@ -56,19 +56,26 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         let handle: JfHandle = tokio::spawn({
             let ctx = ctx.clone();
-            let jobs = self.jobs.clone().unwrap();
-            let job = jobs[0].start(ctx.clone()).await?; // start first job immediately
+            let mut jobs = self.jobs.clone().unwrap();
             let is_cancelled = self.is_cancelled.clone();
+            let job = jobs[0]
+                .link_cancel(is_cancelled.clone())
+                .start(ctx.clone())
+                .await?; // start first job immediately
 
             async move {
-                job.join_with_cancel(is_cancelled.clone()).await?;
-                for job in jobs.iter().skip(1) {
+                job.join().await?;
+                for mut job in jobs.into_iter().skip(1) {
+                    //TODO: remove this statement
                     if is_cancelled.load(Ordering::Relaxed) {
                         job.cancel().await?;
                         continue;
                     }
-                    job.start(ctx.clone()).await?;
-                    job.join_with_cancel(is_cancelled.clone()).await?;
+                    job.link_cancel(is_cancelled.clone())
+                        .start(ctx.clone())
+                        .await?
+                        .join()
+                        .await?;
                 }
                 Ok(())
             }
@@ -102,6 +109,11 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         }
+    }
+
+    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
+        self.is_cancelled = is_cancelled;
+        self.clone()
     }
 }
 

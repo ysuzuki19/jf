@@ -188,6 +188,11 @@ impl<LR: LogWriter> Runner<LR> for Mock<LR> {
             sleep_count: self.sleep_count,
         })
     }
+
+    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
+        self.is_cancelled = is_cancelled;
+        self.clone()
+    }
 }
 
 impl<LR: LogWriter> From<Mock<LR>> for Job<LR> {
