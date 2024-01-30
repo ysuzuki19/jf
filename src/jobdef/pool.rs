@@ -22,7 +22,7 @@ impl JobdefPool {
         self.map
             .values()
             .filter_map(|jobdef| {
-                if jobdef.visibility().is_public() {
+                if jobdef.is_public() {
                     Some(jobdef.name().to_owned())
                 } else {
                     None

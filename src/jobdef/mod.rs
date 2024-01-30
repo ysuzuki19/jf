@@ -27,8 +27,8 @@ impl Jobdef {
         })
     }
 
-    fn visibility(&self) -> &Visibility {
-        &self.visibility
+    fn is_public(&self) -> bool {
+        self.visibility.is_public()
     }
 
     fn visibility_guard(&self, agent: Agent) -> JfResult<()> {
@@ -97,6 +97,7 @@ mod tests {
                         params: Fixture::fixture(),
                     }),
                 )?;
+                assert!(jobdef_public.is_public());
                 assert!(jobdef_public.visibility_guard(Agent::Job).is_ok());
                 assert!(jobdef_public.visibility_guard(Agent::Cli).is_ok());
 
@@ -107,6 +108,7 @@ mod tests {
                         params: Fixture::fixture(),
                     }),
                 )?;
+                assert!(!jobdef_private.is_public());
                 assert!(jobdef_private.visibility_guard(Agent::Job).is_ok());
                 assert!(jobdef_private.visibility_guard(Agent::Cli).is_err());
                 Ok(())

@@ -4,8 +4,10 @@ pub type JfResult<T> = Result<T, JfError>;
 pub enum JfError {
     #[error("IO error occurred: {0}")]
     IoError(#[from] std::io::Error),
-    #[error("SerdeJsonError occurred: {0}")]
-    MpscRecvError(#[from] std::sync::mpsc::RecvError),
+    #[error("std::sync::mpsc::RecvError occurred: {0}")]
+    SyncMpscMpscRecvError(#[from] std::sync::mpsc::RecvError),
+    #[error("std::sync::mpsc::RecvTimeoutError occurred: {0}")]
+    SyncMpscRecvTimeoutError(#[from] std::sync::mpsc::RecvTimeoutError),
     #[error("GlobError occurred: {0}")]
     GlobError(#[from] glob::GlobError),
     #[error("Toml Deserialize error occurred: {0}")]

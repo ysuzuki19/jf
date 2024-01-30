@@ -68,6 +68,7 @@ fn start() -> JfResult<()> {
             let w = Watch::try_fixture()?;
             w.start(Fixture::fixture()).await?;
             assert!(!w.is_finished().await?);
+            w.cancel().await?.wait().await?;
             Ok(())
         },
     )
@@ -87,6 +88,7 @@ fn watch() -> JfResult<()> {
             runner::sleep().await;
             let id2 = w.running_job.lock().await.as_mock().id();
             assert_ne!(id, id2);
+            w.cancel().await?;
             Ok(())
         },
     )
