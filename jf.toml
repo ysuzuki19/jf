@@ -9,8 +9,8 @@ cargo binstall cargo-llvm-cov
 """
 
 [job.install]
-mode = "sequential"
-jobs = ["only-test", "only-install"]
+command = "cargo"
+args = ["install", "--path", "."]
 
 [job.uninstall]
 command = "cargo"
@@ -20,7 +20,7 @@ args = ["uninstall"]
 mode = "sequential"
 jobs = ["git-pull", "install"]
 
-[job.live-llvm-cov]
+[job."llvm-cov:watch"]
 mode = "watch"
 job = "llvm-cov"
 watch_list = ["src/**", "Cargo.toml"]
@@ -33,7 +33,7 @@ args = ["+nightly", "llvm-cov"]
 command = "cargo"
 args = ["+nightly", "llvm-cov", "--lcov", "--output-path", "target/lcov.info"]
 
-[job."live-llvm-cov:html"]
+[job."llvm-cov:html:watch:serve"]
 mode = "parallel"
 jobs = ["llvm-cov:html:serve", "llvm-cov:html:watch"]
 
@@ -61,41 +61,37 @@ visibility = "private"
 command = "cargo"
 args = ["+nightly", "llvm-cov", "--html", "--no-clean"]
 
-[job.live-test]
+[job."test:watch"]
 mode = "watch"
-job = "only-test"
-watch_list = ["src/**", "Cargo.toml"]
+job = "test"
+watch_list = ["src/*", "src/**", "Cargo.toml"]
 
-[job.live-run]
+[job."run:watch"]
 mode = "watch"
 job = "run"
 watch_list = ["src/**", "Cargo.toml"]
 
 [job.test-run]
 mode = "sequential"
-jobs = ["only-test", "run"]
+jobs = ["test", "run"]
 
 [job.run]
 command = "cargo"
 args = ["run"]
 description = "run the project"
 
-[job.only-test]
+[job.test]
 command = "cargo"
 args = ["test", "--release"]
 description = "run the tests"
 
-[job.only-build]
+[job.build]
 command = "cargo"
 args = ["build"]
 
-[job.only-install]
-command = "cargo"
-args = ["install", "--path", "."]
-
 [job.test-build]
 mode = "parallel"
-jobs = ["only-test", "only-build"]
+jobs = ["test", "build"]
 
 [job.git-pull]
 command = "git"
