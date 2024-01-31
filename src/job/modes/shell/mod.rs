@@ -53,8 +53,10 @@ impl<LR: LogWriter> Checker for Shell<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Shell<LR> {
-    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
-        self.command.start(ctx).await?;
+    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
+        ctx.logger.debug("Shell starting...").await?;
+        self.command.start(ctx.clone()).await?;
+        ctx.logger.debug("Shell started").await?;
         Ok(self.clone())
     }
 

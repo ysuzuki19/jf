@@ -79,7 +79,8 @@ impl<LR: LogWriter> Checker for Sequential<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
-    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
+    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
+        ctx.logger.debug("Sequential starting...").await?;
         let handle: JfHandle = tokio::spawn({
             let ctx = ctx.clone();
             let mut jobs = self.jobs.clone().unwrap();
@@ -107,6 +108,7 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
             }
         });
         self.handle.lock().await.replace(handle);
+        ctx.logger.debug("Sequential started").await?;
         Ok(self.clone())
     }
 

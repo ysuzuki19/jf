@@ -71,11 +71,16 @@ impl<LR: LogWriter> Checker for Command<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Command<LR> {
-    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
-        let cd = CommandDriver::spawn(ctx, &self.params.read().command, &self.params.read().args)
-            .await?;
+    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
+        ctx.logger.debug("Command starting...").await?;
+        let cd = CommandDriver::spawn(
+            ctx.clone(),
+            &self.params.read().command,
+            &self.params.read().args,
+        )
+        .await?;
         self.command_driver.lock().await.replace(cd);
-
+        ctx.logger.debug("Command started").await?;
         Ok(self.clone())
     }
 

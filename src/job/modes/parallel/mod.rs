@@ -70,14 +70,14 @@ impl<LR: LogWriter> Checker for Parallel<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
-    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
+    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
+        ctx.logger.debug("Parallel starting...").await?;
         for job in self.running_jobs.lock().await.deref_mut() {
             job.link_cancel(self.is_cancelled.clone())
                 .start(ctx.clone())
                 .await?;
         }
-        // self.running_jobs.lock().await.replace(jobs);
-
+        ctx.logger.debug("Parallel started").await?;
         Ok(self.clone())
     }
 

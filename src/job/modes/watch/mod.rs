@@ -67,7 +67,8 @@ impl<LR: LogWriter> Checker for Watch<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Watch<LR> {
-    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
+    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
+        ctx.logger.debug("Watch starting...").await?;
         let handle = tokio::spawn({
             let watcher = watcher::JfWatcher::new(&self.watch_list, self.is_cancelled.clone())?;
             let ctx = ctx.clone();
@@ -103,6 +104,7 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
             }
         });
         self.handle.lock().await.replace(handle);
+        ctx.logger.debug("Watch started").await?;
         Ok(self.clone())
     }
 

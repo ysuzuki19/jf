@@ -54,9 +54,9 @@ impl<LR: LogWriter> Logger<LR> {
         self.log_writer.write(msg.as_ref()).await
     }
 
-    // pub async fn debug<S: AsRef<str>>(&mut self, msg: S) -> JfResult<()> {
-    //     self.write_with_guard(LogLevel::Debug, msg).await
-    // }
+    pub async fn debug<S: AsRef<str>>(&mut self, msg: S) -> JfResult<()> {
+        self.write_with_guard(LogLevel::Debug, msg).await
+    }
 
     pub async fn info<S: AsRef<str>>(&mut self, msg: S) -> JfResult<()> {
         self.write_with_guard(LogLevel::Info, msg).await
