@@ -7,8 +7,9 @@ use crate::{
 
 pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<()>>;
 
-pub(super) async fn sleep() {
-    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+pub(super) const INTERVAL_MILLIS: u64 = 100;
+pub(super) async fn interval() {
+    tokio::time::sleep(tokio::time::Duration::from_millis(INTERVAL_MILLIS)).await;
 }
 
 #[async_trait::async_trait]
@@ -52,7 +53,7 @@ where
                 break;
             }
 
-            sleep().await;
+            interval().await;
         }
         Ok(self.clone())
     }

@@ -7,6 +7,8 @@ use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
 use crate::util::{error::JfResult, ReadOnly};
 
+use super::INTERVAL_MILLIS;
+
 type NotifyPayload = Result<notify::Event, notify::Error>;
 
 pub struct JfWatcher {
@@ -38,7 +40,10 @@ impl JfWatcher {
             if self.is_cancelled.load(Ordering::Relaxed) {
                 break;
             }
-            match self.rx.recv_timeout(std::time::Duration::from_millis(100)) {
+            match self
+                .rx
+                .recv_timeout(std::time::Duration::from_millis(INTERVAL_MILLIS))
+            {
                 Ok(event) => match event?.kind {
                     EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => {
                         break;

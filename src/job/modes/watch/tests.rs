@@ -86,7 +86,7 @@ fn watch() -> JfResult<()> {
             assert!(!w.is_finished().await?);
             let id = w.running_job.lock().await.clone().unwrap().as_mock().id();
             std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
-            runner::sleep().await;
+            runner::interval().await;
             let id2 = w.running_job.lock().await.clone().unwrap().as_mock().id();
             assert_ne!(id, id2);
             w.cancel().await?;
@@ -103,7 +103,7 @@ fn cancel() -> JfResult<()> {
         async {
             let w = Watch::try_fixture()?;
             w.start(Fixture::fixture()).await?.cancel().await?;
-            runner::sleep().await; // for cover breaking loop
+            runner::interval().await; // for cover breaking loop
             w.join().await?;
             assert!(w.is_finished().await?);
             Ok(())

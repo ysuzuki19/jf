@@ -2,7 +2,6 @@ pub mod modes;
 mod runner;
 #[cfg(test)]
 mod tests;
-mod types;
 
 use futures::{stream, StreamExt};
 
