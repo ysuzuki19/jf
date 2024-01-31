@@ -2,6 +2,9 @@ pub mod modes;
 mod runner;
 mod types;
 
+use futures::{stream, StreamExt};
+
+use self::runner::Bunshin;
 pub use self::runner::Runner;
 use crate::{
     cfg::job_cfg::JobCfg,
@@ -32,6 +35,21 @@ impl<LR: LogWriter> Job<LR> {
             #[cfg(test)]
             JobCfg::Mock(c) => modes::Mock::new(c.params.clone()).into(),
         })
+    }
+}
+
+#[async_trait::async_trait]
+impl<LR: LogWriter> Bunshin for Job<LR> {
+    async fn bunshin(&self) -> Self {
+        match self {
+            Self::Command(t) => Self::Command(t.bunshin().await),
+            Self::Parallel(t) => Self::Parallel(t.bunshin().await),
+            Self::Sequential(t) => Self::Sequential(t.bunshin().await),
+            Self::Shell(t) => Self::Shell(t.bunshin().await),
+            Self::Watch(t) => Self::Watch(t.bunshin().await),
+            #[cfg(test)]
+            Self::Mock(t) => Self::Mock(t.bunshin().await),
+        }
     }
 }
 
@@ -72,17 +90,15 @@ impl<LR: LogWriter> Runner<LR> for Job<LR> {
             Self::Mock(t) => t.cancel().await?.into(),
         })
     }
+}
 
+#[async_trait::async_trait]
+impl<LR: LogWriter> Bunshin for Vec<Job<LR>> {
     async fn bunshin(&self) -> Self {
-        match self {
-            Self::Command(t) => Self::Command(t.bunshin().await),
-            Self::Parallel(t) => Self::Parallel(t.bunshin().await),
-            Self::Sequential(t) => Self::Sequential(t.bunshin().await),
-            Self::Shell(t) => Self::Shell(t.bunshin().await),
-            Self::Watch(t) => Self::Watch(t.bunshin().await),
-            #[cfg(test)]
-            Self::Mock(t) => Self::Mock(t.bunshin().await),
-        }
+        stream::iter(self.iter())
+            .then(|j| async { j.bunshin().await })
+            .collect::<Vec<Job<LR>>>()
+            .await
     }
 }
 

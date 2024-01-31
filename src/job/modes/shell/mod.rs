@@ -3,7 +3,7 @@ mod tests;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{Job, Runner},
+    job::{runner::Bunshin, Job, Runner},
     util::{error::JfResult, ReadOnly},
 };
 
@@ -35,6 +35,16 @@ impl<LR: LogWriter> Shell<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Bunshin for Shell<LR> {
+    async fn bunshin(&self) -> Self {
+        Self {
+            params: self.params.clone(),
+            command: self.command.bunshin().await,
+        }
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Shell<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         self.command.start(ctx).await?;
@@ -48,14 +58,6 @@ impl<LR: LogWriter> Runner<LR> for Shell<LR> {
     async fn cancel(&self) -> JfResult<Self> {
         self.command.cancel().await?;
         Ok(self.clone())
-    }
-
-    async fn bunshin(&self) -> Self {
-        let command = self.command.bunshin().await;
-        Self {
-            params: self.params.clone(),
-            command,
-        }
     }
 }
 

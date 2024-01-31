@@ -9,12 +9,14 @@ use std::{
     },
 };
 
-use futures::{stream, StreamExt};
 use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{runner::Runner, Job},
+    job::{
+        runner::{Bunshin, Runner},
+        Job,
+    },
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
 };
@@ -47,6 +49,17 @@ impl<LR: LogWriter> Parallel<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Bunshin for Parallel<LR> {
+    async fn bunshin(&self) -> Self {
+        Self {
+            jobs: self.jobs.bunshin().await,
+            is_cancelled: Arc::new(AtomicBool::new(false)),
+            running_jobs: Arc::new(Mutex::new(self.running_jobs.lock().await.bunshin().await)),
+        }
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         for job in self.running_jobs.lock().await.deref_mut() {
@@ -74,22 +87,6 @@ impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
             job.cancel().await?.join().await?;
         }
         Ok(self.clone())
-    }
-
-    async fn bunshin(&self) -> Self {
-        Self {
-            jobs: stream::iter(self.jobs.iter())
-                .then(|j| async { j.bunshin().await })
-                .collect::<Vec<Job<LR>>>()
-                .await,
-            is_cancelled: Arc::new(AtomicBool::new(false)),
-            running_jobs: Arc::new(Mutex::new(
-                stream::iter(self.running_jobs.lock().await.iter())
-                    .then(|j| async { j.bunshin().await })
-                    .collect::<Vec<Job<LR>>>()
-                    .await,
-            )),
-        }
     }
 
     fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {

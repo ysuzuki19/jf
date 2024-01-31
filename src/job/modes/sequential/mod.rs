@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{types::JfHandle, Job, Runner},
+    job::{runner::Bunshin, types::JfHandle, Job, Runner},
     jobdef::{Agent, JobdefPool},
     util::{
         error::{IntoJfError, JfResult},
@@ -49,6 +49,21 @@ impl<LR: LogWriter> Sequential<LR> {
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         })
+    }
+}
+
+#[async_trait::async_trait]
+impl<LR: LogWriter> Bunshin for Sequential<LR> {
+    async fn bunshin(&self) -> Self {
+        Self {
+            jobs: stream::iter(self.jobs.clone().unwrap().into_iter())
+                .then(|j| async move { j.bunshin().await })
+                .collect::<Vec<Job<LR>>>()
+                .await
+                .into(),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
+            handle: Arc::new(Mutex::new(None)),
+        }
     }
 }
 
@@ -95,18 +110,6 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
     async fn cancel(&self) -> JfResult<Self> {
         self.is_cancelled.store(true, Ordering::Relaxed);
         Ok(self.clone())
-    }
-
-    async fn bunshin(&self) -> Self {
-        Self {
-            jobs: stream::iter(self.jobs.clone().unwrap().into_iter())
-                .then(|j| async move { j.bunshin().await })
-                .collect::<Vec<Job<LR>>>()
-                .await
-                .into(),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
-            handle: Arc::new(Mutex::new(None)),
-        }
     }
 
     fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {

@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{Job, Runner},
+    job::{runner::Bunshin, Job, Runner},
     util::{error::JfResult, ReadOnly},
 };
 
@@ -45,6 +45,17 @@ impl<LR: LogWriter> Command<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Bunshin for Command<LR> {
+    async fn bunshin(&self) -> Self {
+        Self {
+            params: self.params.clone(),
+            command_driver: Arc::new(Mutex::new(None)),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
+        }
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Command<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         let cd = CommandDriver::spawn(ctx, &self.params.read().command, &self.params.read().args)
@@ -66,14 +77,6 @@ impl<LR: LogWriter> Runner<LR> for Command<LR> {
             command_driver.cancel().await?;
         }
         Ok(self.clone())
-    }
-
-    async fn bunshin(&self) -> Self {
-        Self {
-            params: self.params.clone(),
-            command_driver: Arc::new(Mutex::new(None)),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
-        }
     }
 
     async fn pre_join(&self) -> JfResult<()> {

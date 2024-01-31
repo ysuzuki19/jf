@@ -10,6 +10,11 @@ pub async fn sleep() {
 }
 
 #[async_trait::async_trait]
+pub trait Bunshin {
+    async fn bunshin(&self) -> Self;
+}
+
+#[async_trait::async_trait]
 pub trait Runner<LR: LogWriter>
 where
     Self: Sized + Clone,
@@ -17,7 +22,6 @@ where
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self>;
     async fn is_finished(&self) -> JfResult<bool>;
     async fn cancel(&self) -> JfResult<Self>;
-    async fn bunshin(&self) -> Self;
 
     fn is_cancelled(&self) -> bool {
         false

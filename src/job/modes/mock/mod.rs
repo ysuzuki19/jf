@@ -8,6 +8,7 @@ use tokio::sync::Mutex;
 
 use crate::ctx::logger::LogWriter;
 use crate::ctx::Ctx;
+use crate::job::runner::Bunshin;
 use crate::job::Job;
 use crate::job::Runner;
 use crate::util::error::JfResult;
@@ -143,6 +144,16 @@ impl<LR: LogWriter> Mock<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Bunshin for Mock<LR> {
+    async fn bunshin(&self) -> Self {
+        Self::new(MockParams {
+            each_sleep_time: self.each_sleep_time,
+            sleep_count: self.sleep_count,
+        })
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Mock<LR> {
     async fn start(&self, _: Ctx<LR>) -> JfResult<Self> {
         self.is_started.store(true, Ordering::Relaxed);
@@ -180,13 +191,6 @@ impl<LR: LogWriter> Runner<LR> for Mock<LR> {
         self.is_finished.store(true, Ordering::Relaxed);
         self.is_running.store(false, Ordering::Relaxed);
         Ok(self.clone())
-    }
-
-    async fn bunshin(&self) -> Self {
-        Self::new(MockParams {
-            each_sleep_time: self.each_sleep_time,
-            sleep_count: self.sleep_count,
-        })
     }
 
     fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {

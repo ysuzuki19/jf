@@ -11,7 +11,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{types::JfHandle, Job, Runner},
+    job::{runner::Bunshin, types::JfHandle, Job, Runner},
     jobdef::{Agent, JobdefPool},
     util::{error::JfResult, ReadOnly},
 };
@@ -41,6 +41,19 @@ impl<LR: LogWriter> Watch<LR> {
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
         })
+    }
+}
+
+#[async_trait::async_trait]
+impl<LR: LogWriter> Bunshin for Watch<LR> {
+    async fn bunshin(&self) -> Self {
+        Self {
+            job: Box::new(self.job.read().bunshin().await.into()),
+            running_job: Arc::new(Mutex::new(None)),
+            watch_list: self.watch_list.clone(),
+            is_cancelled: Arc::new(AtomicBool::new(false)),
+            handle: Arc::new(Mutex::new(None)),
+        }
     }
 }
 
@@ -96,16 +109,6 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
             running_job.cancel().await?;
         }
         Ok(self.clone())
-    }
-
-    async fn bunshin(&self) -> Self {
-        Self {
-            job: Box::new(self.job.read().bunshin().await.into()),
-            running_job: Arc::new(Mutex::new(None)),
-            watch_list: self.watch_list.clone(),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
-            handle: Arc::new(Mutex::new(None)),
-        }
     }
 
     fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
