@@ -13,7 +13,7 @@ async fn main() {
     let args = cli::Args::parse();
     match cli::Cli::<ctx::logger::JfStdout>::load(args) {
         Ok(cli) => {
-            let mut logger = cli.ctx().logger.clone();
+            let mut logger = cli.ctx().logger();
             if let Err(e) = cli.run().await {
                 let _ = logger.error(e.to_string()).await;
                 std::process::exit(1);

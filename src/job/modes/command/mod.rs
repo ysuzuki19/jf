@@ -29,14 +29,16 @@ pub struct CommandParams {
 
 #[derive(Clone)]
 pub struct Command<LR: LogWriter> {
+    ctx: Ctx<LR>,
     params: ReadOnly<CommandParams>,
     command_driver: Arc<Mutex<Option<CommandDriver<LR>>>>,
     is_cancelled: Arc<AtomicBool>,
 }
 
 impl<LR: LogWriter> Command<LR> {
-    pub fn new(params: CommandParams) -> Self {
+    pub fn new(ctx: Ctx<LR>, params: CommandParams) -> Self {
         Self {
+            ctx,
             params: params.into(),
             command_driver: Arc::new(Mutex::new(None)),
             is_cancelled: Arc::new(AtomicBool::new(false)),
@@ -48,6 +50,7 @@ impl<LR: LogWriter> Command<LR> {
 impl<LR: LogWriter> Bunshin for Command<LR> {
     async fn bunshin(&self) -> Self {
         Self {
+            ctx: self.ctx.clone(),
             params: self.params.clone(),
             command_driver: Arc::new(Mutex::new(None)),
             is_cancelled: Arc::new(AtomicBool::new(false)),
@@ -71,16 +74,17 @@ impl<LR: LogWriter> Checker for Command<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Command<LR> {
-    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
-        ctx.logger.debug("Command starting...").await?;
+    async fn start(&self) -> JfResult<Self> {
+        let mut logger = self.ctx.logger();
+        logger.debug("Command starting...").await?;
         let cd = CommandDriver::spawn(
-            ctx.clone(),
+            self.ctx.clone(),
             &self.params.read().command,
             &self.params.read().args,
         )
         .await?;
         self.command_driver.lock().await.replace(cd);
-        ctx.logger.debug("Command started").await?;
+        logger.debug("Command started").await?;
         Ok(self.clone())
     }
 

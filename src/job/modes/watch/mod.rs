@@ -24,6 +24,7 @@ pub struct WatchParams {
 
 #[derive(Clone)]
 pub struct Watch<LR: LogWriter> {
+    ctx: Ctx<LR>,
     job: Box<ReadOnly<Job<LR>>>,
     running_job: Arc<Mutex<Option<Job<LR>>>>,
     watch_list: Vec<String>,
@@ -32,10 +33,11 @@ pub struct Watch<LR: LogWriter> {
 }
 
 impl<LR: LogWriter> Watch<LR> {
-    pub fn new(params: WatchParams, pool: JobdefPool) -> JfResult<Self> {
-        let job = pool.build(params.job, Agent::Job)?;
+    pub fn new(ctx: Ctx<LR>, params: WatchParams, pool: JobdefPool) -> JfResult<Self> {
+        let job = pool.build(ctx.clone(), params.job, Agent::Job)?;
         Ok(Self {
-            job: Box::new(job.clone().into()),
+            ctx,
+            job: Box::new(job.into()),
             running_job: Arc::new(Mutex::new(None)),
             watch_list: params.watch_list,
             is_cancelled: Arc::new(AtomicBool::new(false)),
@@ -48,6 +50,7 @@ impl<LR: LogWriter> Watch<LR> {
 impl<LR: LogWriter> Bunshin for Watch<LR> {
     async fn bunshin(&self) -> Self {
         Self {
+            ctx: self.ctx.clone(),
             job: Box::new(self.job.read().bunshin().await.into()),
             running_job: Arc::new(Mutex::new(None)),
             watch_list: self.watch_list.clone(),
@@ -67,11 +70,11 @@ impl<LR: LogWriter> Checker for Watch<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Watch<LR> {
-    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
-        ctx.logger.debug("Watch starting...").await?;
+    async fn start(&self) -> JfResult<Self> {
+        let mut logger = self.ctx.logger();
+        logger.debug("Watch starting...").await?;
         let handle = tokio::spawn({
             let watcher = watcher::JfWatcher::new(&self.watch_list, self.is_cancelled.clone())?;
-            let ctx = ctx.clone();
             let job = self.job.clone();
             let running_job = self.running_job.clone();
             let is_cancelled = self.is_cancelled.clone();
@@ -80,7 +83,7 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
                     .bunshin()
                     .await
                     .link_cancel(is_cancelled.clone())
-                    .start(ctx.clone())
+                    .start()
                     .await?,
             );
 
@@ -98,13 +101,13 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
                     running_job
                         .lock()
                         .await
-                        .replace(job.read().bunshin().await.start(ctx.clone()).await?);
+                        .replace(job.read().bunshin().await.start().await?);
                 }
                 Ok(())
             }
         });
         self.handle.lock().await.replace(handle);
-        ctx.logger.debug("Watch started").await?;
+        logger.debug("Watch started").await?;
         Ok(self.clone())
     }
 

@@ -25,22 +25,24 @@ pub struct ParallelParams {
 
 #[derive(Clone)]
 pub struct Parallel<LR: LogWriter> {
+    ctx: Ctx<LR>,
     jobs: Vec<Job<LR>>,
     is_cancelled: Arc<AtomicBool>,
     running_jobs: Arc<Mutex<Vec<Job<LR>>>>,
 }
 
 impl<LR: LogWriter> Parallel<LR> {
-    pub fn new(params: ParallelParams, pool: JobdefPool) -> JfResult<Self> {
+    pub fn new(ctx: Ctx<LR>, params: ParallelParams, pool: JobdefPool) -> JfResult<Self> {
         let jobs = params
             .jobs
             .into_iter()
-            .map(|job_name| pool.build(job_name, Agent::Job))
+            .map(|job_name| pool.build(ctx.clone(), job_name, Agent::Job))
             .collect::<JfResult<Vec<Job<LR>>>>()?;
         Ok(Self {
+            ctx,
             jobs: jobs.clone(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
-            running_jobs: Arc::new(Mutex::new(jobs.clone())),
+            running_jobs: Arc::new(Mutex::new(jobs)),
         })
     }
 }
@@ -49,6 +51,7 @@ impl<LR: LogWriter> Parallel<LR> {
 impl<LR: LogWriter> Bunshin for Parallel<LR> {
     async fn bunshin(&self) -> Self {
         Self {
+            ctx: self.ctx.clone(),
             jobs: self.jobs.bunshin().await,
             is_cancelled: Arc::new(AtomicBool::new(false)),
             running_jobs: Arc::new(Mutex::new(self.running_jobs.lock().await.bunshin().await)),
@@ -70,14 +73,13 @@ impl<LR: LogWriter> Checker for Parallel<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
-    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
-        ctx.logger.debug("Parallel starting...").await?;
+    async fn start(&self) -> JfResult<Self> {
+        let mut logger = self.ctx.logger();
+        logger.debug("Parallel starting...").await?;
         for job in self.running_jobs.lock().await.deref_mut() {
-            job.link_cancel(self.is_cancelled.clone())
-                .start(ctx.clone())
-                .await?;
+            job.link_cancel(self.is_cancelled.clone()).start().await?;
         }
-        ctx.logger.debug("Parallel started").await?;
+        logger.debug("Parallel started").await?;
         Ok(self.clone())
     }
 

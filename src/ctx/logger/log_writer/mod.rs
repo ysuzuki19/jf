@@ -35,12 +35,9 @@ mod tests {
             async {
                 let mut w = MockLogWriter::init();
                 w.write("test").await?;
-                assert_eq!(w.lines.len(), 1);
-                assert_eq!(w.lines[0], "test");
+                assert_eq!(w.lines(), vec!["test"]);
                 w.write("test2").await?;
-                assert_eq!(w.lines.len(), 2);
-                assert_eq!(w.lines[0], "test");
-                assert_eq!(w.lines[1], "test2");
+                assert_eq!(w.lines(), vec!["test", "test2"]);
                 Ok(())
             },
         )

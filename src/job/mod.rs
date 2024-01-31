@@ -25,13 +25,13 @@ pub enum Job<LR: LogWriter> {
 }
 
 impl<LR: LogWriter> Job<LR> {
-    pub fn new(job_cfg: &JobCfg, pool: JobdefPool) -> JfResult<Self> {
+    pub fn new(ctx: Ctx<LR>, job_cfg: &JobCfg, pool: JobdefPool) -> JfResult<Self> {
         Ok(match job_cfg {
-            JobCfg::Command(c) => modes::Command::new(c.params.clone()).into(),
-            JobCfg::Parallel(c) => modes::Parallel::new(c.params.clone(), pool)?.into(),
-            JobCfg::Sequential(c) => modes::Sequential::new(c.params.clone(), pool)?.into(),
-            JobCfg::Shell(c) => modes::Shell::new(c.params.clone()).into(),
-            JobCfg::Watch(c) => modes::Watch::new(c.params.clone(), pool)?.into(),
+            JobCfg::Command(c) => modes::Command::new(ctx, c.params.clone()).into(),
+            JobCfg::Parallel(c) => modes::Parallel::new(ctx, c.params.clone(), pool)?.into(),
+            JobCfg::Sequential(c) => modes::Sequential::new(ctx, c.params.clone(), pool)?.into(),
+            JobCfg::Shell(c) => modes::Shell::new(ctx, c.params.clone()).into(),
+            JobCfg::Watch(c) => modes::Watch::new(ctx, c.params.clone(), pool)?.into(),
             #[cfg(test)]
             JobCfg::Mock(c) => modes::Mock::new(c.params.clone()).into(),
         })
@@ -70,15 +70,15 @@ impl<LR: LogWriter> Checker for Job<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Job<LR> {
-    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
+    async fn start(&self) -> JfResult<Self> {
         Ok(match self {
-            Self::Command(t) => t.start(ctx).await?.into(),
-            Self::Parallel(t) => t.start(ctx).await?.into(),
-            Self::Sequential(t) => t.start(ctx).await?.into(),
-            Self::Shell(t) => t.start(ctx).await?.into(),
-            Self::Watch(t) => t.start(ctx).await?.into(),
+            Self::Command(t) => t.start().await?.into(),
+            Self::Parallel(t) => t.start().await?.into(),
+            Self::Sequential(t) => t.start().await?.into(),
+            Self::Shell(t) => t.start().await?.into(),
+            Self::Watch(t) => t.start().await?.into(),
             #[cfg(test)]
-            Self::Mock(t) => t.start(ctx).await?.into(),
+            Self::Mock(t) => t.start().await?.into(),
         })
     }
 

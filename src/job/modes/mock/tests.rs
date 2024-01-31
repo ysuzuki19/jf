@@ -35,7 +35,7 @@ fn run_join() -> JfResult<()> {
             let mock = Mock::fixture();
             let id = mock.id();
 
-            mock.start(Fixture::fixture())
+            mock.start()
                 .await?
                 .assert_is_started_eq(true)
                 .assert_is_running_eq(true)
@@ -62,7 +62,7 @@ fn run_cancel_join() -> JfResult<()> {
             let mock = Mock::fixture();
             let id = mock.id();
 
-            mock.start(Fixture::fixture())
+            mock.start()
                 .await?
                 .cancel()
                 .await?
@@ -86,7 +86,7 @@ fn bunshin() -> JfResult<()> {
         async {
             let origin = Mock::fixture();
 
-            origin.start(Fixture::fixture()).await?.cancel().await?;
+            origin.start().await?.cancel().await?;
             origin
                 .assert_is_started_eq(true)
                 .assert_is_running_eq(false)

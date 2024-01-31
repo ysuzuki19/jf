@@ -9,7 +9,7 @@ impl Fixture for Command<MockLogWriter> {
             command: String::from("sleep"),
             args: vec![String::from("1")],
         };
-        Command::new(params)
+        Command::new(Fixture::fixture(), params)
     }
 }
 
@@ -20,7 +20,7 @@ fn run_without_blocking() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let command = Command::fixture();
-            command.start(Fixture::fixture()).await?;
+            command.start().await?;
             assert!(!command.is_finished().await?);
             Ok(())
         },
@@ -34,7 +34,7 @@ fn join() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let command = Command::fixture();
-            command.start(Fixture::fixture()).await?;
+            command.start().await?;
             command.join().await?;
             assert!(command.is_finished().await?);
             Ok(())
@@ -49,7 +49,7 @@ fn cancel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let command = Command::fixture();
-            command.start(Fixture::fixture()).await?.cancel().await?;
+            command.start().await?.cancel().await?;
             assert!(command.is_finished().await?);
             Ok(())
         },
@@ -63,7 +63,7 @@ fn bunshin() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let origin = Command::fixture();
-            origin.start(Fixture::fixture()).await?;
+            origin.start().await?;
             origin.join().await?;
             assert!(origin.is_finished().await?);
             let bunshin = origin.bunshin().await;

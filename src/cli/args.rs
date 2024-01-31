@@ -60,9 +60,7 @@ impl Args {
     }
 
     fn setup_ctx<LR: logger::LogWriter>(&self) -> Ctx<LR> {
-        Ctx {
-            logger: logger::Logger::new(self.log_level),
-        }
+        Ctx::new(self.log_level)
     }
 
     fn setup_opts(&self) -> Opts {
@@ -146,7 +144,7 @@ mod tests {
         let args = Args::parse_from([fixtures::APP_NAME, "--log-level", "error"]);
 
         let ctx = args.setup_ctx::<MockLogWriter>();
-        assert_eq!(ctx.logger.level(), logger::LogLevel::Error);
+        assert_eq!(ctx.logger().level(), logger::LogLevel::Error);
     }
 
     #[test]

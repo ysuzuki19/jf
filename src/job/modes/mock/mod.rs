@@ -7,7 +7,7 @@ use std::sync::{atomic::Ordering, Arc};
 use tokio::sync::Mutex;
 
 use crate::{
-    ctx::{logger::LogWriter, Ctx},
+    ctx::logger::LogWriter,
     job::{runner::*, Job},
     util::{error::JfResult, testutil::Fixture},
 };
@@ -160,7 +160,7 @@ impl<LR: LogWriter> Checker for Mock<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Mock<LR> {
-    async fn start(&self, _: Ctx<LR>) -> JfResult<Self> {
+    async fn start(&self) -> JfResult<Self> {
         self.is_started.store(true, Ordering::Relaxed);
         self.is_running.store(true, Ordering::Relaxed);
         let handle = tokio::spawn({

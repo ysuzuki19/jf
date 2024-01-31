@@ -24,8 +24,8 @@ impl JobController {
 
     pub async fn run<LR: logger::LogWriter>(&self, ctx: Ctx<LR>, job_name: String) -> JfResult<()> {
         self.pool
-            .build::<LR>(job_name, Agent::Cli)?
-            .start(ctx)
+            .build::<LR>(ctx, job_name, Agent::Cli)?
+            .start()
             .await?
             .join()
             .await?;

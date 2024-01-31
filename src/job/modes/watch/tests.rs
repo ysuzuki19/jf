@@ -27,7 +27,11 @@ impl Fixture for WatchParams {
 impl TryFixture for Watch<MockLogWriter> {
     #[cfg_attr(coverage, coverage(off))]
     fn try_fixture() -> JfResult<Self> {
-        Watch::new(Fixture::fixture(), TryFixture::try_fixture()?)
+        Watch::new(
+            Fixture::fixture(),
+            Fixture::fixture(),
+            TryFixture::try_fixture()?,
+        )
     }
 }
 
@@ -41,7 +45,12 @@ fn invalid_new_with_unknown_job() -> JfResult<()> {
                 job: "unknown".to_string(),
                 watch_list: fixtures::watch_list(),
             };
-            assert!(Watch::<MockLogWriter>::new(params, TryFixture::try_fixture()?).is_err());
+            assert!(Watch::<MockLogWriter>::new(
+                Fixture::fixture(),
+                params,
+                TryFixture::try_fixture()?
+            )
+            .is_err());
             Ok(())
         },
     )
@@ -67,7 +76,7 @@ fn start() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let w = Watch::try_fixture()?;
-            w.start(Fixture::fixture()).await?;
+            w.start().await?;
             assert!(!w.is_finished().await?);
             w.cancel().await?.join().await?;
             Ok(())
@@ -82,7 +91,7 @@ fn watch() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let w = Watch::try_fixture()?;
-            w.start(Fixture::fixture()).await?;
+            w.start().await?;
             assert!(!w.is_finished().await?);
             let id = w.running_job.lock().await.clone().unwrap().as_mock().id();
             std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
@@ -102,7 +111,7 @@ fn cancel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let w = Watch::try_fixture()?;
-            w.start(Fixture::fixture()).await?.cancel().await?;
+            w.start().await?.cancel().await?;
             runner::interval().await; // for cover breaking loop
             w.join().await?;
             assert!(w.is_finished().await?);

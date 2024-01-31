@@ -39,7 +39,7 @@ impl<LR: LogWriter> LogDriver<LR> {
                 let mut reader = BufReader::new(stdout).lines();
 
                 while let Some(line) = reader.next_line().await? {
-                    ctx.lock().await.logger.info(line).await?;
+                    ctx.lock().await.logger().info(line).await?;
                 }
 
                 Ok(())
@@ -72,7 +72,7 @@ mod tests {
 
     impl LogDriver<MockLogWriter> {
         async fn log_writer(&self) -> MockLogWriter {
-            self.ctx.lock().await.logger.log_writer().clone()
+            self.ctx.lock().await.logger().log_writer().to_owned()
         }
     }
 
@@ -112,7 +112,7 @@ mod tests {
             async {
                 let ctx = Fixture::fixture();
                 let mut log_driver = LogDriver::new(ctx);
-                assert_eq!(log_driver.log_writer().await.lines.len(), 0);
+                assert_eq!(log_driver.log_writer().await.lines().len(), 0);
 
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
@@ -121,7 +121,7 @@ mod tests {
                 log_driver.mount(child.stdout.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
-                assert_eq!(log_driver.log_writer().await.lines.len(), 1);
+                assert_eq!(log_driver.log_writer().await.lines(), vec!["hello"]);
 
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
@@ -130,7 +130,10 @@ mod tests {
                 log_driver.mount(child.stdout.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
-                assert_eq!(log_driver.log_writer().await.lines.len(), 2);
+                assert_eq!(
+                    log_driver.log_writer().await.lines(),
+                    vec!["hello", "hello"]
+                );
                 Ok(())
             },
         )

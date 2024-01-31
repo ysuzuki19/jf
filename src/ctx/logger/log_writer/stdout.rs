@@ -20,7 +20,10 @@ impl LogWriter for JfStdout {
 
     #[cfg_attr(coverage, coverage(off))]
     async fn write(&mut self, s: &str) -> JfResult<()> {
-        self.0.write_all(s.as_bytes()).await?;
+        // let now = Local::now().format("%H:%M:%S.%3f");
+        // let line = format!("[{}] {}", now, s);
+        let line = s.to_string();
+        self.0.write_all(line.as_bytes()).await?;
         #[cfg(not(test))]
         self.0.write_all(b"\n").await?;
         Ok(())

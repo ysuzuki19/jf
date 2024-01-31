@@ -15,19 +15,24 @@ pub struct ShellParams {
 
 #[derive(Clone)]
 pub struct Shell<LR: LogWriter> {
+    ctx: Ctx<LR>,
     params: ReadOnly<ShellParams>,
     command: super::Command<LR>,
 }
 
 impl<LR: LogWriter> Shell<LR> {
-    pub fn new(params: ShellParams) -> Self {
+    pub fn new(ctx: Ctx<LR>, params: ShellParams) -> Self {
         let mut args = params.args.clone().unwrap_or_default();
         args.extend(vec!["-c".to_string(), params.script.clone()]);
-        let command = super::Command::new(super::CommandParams {
-            command: "sh".to_string(),
-            args,
-        });
+        let command = super::Command::new(
+            ctx.clone(),
+            super::CommandParams {
+                command: "sh".to_string(),
+                args,
+            },
+        );
         Self {
+            ctx,
             params: params.into(),
             command,
         }
@@ -38,6 +43,7 @@ impl<LR: LogWriter> Shell<LR> {
 impl<LR: LogWriter> Bunshin for Shell<LR> {
     async fn bunshin(&self) -> Self {
         Self {
+            ctx: self.ctx.clone(),
             params: self.params.clone(),
             command: self.command.bunshin().await,
         }
@@ -53,10 +59,11 @@ impl<LR: LogWriter> Checker for Shell<LR> {
 
 #[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Shell<LR> {
-    async fn start(&self, mut ctx: Ctx<LR>) -> JfResult<Self> {
-        ctx.logger.debug("Shell starting...").await?;
-        self.command.start(ctx.clone()).await?;
-        ctx.logger.debug("Shell started").await?;
+    async fn start(&self) -> JfResult<Self> {
+        let mut logger = self.ctx.logger();
+        logger.debug("Shell starting...").await?;
+        self.command.start().await?;
+        logger.debug("Shell started").await?;
         Ok(self.clone())
     }
 

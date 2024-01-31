@@ -20,12 +20,7 @@ fn command() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let job: Job<_> = modes::Command::fixture().into();
-            job.start(Ctx::fixture())
-                .await?
-                .cancel()
-                .await?
-                .join()
-                .await?;
+            job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
             assert!(!job.is_finished().await?);
@@ -42,12 +37,7 @@ fn parallel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let job: Job<_> = modes::Parallel::try_fixture()?.into();
-            job.start(Ctx::fixture())
-                .await?
-                .cancel()
-                .await?
-                .join()
-                .await?;
+            job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
             assert!(!job.is_finished().await?);
@@ -64,12 +54,7 @@ fn sequential() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let job: Job<_> = modes::Sequential::try_fixture()?.into();
-            job.start(Ctx::fixture())
-                .await?
-                .cancel()
-                .await?
-                .join()
-                .await?;
+            job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
             assert!(!job.is_finished().await?);
@@ -86,12 +71,7 @@ fn shell() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let job: Job<_> = modes::Shell::fixture().into();
-            job.start(Ctx::fixture())
-                .await?
-                .cancel()
-                .await?
-                .join()
-                .await?;
+            job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
             assert!(!job.is_finished().await?);
@@ -108,12 +88,7 @@ fn watch() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let job: Job<_> = modes::Watch::try_fixture()?.into();
-            job.start(Ctx::fixture())
-                .await?
-                .cancel()
-                .await?
-                .join()
-                .await?;
+            job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
             assert!(!job.is_finished().await?);

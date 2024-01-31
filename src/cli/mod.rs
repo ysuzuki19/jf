@@ -60,7 +60,10 @@ mod tests {
     fn load() -> JfResult<()> {
         let args = Args::parse_from(args::fixtures::SIMPLE);
         let cli = Cli::<MockLogWriter>::load(args)?;
-        assert_eq!(cli.ctx(), &Ctx::new(logger::LogLevel::Info));
+        assert_eq!(
+            cli.ctx().logger(),
+            Ctx::new(logger::LogLevel::Info).logger()
+        );
         assert_eq!(
             cli.action,
             Configured::Run(fixtures::JOB_NAME.into()).into()

@@ -22,14 +22,14 @@ impl From<Statics> for Action {
 
 #[async_trait::async_trait]
 impl CliAction for Statics {
-    async fn run<LR: LogWriter>(self, mut ctx: Ctx<LR>, _: Opts) -> JfResult<()> {
+    async fn run<LR: LogWriter>(self, ctx: Ctx<LR>, _: Opts) -> JfResult<()> {
         let mut cmd = <Args as clap::CommandFactory>::command();
         let s = match self {
             Statics::Completion(shell) => completion_script::generate(shell),
             Statics::Help => cmd.render_help().to_string(),
             Statics::Version => cmd.render_version().to_string(),
         };
-        ctx.logger.force(s).await?;
+        ctx.logger().force(s).await?;
         Ok(())
     }
 }

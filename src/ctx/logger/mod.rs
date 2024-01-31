@@ -6,19 +6,11 @@ use crate::util::error::JfResult;
 pub use self::log_level::LogLevel;
 pub use log_writer::*;
 
+#[derive(Clone)]
 #[cfg_attr(test, derive(Debug))]
 pub struct Logger<LR: LogWriter> {
     level: LogLevel,
     log_writer: LR,
-}
-
-impl<LR: LogWriter> Clone for Logger<LR> {
-    fn clone(&self) -> Self {
-        Self {
-            level: self.level,
-            log_writer: LR::init(),
-        }
-    }
 }
 
 impl<LR: LogWriter> Default for Logger<LR> {
@@ -115,14 +107,14 @@ mod tests {
                 let mut logger = Logger::<MockLogWriter>::new(LogLevel::Info);
                 assert_eq!(logger.level(), LogLevel::Info);
                 logger.force("log_msg").await?;
-                assert_eq!(logger.log_writer.lines.len(), 1);
-                assert_eq!(logger.log_writer.lines[0], "log_msg");
+                assert_eq!(logger.log_writer.lines(), vec!["log_msg"]);
                 logger.error("error_msg").await?;
-                assert_eq!(logger.log_writer.lines.len(), 2);
-                assert_eq!(logger.log_writer.lines[1], "error_msg");
-                logger.error("info_msg").await?;
-                assert_eq!(logger.log_writer.lines.len(), 3);
-                assert_eq!(logger.log_writer.lines[2], "info_msg");
+                assert_eq!(logger.log_writer.lines(), vec!["log_msg", "error_msg"]);
+                logger.info("info_msg").await?;
+                assert_eq!(
+                    logger.log_writer.lines(),
+                    vec!["log_msg", "error_msg", "info_msg"]
+                );
                 Ok(())
             },
         )
@@ -137,13 +129,11 @@ mod tests {
                 let mut logger = Logger::<MockLogWriter>::new(LogLevel::Error);
                 assert_eq!(logger.level(), LogLevel::Error);
                 logger.force("log_msg").await?;
-                assert_eq!(logger.log_writer.lines.len(), 1);
-                assert_eq!(logger.log_writer.lines[0], "log_msg");
+                assert_eq!(logger.log_writer.lines(), vec!["log_msg"]);
                 logger.error("error_msg").await?;
-                assert_eq!(logger.log_writer.lines.len(), 2);
-                assert_eq!(logger.log_writer.lines[1], "error_msg");
+                assert_eq!(logger.log_writer.lines(), vec!["log_msg", "error_msg"]);
                 logger.info("info_msg").await?;
-                assert_eq!(logger.log_writer.lines.len(), 2);
+                assert_eq!(logger.log_writer.lines(), vec!["log_msg", "error_msg"]);
                 Ok(())
             },
         )
@@ -159,11 +149,11 @@ mod tests {
                 assert_eq!(logger.level(), LogLevel::None);
 
                 logger.force("log_msg").await?;
-                assert_eq!(logger.log_writer.lines.len(), 1); // logger.log() is forced to display
+                assert_eq!(logger.log_writer.lines(), vec!["log_msg"]);
                 logger.info("info_msg").await?;
-                assert_eq!(logger.log_writer.lines.len(), 1); // guard by log level
+                assert_eq!(logger.log_writer.lines(), vec!["log_msg"]);
                 logger.error("").await?;
-                assert_eq!(logger.log_writer.lines.len(), 1); // guard by log level
+                assert_eq!(logger.log_writer.lines(), vec!["log_msg"]);
                 Ok(())
             },
         )

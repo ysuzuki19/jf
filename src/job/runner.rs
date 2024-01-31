@@ -1,9 +1,6 @@
 use std::sync::{atomic::AtomicBool, Arc};
 
-use crate::{
-    ctx::{logger::LogWriter, Ctx},
-    util::error::JfResult,
-};
+use crate::{ctx::logger::LogWriter, util::error::JfResult};
 
 pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<()>>;
 
@@ -30,7 +27,7 @@ pub trait Runner<LR: LogWriter>: Checker
 where
     Self: Sized + Clone,
 {
-    async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self>;
+    async fn start(&self) -> JfResult<Self>;
     async fn cancel(&self) -> JfResult<Self>;
 
     fn link_cancel(&mut self, _: Arc<AtomicBool>) -> Self {

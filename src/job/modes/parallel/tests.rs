@@ -12,7 +12,7 @@ impl TryFixture for Parallel<MockLogWriter> {
         let params = ParallelParams {
             jobs: vec!["fast".into(), "fast".into()],
         };
-        Parallel::new(params, TryFixture::try_fixture()?)
+        Parallel::new(Fixture::fixture(), params, TryFixture::try_fixture()?)
     }
 }
 
@@ -20,6 +20,7 @@ impl TryFixture for Parallel<MockLogWriter> {
 #[cfg_attr(coverage, coverage(off))]
 fn invalid_new_with_unknown_job() -> JfResult<()> {
     let must_fail = Parallel::<MockLogWriter>::new(
+        Fixture::fixture(),
         ParallelParams {
             jobs: vec!["mock".into(), "mock".into()],
         },
@@ -44,7 +45,7 @@ fn start() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_fixture()?;
-            p.start(Fixture::fixture()).await?;
+            p.start().await?;
             for job in p.jobs {
                 job.as_mock().assert_is_started_eq(true);
             }
@@ -60,7 +61,7 @@ fn cancel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_fixture()?;
-            p.start(Fixture::fixture()).await?.cancel().await?;
+            p.start().await?.cancel().await?;
             for job in p.jobs {
                 job.as_mock()
                     .assert_is_started_eq(true)
@@ -78,7 +79,7 @@ fn join() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_fixture()?;
-            p.start(Fixture::fixture())
+            p.start()
                 .await?
                 .join()
                 .await?
@@ -101,7 +102,7 @@ fn bunshin() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let origin = Parallel::try_fixture()?;
-            origin.start(Fixture::fixture()).await?.cancel().await?;
+            origin.start().await?.cancel().await?;
 
             let bunshin = origin.bunshin().await;
             assert_eq!(origin.jobs.len(), bunshin.jobs.len());

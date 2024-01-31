@@ -1,22 +1,38 @@
+use std::sync::{Arc, Mutex};
+
 use crate::util::error::JfResult;
 
 use super::LogWriter;
 
 #[derive(Clone)]
-#[cfg_attr(test, derive(PartialEq, Debug))]
+#[cfg_attr(test, derive(Debug))]
 pub struct MockLogWriter {
-    pub lines: Vec<String>,
+    lines: Arc<Mutex<Vec<String>>>,
+}
+
+impl PartialEq for MockLogWriter {
+    fn eq(&self, other: &Self) -> bool {
+        self.lines.lock().unwrap().clone() == other.lines.lock().unwrap().clone()
+    }
 }
 
 #[async_trait::async_trait]
 impl LogWriter for MockLogWriter {
     fn init() -> Self {
-        Self { lines: vec![] }
+        Self {
+            lines: Arc::new(Mutex::new(vec![])),
+        }
     }
 
     async fn write(&mut self, str: &str) -> JfResult<()> {
-        self.lines.push(str.to_string());
+        self.lines.lock().as_mut().unwrap().push(str.to_string());
         Ok(())
+    }
+}
+
+impl MockLogWriter {
+    pub fn lines(&self) -> Vec<String> {
+        self.lines.lock().unwrap().clone()
     }
 }
 
@@ -29,9 +45,13 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn init() {
-        let writer = MockLogWriter::init();
-        assert_eq!(writer, LogWriter::init());
-        assert_eq!(writer.lines, Vec::<String>::new());
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async move {
+                let writer = MockLogWriter::init();
+                assert_eq!(writer.lines(), Vec::<String>::new());
+            },
+        )
     }
 
     #[test]
@@ -42,7 +62,8 @@ mod tests {
             async move {
                 let mut writer = MockLogWriter::init();
                 writer.write("test").await?;
-                assert_eq!(writer.lines, vec!["test".to_string()]);
+                assert_eq!(writer.lines(), vec!["test".to_string()]);
+                assert_eq!(writer.clone().lines(), vec!["test".to_string()]);
                 Ok(())
             },
         )
