@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{runner::Bunshin, Job, Runner},
+    job::{runner::*, Job},
     util::{error::JfResult, ReadOnly},
 };
 
@@ -56,6 +56,20 @@ impl<LR: LogWriter> Bunshin for Command<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Checker for Command<LR> {
+    async fn is_finished(&self) -> JfResult<bool> {
+        match self.command_driver.lock().await.deref_mut() {
+            Some(ref mut cd) => Ok(cd.is_finished().await?),
+            None => Ok(false), // not yet started
+        }
+    }
+
+    fn is_cancelled(&self) -> bool {
+        self.is_cancelled.load(Ordering::Relaxed)
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Command<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         let cd = CommandDriver::spawn(ctx, &self.params.read().command, &self.params.read().args)
@@ -63,13 +77,6 @@ impl<LR: LogWriter> Runner<LR> for Command<LR> {
         self.command_driver.lock().await.replace(cd);
 
         Ok(self.clone())
-    }
-
-    async fn is_finished(&self) -> JfResult<bool> {
-        match self.command_driver.lock().await.deref_mut() {
-            Some(ref mut cd) => Ok(cd.is_finished().await?),
-            None => Ok(false), // not yet started
-        }
     }
 
     async fn cancel(&self) -> JfResult<Self> {
@@ -84,10 +91,6 @@ impl<LR: LogWriter> Runner<LR> for Command<LR> {
             command_driver.join().await?;
         }
         Ok(())
-    }
-
-    fn is_cancelled(&self) -> bool {
-        self.is_cancelled.load(Ordering::Relaxed)
     }
 
     fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {

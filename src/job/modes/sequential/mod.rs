@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{runner::Bunshin, types::JfHandle, Job, Runner},
+    job::{runner::*, types::JfHandle, Job},
     jobdef::{Agent, JobdefPool},
     util::{
         error::{IntoJfError, JfResult},
@@ -68,6 +68,16 @@ impl<LR: LogWriter> Bunshin for Sequential<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Checker for Sequential<LR> {
+    async fn is_finished(&self) -> JfResult<bool> {
+        match self.handle.lock().await.deref() {
+            Some(handle) => Ok(handle.is_finished()),
+            None => Ok(false), // not started yet
+        }
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         let handle: JfHandle = tokio::spawn({
@@ -98,13 +108,6 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
         });
         self.handle.lock().await.replace(handle);
         Ok(self.clone())
-    }
-
-    async fn is_finished(&self) -> JfResult<bool> {
-        match self.handle.lock().await.deref() {
-            Some(handle) => Ok(handle.is_finished()),
-            None => Ok(false), // not started yet
-        }
     }
 
     async fn cancel(&self) -> JfResult<Self> {

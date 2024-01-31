@@ -13,10 +13,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{
-        runner::{Bunshin, Runner},
-        Job,
-    },
+    job::{runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
 };
@@ -60,6 +57,18 @@ impl<LR: LogWriter> Bunshin for Parallel<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Checker for Parallel<LR> {
+    async fn is_finished(&self) -> JfResult<bool> {
+        for job in self.running_jobs.lock().await.deref_mut() {
+            if !job.is_finished().await? {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         for job in self.running_jobs.lock().await.deref_mut() {
@@ -70,15 +79,6 @@ impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
         // self.running_jobs.lock().await.replace(jobs);
 
         Ok(self.clone())
-    }
-
-    async fn is_finished(&self) -> JfResult<bool> {
-        for job in self.running_jobs.lock().await.deref_mut() {
-            if !job.is_finished().await? {
-                return Ok(false);
-            }
-        }
-        Ok(true)
     }
 
     async fn cancel(&self) -> JfResult<Self> {

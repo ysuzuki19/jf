@@ -6,13 +6,11 @@ use std::sync::{atomic::Ordering, Arc};
 
 use tokio::sync::Mutex;
 
-use crate::ctx::logger::LogWriter;
-use crate::ctx::Ctx;
-use crate::job::runner::Bunshin;
-use crate::job::Job;
-use crate::job::Runner;
-use crate::util::error::JfResult;
-use crate::util::testutil::Fixture;
+use crate::{
+    ctx::{logger::LogWriter, Ctx},
+    job::{runner::*, Job},
+    util::{error::JfResult, testutil::Fixture},
+};
 
 static MOCK_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -154,6 +152,13 @@ impl<LR: LogWriter> Bunshin for Mock<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Checker for Mock<LR> {
+    async fn is_finished(&self) -> JfResult<bool> {
+        Ok(self.is_finished.load(Ordering::Relaxed))
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Mock<LR> {
     async fn start(&self, _: Ctx<LR>) -> JfResult<Self> {
         self.is_started.store(true, Ordering::Relaxed);
@@ -177,10 +182,6 @@ impl<LR: LogWriter> Runner<LR> for Mock<LR> {
         });
         self.handle.lock().await.replace(handle);
         Ok(self.clone())
-    }
-
-    async fn is_finished(&self) -> JfResult<bool> {
-        Ok(self.is_finished.load(Ordering::Relaxed))
     }
 
     async fn cancel(&self) -> JfResult<Self> {

@@ -15,17 +15,20 @@ pub trait Bunshin {
 }
 
 #[async_trait::async_trait]
-pub trait Runner<LR: LogWriter>
+pub trait Checker {
+    async fn is_finished(&self) -> JfResult<bool>;
+    fn is_cancelled(&self) -> bool {
+        false
+    }
+}
+
+#[async_trait::async_trait]
+pub trait Runner<LR: LogWriter>: Checker
 where
     Self: Sized + Clone,
 {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self>;
-    async fn is_finished(&self) -> JfResult<bool>;
     async fn cancel(&self) -> JfResult<Self>;
-
-    fn is_cancelled(&self) -> bool {
-        false
-    }
 
     fn link_cancel(&mut self, _: Arc<AtomicBool>) -> Self {
         self.clone()

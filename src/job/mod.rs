@@ -4,8 +4,7 @@ mod types;
 
 use futures::{stream, StreamExt};
 
-use self::runner::Bunshin;
-pub use self::runner::Runner;
+use self::runner::*;
 use crate::{
     cfg::job_cfg::JobCfg,
     ctx::{logger::LogWriter, Ctx},
@@ -54,6 +53,21 @@ impl<LR: LogWriter> Bunshin for Job<LR> {
 }
 
 #[async_trait::async_trait]
+impl<LR: LogWriter> Checker for Job<LR> {
+    async fn is_finished(&self) -> JfResult<bool> {
+        match self {
+            Self::Command(t) => t.is_finished().await,
+            Self::Parallel(t) => t.is_finished().await,
+            Self::Sequential(t) => t.is_finished().await,
+            Self::Shell(t) => t.is_finished().await,
+            Self::Watch(t) => t.is_finished().await,
+            #[cfg(test)]
+            Self::Mock(t) => t.is_finished().await,
+        }
+    }
+}
+
+#[async_trait::async_trait]
 impl<LR: LogWriter> Runner<LR> for Job<LR> {
     async fn start(&self, ctx: Ctx<LR>) -> JfResult<Self> {
         Ok(match self {
@@ -65,18 +79,6 @@ impl<LR: LogWriter> Runner<LR> for Job<LR> {
             #[cfg(test)]
             Self::Mock(t) => t.start(ctx).await?.into(),
         })
-    }
-
-    async fn is_finished(&self) -> JfResult<bool> {
-        match self {
-            Self::Command(t) => t.is_finished().await,
-            Self::Parallel(t) => t.is_finished().await,
-            Self::Sequential(t) => t.is_finished().await,
-            Self::Shell(t) => t.is_finished().await,
-            Self::Watch(t) => t.is_finished().await,
-            #[cfg(test)]
-            Self::Mock(t) => t.is_finished().await,
-        }
     }
 
     async fn cancel(&self) -> JfResult<Self> {
