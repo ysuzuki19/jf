@@ -7,7 +7,7 @@ use tokio::{
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::types::JfHandle,
+    job::JfHandle,
     util::error::{IntoJfError, JfResult},
 };
 

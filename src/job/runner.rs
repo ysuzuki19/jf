@@ -5,12 +5,14 @@ use crate::{
     util::error::JfResult,
 };
 
-pub async fn sleep() {
+pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<()>>;
+
+pub(super) async fn sleep() {
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 }
 
 #[async_trait::async_trait]
-pub trait Bunshin {
+pub(super) trait Bunshin {
     async fn bunshin(&self) -> Self;
 }
 

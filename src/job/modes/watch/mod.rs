@@ -11,7 +11,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::{logger::LogWriter, Ctx},
-    job::{runner::*, types::JfHandle, Job},
+    job::{runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::{error::JfResult, ReadOnly},
 };
