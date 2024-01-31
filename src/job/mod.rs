@@ -4,7 +4,7 @@ mod types;
 
 use futures::{stream, StreamExt};
 
-use self::runner::*;
+pub use self::runner::*;
 use crate::{
     cfg::job_cfg::JobCfg,
     ctx::{logger::LogWriter, Ctx},
