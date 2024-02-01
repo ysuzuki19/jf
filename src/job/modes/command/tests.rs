@@ -2,14 +2,14 @@ use crate::util::testutil::*;
 
 use super::*;
 
-impl Fixture for Command<MockLogWriter> {
+impl AsyncFixture for Command {
     #[cfg_attr(coverage, coverage(off))]
-    fn fixture() -> Self {
+    async fn async_fixture() -> Self {
         let params = CommandParams {
             command: String::from("sleep"),
             args: vec![String::from("1")],
         };
-        Command::new(Fixture::fixture(), params)
+        Command::new(Ctx::async_fixture().await, params)
     }
 }
 
@@ -19,7 +19,7 @@ fn run_without_blocking() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = Command::fixture();
+            let command = Command::async_fixture().await;
             command.start().await?;
             assert!(!command.is_finished().await?);
             Ok(())
@@ -33,7 +33,7 @@ fn join() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = Command::fixture();
+            let command = Command::async_fixture().await;
             command.start().await?;
             command.join().await?;
             assert!(command.is_finished().await?);
@@ -48,7 +48,7 @@ fn cancel() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = Command::fixture();
+            let command = Command::async_fixture().await;
             command.start().await?.cancel().await?;
             assert!(command.is_finished().await?);
             Ok(())
@@ -62,7 +62,7 @@ fn bunshin() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let origin = Command::fixture();
+            let origin = Command::async_fixture().await;
             origin.start().await?;
             origin.join().await?;
             assert!(origin.is_finished().await?);
@@ -79,7 +79,7 @@ fn is_finished_not_yet_started() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let command = Command::fixture();
+            let command = Command::async_fixture().await;
             assert!(!command.is_finished().await?);
             Ok(())
         },

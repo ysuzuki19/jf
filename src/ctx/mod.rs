@@ -1,36 +1,33 @@
-use self::logger::LogWriter;
-
-pub mod logger;
+use crate::log_worker::Logger;
 
 #[derive(Clone)]
 #[cfg_attr(test, derive(PartialEq, Debug))]
-pub struct Ctx<LR: logger::LogWriter> {
-    logger: logger::Logger<LR>,
+pub struct Ctx {
+    logger: Logger,
 }
 
-impl<LR: LogWriter> Ctx<LR> {
-    pub fn new(log_level: logger::LogLevel) -> Self {
-        Self {
-            logger: logger::Logger::new(log_level),
-        }
+impl Ctx {
+    pub fn new(logger: Logger) -> Self {
+        Self { logger }
     }
 
-    pub fn logger(&self) -> logger::Logger<LR> {
+    pub fn logger(&self) -> Logger {
         self.logger.clone()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::util::testutil::*;
+    use crate::{log_worker::LogWorkerMock, util::testutil::*};
 
     use super::*;
 
-    impl Fixture for Ctx<MockLogWriter> {
+    impl AsyncFixture for Ctx {
         #[cfg_attr(coverage, coverage(off))]
-        fn fixture() -> Self {
+        async fn async_fixture() -> Self {
+            let log_worker_mock = LogWorkerMock::new().await;
             Self {
-                logger: Fixture::fixture(),
+                logger: log_worker_mock.logger,
             }
         }
     }
@@ -38,7 +35,11 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn cover() {
-        let ctx = Ctx::<MockLogWriter>::fixture();
-        println!("{:?}", ctx); // Cover derive(Debug)
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let _ = Ctx::async_fixture().await;
+            },
+        );
     }
 }

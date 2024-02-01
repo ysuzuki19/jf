@@ -12,7 +12,7 @@ use std::{
 use tokio::sync::Mutex;
 
 use crate::{
-    ctx::{logger::LogWriter, Ctx},
+    ctx::Ctx,
     job::{runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
@@ -24,20 +24,20 @@ pub struct ParallelParams {
 }
 
 #[derive(Clone)]
-pub struct Parallel<LR: LogWriter> {
-    ctx: Ctx<LR>,
-    jobs: Vec<Job<LR>>,
+pub struct Parallel {
+    ctx: Ctx,
+    jobs: Vec<Job>,
     is_cancelled: Arc<AtomicBool>,
-    running_jobs: Arc<Mutex<Vec<Job<LR>>>>,
+    running_jobs: Arc<Mutex<Vec<Job>>>,
 }
 
-impl<LR: LogWriter> Parallel<LR> {
-    pub fn new(ctx: Ctx<LR>, params: ParallelParams, pool: JobdefPool) -> JfResult<Self> {
+impl Parallel {
+    pub fn new(ctx: Ctx, params: ParallelParams, pool: JobdefPool) -> JfResult<Self> {
         let jobs = params
             .jobs
             .into_iter()
             .map(|job_name| pool.build(ctx.clone(), job_name, Agent::Job))
-            .collect::<JfResult<Vec<Job<LR>>>>()?;
+            .collect::<JfResult<Vec<Job>>>()?;
         Ok(Self {
             ctx,
             jobs: jobs.clone(),
@@ -48,7 +48,7 @@ impl<LR: LogWriter> Parallel<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Bunshin for Parallel<LR> {
+impl Bunshin for Parallel {
     async fn bunshin(&self) -> Self {
         Self {
             ctx: self.ctx.clone(),
@@ -60,7 +60,7 @@ impl<LR: LogWriter> Bunshin for Parallel<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Checker for Parallel<LR> {
+impl Checker for Parallel {
     async fn is_finished(&self) -> JfResult<bool> {
         for job in self.running_jobs.lock().await.deref_mut() {
             if !job.is_finished().await? {
@@ -72,7 +72,7 @@ impl<LR: LogWriter> Checker for Parallel<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
+impl Runner for Parallel {
     async fn start(&self) -> JfResult<Self> {
         let mut logger = self.ctx.logger();
         logger.debug("Parallel starting...").await?;
@@ -97,8 +97,8 @@ impl<LR: LogWriter> Runner<LR> for Parallel<LR> {
     }
 }
 
-impl<LR: LogWriter> From<Parallel<LR>> for Job<LR> {
-    fn from(value: Parallel<LR>) -> Self {
+impl From<Parallel> for Job {
+    fn from(value: Parallel) -> Self {
         Self::Parallel(value)
     }
 }

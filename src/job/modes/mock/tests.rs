@@ -5,7 +5,7 @@ use super::*;
 const MOCK_SLEEP_TIME: u64 = 1;
 const MOCK_SLEEP_COUNT: u8 = 3;
 
-impl Fixture for Mock<MockLogWriter> {
+impl Fixture for Mock {
     #[cfg_attr(coverage, coverage(off))]
     fn fixture() -> Self {
         Self::new(MockParams {

@@ -2,14 +2,14 @@ use crate::util::testutil::*;
 
 use super::*;
 
-impl Fixture for Shell<MockLogWriter> {
+impl AsyncFixture for Shell {
     #[cfg_attr(coverage, coverage(off))]
-    fn fixture() -> Self {
+    async fn async_fixture() -> Self {
         let params = ShellParams {
             script: "echo hello".to_string(),
             args: None,
         };
-        Shell::new(Fixture::fixture(), params)
+        Shell::new(Ctx::async_fixture().await, params)
     }
 }
 
@@ -19,7 +19,7 @@ fn run_without_blocking() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let shell = Shell::fixture();
+            let shell = Shell::async_fixture().await;
             shell.start().await?;
             assert!(!shell.is_finished().await?);
             assert!(!shell.command.is_finished().await?);
@@ -34,7 +34,7 @@ fn join() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let shell = Shell::fixture();
+            let shell = Shell::async_fixture().await;
             shell.start().await?.join().await?;
             assert!(shell.is_finished().await?);
             assert!(shell.command.is_finished().await?);
@@ -49,7 +49,7 @@ fn cancel() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let shell = Shell::fixture();
+            let shell = Shell::async_fixture().await;
             shell.start().await?.cancel().await?;
             assert!(shell.is_finished().await?);
             assert!(shell.command.is_finished().await?);
@@ -64,7 +64,7 @@ fn bunshin() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let origin = Shell::fixture();
+            let origin = Shell::async_fixture().await;
             origin.start().await?.cancel().await?;
             assert!(origin.is_finished().await?);
             let bunshin = origin.bunshin().await;
@@ -80,7 +80,7 @@ fn is_finished_not_yet_started() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let shell = Shell::fixture();
+            let shell = Shell::async_fixture().await;
             assert!(!shell.is_finished().await?);
             Ok(())
         },

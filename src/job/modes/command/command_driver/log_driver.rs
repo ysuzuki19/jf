@@ -1,24 +1,18 @@
-use std::sync::Arc;
-
-use tokio::{
-    io::{AsyncBufReadExt, BufReader},
-    sync::Mutex,
-};
+use tokio::io::{AsyncBufReadExt, BufReader};
 
 use crate::{
-    ctx::{logger::LogWriter, Ctx},
+    ctx::Ctx,
     job::JfHandle,
     util::error::{IntoJfError, JfResult},
 };
 
-pub(super) struct LogDriver<LR: LogWriter> {
-    ctx: Arc<Mutex<Ctx<LR>>>,
+pub(super) struct LogDriver {
+    ctx: Ctx,
     handle: Option<JfHandle>,
 }
 
-impl<LR: LogWriter> LogDriver<LR> {
-    pub fn new(ctx: Ctx<LR>) -> Self {
-        let ctx = Arc::new(Mutex::new(ctx));
+impl LogDriver {
+    pub fn new(ctx: Ctx) -> Self {
         Self { ctx, handle: None }
     }
 
@@ -34,12 +28,12 @@ impl<LR: LogWriter> LogDriver<LR> {
 
     pub fn start(&mut self, stdout: tokio::process::ChildStdout) {
         let handle = tokio::spawn({
-            let ctx = self.ctx.clone();
+            let mut logger = self.ctx.logger();
             async move {
                 let mut reader = BufReader::new(stdout).lines();
 
                 while let Some(line) = reader.next_line().await? {
-                    ctx.lock().await.logger().info(line).await?;
+                    logger.info(line).await?;
                 }
 
                 Ok(())
@@ -59,20 +53,14 @@ impl<LR: LogWriter> LogDriver<LR> {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::testutil::*;
+    use crate::{log_worker::LogWorkerMock, util::testutil::*};
 
     use super::*;
 
-    impl Fixture for LogDriver<MockLogWriter> {
+    impl AsyncFixture for LogDriver {
         #[cfg_attr(coverage, coverage(off))]
-        fn fixture() -> Self {
-            Self::new(Fixture::fixture())
-        }
-    }
-
-    impl LogDriver<MockLogWriter> {
-        async fn log_writer(&self) -> MockLogWriter {
-            self.ctx.lock().await.logger().log_writer().to_owned()
+        async fn async_fixture() -> Self {
+            Self::new(Ctx::async_fixture().await)
         }
     }
 
@@ -82,7 +70,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let ctx = Fixture::fixture();
+                let ctx = Ctx::async_fixture().await;
                 let mut log_driver = LogDriver::new(ctx);
                 assert!(log_driver.mount(None).is_err());
                 Ok(())
@@ -96,7 +84,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let ctx = Fixture::fixture();
+                let ctx = Ctx::async_fixture().await;
                 let mut log_driver = LogDriver::new(ctx);
                 assert!(log_driver.join().await.is_ok());
                 Ok(())
@@ -110,9 +98,10 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let ctx = Fixture::fixture();
+                let log_worker_mock = LogWorkerMock::new().await;
+                let ctx = Ctx::new(log_worker_mock.logger);
                 let mut log_driver = LogDriver::new(ctx);
-                assert_eq!(log_driver.log_writer().await.lines().len(), 0);
+                assert_eq!(log_worker_mock.log_writer.lines().len(), 0);
 
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
@@ -121,7 +110,7 @@ mod tests {
                 log_driver.mount(child.stdout.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
-                assert_eq!(log_driver.log_writer().await.lines(), vec!["hello"]);
+                assert_eq!(log_worker_mock.log_writer.lines(), vec!["hello"]);
 
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
@@ -130,10 +119,7 @@ mod tests {
                 log_driver.mount(child.stdout.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
-                assert_eq!(
-                    log_driver.log_writer().await.lines(),
-                    vec!["hello", "hello"]
-                );
+                assert_eq!(log_worker_mock.log_writer.lines(), vec!["hello", "hello"]);
                 Ok(())
             },
         )

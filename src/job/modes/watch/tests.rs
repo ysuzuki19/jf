@@ -1,6 +1,5 @@
 use std::io::Write;
 
-use crate::ctx::logger::MockLogWriter;
 use crate::job::runner;
 use crate::util::testutil::*;
 
@@ -24,11 +23,11 @@ impl Fixture for WatchParams {
     }
 }
 
-impl TryFixture for Watch<MockLogWriter> {
+impl TryAsyncFixture for Watch {
     #[cfg_attr(coverage, coverage(off))]
-    fn try_fixture() -> JfResult<Self> {
+    async fn try_async_fixture() -> JfResult<Self> {
         Watch::new(
-            Fixture::fixture(),
+            Ctx::async_fixture().await,
             Fixture::fixture(),
             TryFixture::try_fixture()?,
         )
@@ -45,8 +44,8 @@ fn invalid_new_with_unknown_job() -> JfResult<()> {
                 job: "unknown".to_string(),
                 watch_list: fixtures::watch_list(),
             };
-            assert!(Watch::<MockLogWriter>::new(
-                Fixture::fixture(),
+            assert!(Watch::new(
+                Ctx::async_fixture().await,
                 params,
                 TryFixture::try_fixture()?
             )
@@ -62,7 +61,7 @@ fn new() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let w = Watch::try_fixture()?;
+            let w = Watch::try_async_fixture().await?;
             assert!(!w.is_finished().await?);
             Ok(())
         },
@@ -75,7 +74,7 @@ fn start() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let w = Watch::try_fixture()?;
+            let w = Watch::try_async_fixture().await?;
             w.start().await?;
             assert!(!w.is_finished().await?);
             w.cancel().await?.join().await?;
@@ -90,13 +89,13 @@ fn watch() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let w = Watch::try_fixture()?;
+            let w = Watch::try_async_fixture().await?;
             w.start().await?;
             assert!(!w.is_finished().await?);
-            let id = w.running_job.lock().await.clone().unwrap().as_mock().id();
+            let id = w.job.lock().await.as_mock().id();
             std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
             runner::interval().await;
-            let id2 = w.running_job.lock().await.clone().unwrap().as_mock().id();
+            let id2 = w.job.lock().await.as_mock().id();
             assert_ne!(id, id2);
             w.cancel().await?;
             Ok(())
@@ -110,7 +109,7 @@ fn cancel() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let w = Watch::try_fixture()?;
+            let w = Watch::try_async_fixture().await?;
             w.start().await?.cancel().await?;
             runner::interval().await; // for cover breaking loop
             w.join().await?;
@@ -126,11 +125,11 @@ fn bunshin() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let origin = Watch::try_fixture()?;
+            let origin = Watch::try_async_fixture().await?;
             let bunshin = origin.bunshin().await;
             assert_ne!(
-                origin.job.read().as_mock().id(),
-                bunshin.job.read().as_mock().id()
+                origin.job.lock().await.as_mock().id(),
+                bunshin.job.lock().await.as_mock().id()
             );
             Ok(())
         },

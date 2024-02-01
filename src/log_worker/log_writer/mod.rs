@@ -10,7 +10,6 @@ use crate::util::error::JfResult;
 
 #[async_trait::async_trait]
 pub trait LogWriter: Send + Sync + Clone + 'static {
-    fn init() -> Self;
     async fn write(&mut self, str: &str) -> JfResult<()>;
 }
 
@@ -23,8 +22,8 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn init() {
-        let _ = JfStdout::init();
-        let _ = MockLogWriter::init();
+        let _ = JfStdout::new();
+        let _ = MockLogWriter::new();
     }
 
     #[test]
@@ -33,7 +32,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let mut w = MockLogWriter::init();
+                let mut w = MockLogWriter::new();
                 w.write("test").await?;
                 assert_eq!(w.lines(), vec!["test"]);
                 w.write("test2").await?;

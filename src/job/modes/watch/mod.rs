@@ -10,10 +10,10 @@ use std::sync::{
 use tokio::sync::Mutex;
 
 use crate::{
-    ctx::{logger::LogWriter, Ctx},
+    ctx::Ctx,
     job::{runner::*, Job},
     jobdef::{Agent, JobdefPool},
-    util::{error::JfResult, ReadOnly},
+    util::error::JfResult,
 };
 
 #[derive(Clone, serde::Deserialize)]
@@ -23,22 +23,20 @@ pub struct WatchParams {
 }
 
 #[derive(Clone)]
-pub struct Watch<LR: LogWriter> {
-    ctx: Ctx<LR>,
-    job: Box<ReadOnly<Job<LR>>>,
-    running_job: Arc<Mutex<Option<Job<LR>>>>,
+pub struct Watch {
+    ctx: Ctx,
+    job: Arc<Mutex<Job>>,
     watch_list: Vec<String>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<JfHandle>>>,
 }
 
-impl<LR: LogWriter> Watch<LR> {
-    pub fn new(ctx: Ctx<LR>, params: WatchParams, pool: JobdefPool) -> JfResult<Self> {
+impl Watch {
+    pub fn new(ctx: Ctx, params: WatchParams, pool: JobdefPool) -> JfResult<Self> {
         let job = pool.build(ctx.clone(), params.job, Agent::Job)?;
         Ok(Self {
             ctx,
-            job: Box::new(job.into()),
-            running_job: Arc::new(Mutex::new(None)),
+            job: Arc::new(Mutex::new(job)),
             watch_list: params.watch_list,
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
@@ -47,12 +45,11 @@ impl<LR: LogWriter> Watch<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Bunshin for Watch<LR> {
+impl Bunshin for Watch {
     async fn bunshin(&self) -> Self {
         Self {
             ctx: self.ctx.clone(),
-            job: Box::new(self.job.read().bunshin().await.into()),
-            running_job: Arc::new(Mutex::new(None)),
+            job: Arc::new(Mutex::new(self.job.lock().await.bunshin().await)),
             watch_list: self.watch_list.clone(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
@@ -61,7 +58,7 @@ impl<LR: LogWriter> Bunshin for Watch<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Checker for Watch<LR> {
+impl Checker for Watch {
     async fn is_finished(&self) -> JfResult<bool> {
         let is_finished = self.is_cancelled.load(Ordering::Relaxed);
         Ok(is_finished)
@@ -69,53 +66,40 @@ impl<LR: LogWriter> Checker for Watch<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Runner<LR> for Watch<LR> {
+impl Runner for Watch {
     async fn start(&self) -> JfResult<Self> {
         let mut logger = self.ctx.logger();
         logger.debug("Watch starting...").await?;
         let handle = tokio::spawn({
             let watcher = watcher::JfWatcher::new(&self.watch_list, self.is_cancelled.clone())?;
             let job = self.job.clone();
-            let running_job = self.running_job.clone();
             let is_cancelled = self.is_cancelled.clone();
-            running_job.lock().await.replace(
-                job.read()
-                    .bunshin()
-                    .await
-                    .link_cancel(is_cancelled.clone())
-                    .start()
-                    .await?,
-            );
+            job.lock().await.start().await?;
 
             async move {
                 loop {
                     watcher.wait()?;
 
-                    if let Some(running_job) = running_job.lock().await.take() {
-                        running_job.cancel().await?;
-                    }
+                    job.lock().await.cancel().await?.join().await?;
                     if is_cancelled.load(Ordering::Relaxed) {
                         break;
                     }
 
-                    running_job
-                        .lock()
-                        .await
-                        .replace(job.read().bunshin().await.start().await?);
+                    let mut j = job.lock().await;
+                    *j = j.bunshin().await.start().await?;
                 }
                 Ok(())
             }
         });
         self.handle.lock().await.replace(handle);
         logger.debug("Watch started").await?;
+        logger.info("Watch started").await?;
         Ok(self.clone())
     }
 
     async fn cancel(&self) -> JfResult<Self> {
         self.is_cancelled.store(true, Ordering::Relaxed);
-        if let Some(running_job) = self.running_job.lock().await.take() {
-            running_job.cancel().await?;
-        }
+        self.job.lock().await.cancel().await?.join().await?;
         Ok(self.clone())
     }
 
@@ -125,8 +109,8 @@ impl<LR: LogWriter> Runner<LR> for Watch<LR> {
     }
 }
 
-impl<LR: LogWriter> From<Watch<LR>> for Job<LR> {
-    fn from(value: Watch<LR>) -> Self {
+impl From<Watch> for Job {
+    fn from(value: Watch) -> Self {
         Self::Watch(value)
     }
 }

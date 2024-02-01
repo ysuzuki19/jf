@@ -13,7 +13,7 @@ use std::{
 use tokio::sync::Mutex;
 
 use crate::{
-    ctx::{logger::LogWriter, Ctx},
+    ctx::Ctx,
     job::{runner::*, Job},
     util::{error::JfResult, ReadOnly},
 };
@@ -28,15 +28,15 @@ pub struct CommandParams {
 }
 
 #[derive(Clone)]
-pub struct Command<LR: LogWriter> {
-    ctx: Ctx<LR>,
+pub struct Command {
+    ctx: Ctx,
     params: ReadOnly<CommandParams>,
-    command_driver: Arc<Mutex<Option<CommandDriver<LR>>>>,
+    command_driver: Arc<Mutex<Option<CommandDriver>>>,
     is_cancelled: Arc<AtomicBool>,
 }
 
-impl<LR: LogWriter> Command<LR> {
-    pub fn new(ctx: Ctx<LR>, params: CommandParams) -> Self {
+impl Command {
+    pub fn new(ctx: Ctx, params: CommandParams) -> Self {
         Self {
             ctx,
             params: params.into(),
@@ -47,7 +47,7 @@ impl<LR: LogWriter> Command<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Bunshin for Command<LR> {
+impl Bunshin for Command {
     async fn bunshin(&self) -> Self {
         Self {
             ctx: self.ctx.clone(),
@@ -59,7 +59,7 @@ impl<LR: LogWriter> Bunshin for Command<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Checker for Command<LR> {
+impl Checker for Command {
     async fn is_finished(&self) -> JfResult<bool> {
         match self.command_driver.lock().await.deref_mut() {
             Some(ref mut cd) => Ok(cd.is_finished().await?),
@@ -73,7 +73,7 @@ impl<LR: LogWriter> Checker for Command<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Runner<LR> for Command<LR> {
+impl Runner for Command {
     async fn start(&self) -> JfResult<Self> {
         let mut logger = self.ctx.logger();
         logger.debug("Command starting...").await?;
@@ -85,6 +85,7 @@ impl<LR: LogWriter> Runner<LR> for Command<LR> {
         .await?;
         self.command_driver.lock().await.replace(cd);
         logger.debug("Command started").await?;
+        logger.force("").await?; //FIXME: force flush
         Ok(self.clone())
     }
 
@@ -96,6 +97,7 @@ impl<LR: LogWriter> Runner<LR> for Command<LR> {
     }
 
     async fn pre_join(&self) -> JfResult<()> {
+        self.ctx.logger().force("").await?; //FIXME: force flush
         if let Some(command_driver) = self.command_driver.lock().await.deref_mut() {
             command_driver.join().await?;
         }
@@ -108,8 +110,8 @@ impl<LR: LogWriter> Runner<LR> for Command<LR> {
     }
 }
 
-impl<LR: LogWriter> From<Command<LR>> for Job<LR> {
-    fn from(value: Command<LR>) -> Self {
+impl From<Command> for Job {
+    fn from(value: Command) -> Self {
         Self::Command(value)
     }
 }

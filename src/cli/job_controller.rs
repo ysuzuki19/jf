@@ -1,6 +1,6 @@
 use crate::{
     cfg::Cfg,
-    ctx::{logger, Ctx},
+    ctx::Ctx,
     job::Runner,
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
@@ -22,9 +22,9 @@ impl JobController {
         })
     }
 
-    pub async fn run<LR: logger::LogWriter>(&self, ctx: Ctx<LR>, job_name: String) -> JfResult<()> {
+    pub async fn run(&self, ctx: Ctx, job_name: String) -> JfResult<()> {
         self.pool
-            .build::<LR>(ctx, job_name, Agent::Cli)?
+            .build(ctx, job_name, Agent::Cli)?
             .start()
             .await?
             .join()
@@ -42,7 +42,7 @@ impl JobController {
         job_names
     }
 
-    pub fn validate(&self) -> JfResult<()> {
-        self.pool.validate()
+    pub fn validate(&self, ctx: Ctx) -> JfResult<()> {
+        self.pool.validate(ctx)
     }
 }

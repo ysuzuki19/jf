@@ -1,17 +1,17 @@
 mod log_driver;
 
 use crate::{
-    ctx::{logger::LogWriter, Ctx},
+    ctx::Ctx,
     util::error::{IntoJfError, JfResult},
 };
 
-pub struct CommandDriver<LR: LogWriter> {
+pub struct CommandDriver {
     child: tokio::process::Child,
-    log_driver: log_driver::LogDriver<LR>,
+    log_driver: log_driver::LogDriver,
 }
 
-impl<LR: LogWriter> CommandDriver<LR> {
-    pub async fn spawn(ctx: Ctx<LR>, command: &String, args: &Vec<String>) -> JfResult<Self> {
+impl CommandDriver {
+    pub async fn spawn(ctx: Ctx, command: &String, args: &Vec<String>) -> JfResult<Self> {
         let mut cmd = tokio::process::Command::new(command);
         cmd.args(args);
         cmd.stdout(std::process::Stdio::piped());

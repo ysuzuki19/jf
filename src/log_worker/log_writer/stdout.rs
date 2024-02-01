@@ -12,12 +12,14 @@ impl Clone for JfStdout {
     }
 }
 
-#[async_trait::async_trait]
-impl LogWriter for JfStdout {
-    fn init() -> Self {
+impl JfStdout {
+    pub fn new() -> Self {
         Self(tokio::io::stdout())
     }
+}
 
+#[async_trait::async_trait]
+impl LogWriter for JfStdout {
     #[cfg_attr(coverage, coverage(off))]
     async fn write(&mut self, s: &str) -> JfResult<()> {
         // let now = Local::now().format("%H:%M:%S.%3f");
@@ -42,7 +44,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async move {
-                let mut js = JfStdout::init();
+                let mut js = JfStdout::new();
                 js.write("").await?;
                 Ok(())
             },
@@ -52,7 +54,7 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn instance() {
-        let js = JfStdout::init();
+        let js = JfStdout::new();
         let _ = js.clone();
     }
 }

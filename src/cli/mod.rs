@@ -3,10 +3,7 @@ mod completion_script;
 mod job_controller;
 mod models;
 
-use crate::{
-    ctx::{logger, Ctx},
-    util::error::JfResult,
-};
+use crate::{ctx::Ctx, log_worker::Logger, util::error::JfResult};
 
 pub use self::args::Args;
 use self::models::{
@@ -14,20 +11,16 @@ use self::models::{
     Opts,
 };
 
-pub struct Cli<LR: logger::LogWriter> {
-    ctx: Ctx<LR>,
+pub struct Cli {
+    ctx: Ctx,
     action: Action,
     opts: Opts,
 }
 
-impl<LR: logger::LogWriter> Cli<LR> {
-    pub fn load(args: Args) -> JfResult<Self> {
-        let (ctx, action, opts) = args.setup()?;
+impl Cli {
+    pub fn load(logger: Logger, args: Args) -> JfResult<Self> {
+        let (ctx, action, opts) = args.setup(logger)?;
         Ok(Self { ctx, action, opts })
-    }
-
-    pub fn ctx(&self) -> &Ctx<LR> {
-        &self.ctx
     }
 
     pub async fn run(self) -> JfResult<()> {
@@ -40,15 +33,16 @@ mod tests {
     use clap::Parser;
 
     use crate::cli::{args::fixtures, models::action::Configured};
+    use crate::log_worker::LogWorkerMock;
     use crate::util::testutil::*;
 
     use super::*;
 
-    impl Fixture for Cli<MockLogWriter> {
+    impl AsyncFixture for Cli {
         #[cfg_attr(coverage, coverage(off))]
-        fn fixture() -> Self {
+        async fn async_fixture() -> Self {
             Self {
-                ctx: Fixture::fixture(),
+                ctx: Ctx::async_fixture().await,
                 action: Fixture::fixture(),
                 opts: Fixture::fixture(),
             }
@@ -58,18 +52,21 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn load() -> JfResult<()> {
-        let args = Args::parse_from(args::fixtures::SIMPLE);
-        let cli = Cli::<MockLogWriter>::load(args)?;
-        assert_eq!(
-            cli.ctx().logger(),
-            Ctx::new(logger::LogLevel::Info).logger()
-        );
-        assert_eq!(
-            cli.action,
-            Configured::Run(fixtures::JOB_NAME.into()).into()
-        );
-        assert_eq!(cli.opts, Opts::default());
-        Ok(())
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async move {
+                let args = Args::parse_from(args::fixtures::SIMPLE);
+                let log_worker_mock = LogWorkerMock::new().await;
+                let cli = Cli::load(log_worker_mock.logger.clone(), args)?;
+                assert_eq!(cli.ctx, Ctx::new(log_worker_mock.logger));
+                assert_eq!(
+                    cli.action,
+                    Configured::Run(fixtures::JOB_NAME.into()).into()
+                );
+                assert_eq!(cli.opts, Opts::default());
+                Ok(())
+            },
+        )
     }
 
     #[test]
@@ -78,8 +75,8 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let cli = Cli::fixture();
-                assert_eq!(cli.ctx(), &Ctx::fixture());
+                let cli = Cli::async_fixture().await;
+                assert_eq!(cli.ctx, Ctx::async_fixture().await);
                 assert_eq!(cli.action, Action::fixture());
                 cli.run().await?;
                 Ok(())

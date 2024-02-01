@@ -6,26 +6,21 @@ mod tests;
 use futures::{stream, StreamExt};
 
 pub use self::runner::*;
-use crate::{
-    cfg::job_cfg::JobCfg,
-    ctx::{logger::LogWriter, Ctx},
-    jobdef::JobdefPool,
-    util::error::JfResult,
-};
+use crate::{cfg::job_cfg::JobCfg, ctx::Ctx, jobdef::JobdefPool, util::error::JfResult};
 
 #[derive(Clone)]
-pub enum Job<LR: LogWriter> {
-    Command(modes::Command<LR>),
-    Parallel(modes::Parallel<LR>),
-    Sequential(modes::Sequential<LR>),
-    Shell(modes::Shell<LR>),
-    Watch(modes::Watch<LR>),
+pub enum Job {
+    Command(modes::Command),
+    Parallel(modes::Parallel),
+    Sequential(modes::Sequential),
+    Shell(modes::Shell),
+    Watch(modes::Watch),
     #[cfg(test)]
-    Mock(modes::Mock<LR>),
+    Mock(modes::Mock),
 }
 
-impl<LR: LogWriter> Job<LR> {
-    pub fn new(ctx: Ctx<LR>, job_cfg: &JobCfg, pool: JobdefPool) -> JfResult<Self> {
+impl Job {
+    pub fn new(ctx: Ctx, job_cfg: &JobCfg, pool: JobdefPool) -> JfResult<Self> {
         Ok(match job_cfg {
             JobCfg::Command(c) => modes::Command::new(ctx, c.params.clone()).into(),
             JobCfg::Parallel(c) => modes::Parallel::new(ctx, c.params.clone(), pool)?.into(),
@@ -39,7 +34,7 @@ impl<LR: LogWriter> Job<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Bunshin for Job<LR> {
+impl Bunshin for Job {
     async fn bunshin(&self) -> Self {
         match self {
             Self::Command(t) => Self::Command(t.bunshin().await),
@@ -54,7 +49,7 @@ impl<LR: LogWriter> Bunshin for Job<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Checker for Job<LR> {
+impl Checker for Job {
     async fn is_finished(&self) -> JfResult<bool> {
         match self {
             Self::Command(t) => t.is_finished().await,
@@ -69,7 +64,7 @@ impl<LR: LogWriter> Checker for Job<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Runner<LR> for Job<LR> {
+impl Runner for Job {
     async fn start(&self) -> JfResult<Self> {
         Ok(match self {
             Self::Command(t) => t.start().await?.into(),
@@ -96,11 +91,11 @@ impl<LR: LogWriter> Runner<LR> for Job<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Bunshin for Vec<Job<LR>> {
+impl Bunshin for Vec<Job> {
     async fn bunshin(&self) -> Self {
         stream::iter(self.iter())
             .then(|j| async { j.bunshin().await })
-            .collect::<Vec<Job<LR>>>()
+            .collect::<Vec<Job>>()
             .await
     }
 }

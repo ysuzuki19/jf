@@ -1,7 +1,8 @@
 use std::path::PathBuf;
 
 use crate::{
-    ctx::{logger, Ctx},
+    ctx::Ctx,
+    log_worker::{LogLevel, Logger},
     util::error::{IntoJfError, JfResult},
 };
 
@@ -36,7 +37,7 @@ pub struct Args {
     cfg: Option<PathBuf>,
 
     #[arg(long, default_value = "info")]
-    log_level: logger::LogLevel,
+    log_level: LogLevel,
 
     #[arg(long)]
     completion: Option<clap_complete::Shell>,
@@ -52,15 +53,19 @@ pub struct Args {
 }
 
 impl Args {
-    pub fn setup<LR: logger::LogWriter>(&self) -> JfResult<(Ctx<LR>, Action, Opts)> {
-        let ctx = self.setup_ctx();
+    pub fn log_level(&self) -> LogLevel {
+        self.log_level
+    }
+
+    pub fn setup(&self, logger: Logger) -> JfResult<(Ctx, Action, Opts)> {
+        let ctx = self.setup_ctx(logger);
         let action = self.setup_action()?;
         let opts = self.setup_opts();
         Ok((ctx, action, opts))
     }
 
-    fn setup_ctx<LR: logger::LogWriter>(&self) -> Ctx<LR> {
-        Ctx::new(self.log_level)
+    fn setup_ctx(&self, logger: Logger) -> Ctx {
+        Ctx::new(logger)
     }
 
     fn setup_opts(&self) -> Opts {
@@ -107,7 +112,7 @@ mod tests {
     use clap::Parser;
     use clap_complete::Shell;
 
-    use crate::util::testutil::*;
+    use crate::{log_worker::LogWorkerMock, util::testutil::async_test};
 
     use super::*;
 
@@ -119,7 +124,7 @@ mod tests {
         assert!(!args.help);
         assert!(!args.validate);
         assert_eq!(args.cfg, None);
-        assert_eq!(args.log_level, logger::LogLevel::Info);
+        assert_eq!(args.log_level, LogLevel::Info);
         assert_eq!(args.completion, None);
         assert!(!args.list);
         assert!(!args.description);
@@ -129,22 +134,34 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn setup() -> JfResult<()> {
-        let args = Args::default();
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async move {
+                let args = Args::default();
 
-        let (ctx, action, opts) = args.setup::<MockLogWriter>()?;
-        assert_eq!(ctx, args.setup_ctx());
-        assert_eq!(action, args.setup_action()?);
-        assert_eq!(opts, args.setup_opts());
-        Ok(())
+                let log_worker_mock = LogWorkerMock::new().await;
+                let (ctx, action, opts) = args.setup(log_worker_mock.logger.clone())?;
+                assert_eq!(ctx, args.setup_ctx(log_worker_mock.logger));
+                assert_eq!(action, args.setup_action()?);
+                assert_eq!(opts, args.setup_opts());
+                Ok(())
+            },
+        )
     }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn setup_ctx() {
-        let args = Args::parse_from([fixtures::APP_NAME, "--log-level", "error"]);
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async move {
+                let args = Args::parse_from([fixtures::APP_NAME, "--log-level", "error"]);
 
-        let ctx = args.setup_ctx::<MockLogWriter>();
-        assert_eq!(ctx.logger().level(), logger::LogLevel::Error);
+                let log_worker_mock = LogWorkerMock::new().await;
+                let ctx = args.setup_ctx(log_worker_mock.logger.clone().update(LogLevel::Error));
+                assert_eq!(ctx.logger().level(), LogLevel::Error);
+            },
+        )
     }
 
     #[test]

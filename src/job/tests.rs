@@ -2,9 +2,9 @@ use crate::util::testutil::*;
 
 use super::*;
 
-impl Job<MockLogWriter> {
+impl Job {
     #[cfg_attr(coverage, coverage(off))]
-    pub fn as_mock(&self) -> &modes::Mock<MockLogWriter> {
+    pub fn as_mock(&self) -> &modes::Mock {
         if let Self::Mock(t) = self {
             t
         } else {
@@ -19,7 +19,7 @@ fn command() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let job: Job<_> = modes::Command::fixture().into();
+            let job: Job = modes::Command::async_fixture().await.into();
             job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
@@ -36,7 +36,7 @@ fn parallel() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let job: Job<_> = modes::Parallel::try_fixture()?.into();
+            let job: Job = modes::Parallel::try_async_fixture().await?.into();
             job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
@@ -53,7 +53,7 @@ fn sequential() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let job: Job<_> = modes::Sequential::try_fixture()?.into();
+            let job: Job = modes::Sequential::try_async_fixture().await?.into();
             job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
@@ -70,7 +70,7 @@ fn shell() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let job: Job<_> = modes::Shell::fixture().into();
+            let job: Job = modes::Shell::async_fixture().await.into();
             job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;
@@ -87,7 +87,7 @@ fn watch() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let job: Job<_> = modes::Watch::try_fixture()?.into();
+            let job: Job = modes::Watch::try_async_fixture().await?.into();
             job.start().await?.cancel().await?.join().await?;
             assert!(job.is_finished().await?);
             let job = job.bunshin().await;

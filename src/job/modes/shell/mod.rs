@@ -2,7 +2,7 @@
 mod tests;
 
 use crate::{
-    ctx::{logger::LogWriter, Ctx},
+    ctx::Ctx,
     job::{runner::*, Job},
     util::{error::JfResult, ReadOnly},
 };
@@ -14,14 +14,14 @@ pub struct ShellParams {
 }
 
 #[derive(Clone)]
-pub struct Shell<LR: LogWriter> {
-    ctx: Ctx<LR>,
+pub struct Shell {
+    ctx: Ctx,
     params: ReadOnly<ShellParams>,
-    command: super::Command<LR>,
+    command: super::Command,
 }
 
-impl<LR: LogWriter> Shell<LR> {
-    pub fn new(ctx: Ctx<LR>, params: ShellParams) -> Self {
+impl Shell {
+    pub fn new(ctx: Ctx, params: ShellParams) -> Self {
         let mut args = params.args.clone().unwrap_or_default();
         args.extend(vec!["-c".to_string(), params.script.clone()]);
         let command = super::Command::new(
@@ -40,7 +40,7 @@ impl<LR: LogWriter> Shell<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Bunshin for Shell<LR> {
+impl Bunshin for Shell {
     async fn bunshin(&self) -> Self {
         Self {
             ctx: self.ctx.clone(),
@@ -51,14 +51,14 @@ impl<LR: LogWriter> Bunshin for Shell<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Checker for Shell<LR> {
+impl Checker for Shell {
     async fn is_finished(&self) -> JfResult<bool> {
         self.command.is_finished().await
     }
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Runner<LR> for Shell<LR> {
+impl Runner for Shell {
     async fn start(&self) -> JfResult<Self> {
         let mut logger = self.ctx.logger();
         logger.debug("Shell starting...").await?;
@@ -73,8 +73,8 @@ impl<LR: LogWriter> Runner<LR> for Shell<LR> {
     }
 }
 
-impl<LR: LogWriter> From<Shell<LR>> for Job<LR> {
-    fn from(value: Shell<LR>) -> Self {
+impl From<Shell> for Job {
+    fn from(value: Shell) -> Self {
         Self::Shell(value)
     }
 }

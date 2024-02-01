@@ -16,14 +16,16 @@ impl PartialEq for MockLogWriter {
     }
 }
 
-#[async_trait::async_trait]
-impl LogWriter for MockLogWriter {
-    fn init() -> Self {
+impl MockLogWriter {
+    pub fn new() -> Self {
         Self {
             lines: Arc::new(Mutex::new(vec![])),
         }
     }
+}
 
+#[async_trait::async_trait]
+impl LogWriter for MockLogWriter {
     async fn write(&mut self, str: &str) -> JfResult<()> {
         self.lines.lock().as_mut().unwrap().push(str.to_string());
         Ok(())
@@ -48,7 +50,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async move {
-                let writer = MockLogWriter::init();
+                let writer = MockLogWriter::new();
                 assert_eq!(writer.lines(), Vec::<String>::new());
             },
         )
@@ -60,7 +62,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async move {
-                let mut writer = MockLogWriter::init();
+                let mut writer = MockLogWriter::new();
                 writer.write("test").await?;
                 assert_eq!(writer.lines(), vec!["test".to_string()]);
                 assert_eq!(writer.clone().lines(), vec!["test".to_string()]);

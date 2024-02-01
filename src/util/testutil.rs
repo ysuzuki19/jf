@@ -1,4 +1,16 @@
-pub use crate::ctx::logger::MockLogWriter;
+use super::error::JfResult;
+
+pub trait AsyncFixture {
+    async fn async_fixture() -> Self
+    where
+        Self: Sized;
+}
+
+pub trait TryAsyncFixture {
+    async fn try_async_fixture() -> JfResult<Self>
+    where
+        Self: Sized;
+}
 
 pub trait Fixture {
     fn fixture() -> Self;

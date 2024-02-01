@@ -1,6 +1,6 @@
 use crate::{
     cli::{completion_script, models::Opts, Args},
-    ctx::{logger::LogWriter, Ctx},
+    ctx::Ctx,
     util::error::JfResult,
 };
 
@@ -22,7 +22,7 @@ impl From<Statics> for Action {
 
 #[async_trait::async_trait]
 impl CliAction for Statics {
-    async fn run<LR: LogWriter>(self, ctx: Ctx<LR>, _: Opts) -> JfResult<()> {
+    async fn run(self, ctx: Ctx, _: Opts) -> JfResult<()> {
         let mut cmd = <Args as clap::CommandFactory>::command();
         let s = match self {
             Statics::Completion(shell) => completion_script::generate(shell),
@@ -61,7 +61,8 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let s = Statics::Completion(clap_complete::Shell::Bash);
-                s.run(Fixture::fixture(), Fixture::fixture()).await?;
+                s.run(Ctx::async_fixture().await, Fixture::fixture())
+                    .await?;
                 Ok(())
             },
         )
@@ -74,7 +75,8 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let s = Statics::Help;
-                s.run(Fixture::fixture(), Fixture::fixture()).await?;
+                s.run(Ctx::async_fixture().await, Fixture::fixture())
+                    .await?;
                 Ok(())
             },
         )
@@ -87,7 +89,8 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let s = Statics::Version;
-                s.run(Fixture::fixture(), Fixture::fixture()).await?;
+                s.run(Ctx::async_fixture().await, Fixture::fixture())
+                    .await?;
                 Ok(())
             },
         )

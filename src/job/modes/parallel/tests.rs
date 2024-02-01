@@ -6,36 +6,51 @@ use crate::{
 
 use super::*;
 
-impl TryFixture for Parallel<MockLogWriter> {
+impl TryAsyncFixture for Parallel {
     #[cfg_attr(coverage, coverage(off))]
-    fn try_fixture() -> JfResult<Self> {
+    async fn try_async_fixture() -> JfResult<Self> {
         let params = ParallelParams {
             jobs: vec!["fast".into(), "fast".into()],
         };
-        Parallel::new(Fixture::fixture(), params, TryFixture::try_fixture()?)
+        Parallel::new(
+            Ctx::async_fixture().await,
+            params,
+            TryFixture::try_fixture()?,
+        )
     }
 }
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
 fn invalid_new_with_unknown_job() -> JfResult<()> {
-    let must_fail = Parallel::<MockLogWriter>::new(
-        Fixture::fixture(),
-        ParallelParams {
-            jobs: vec!["mock".into(), "mock".into()],
+    async_test(
+        #[cfg_attr(coverage, coverage(off))]
+        async {
+            let must_fail = Parallel::new(
+                Ctx::async_fixture().await,
+                ParallelParams {
+                    jobs: vec!["mock".into(), "mock".into()],
+                },
+                JobdefPool::new(vec![]),
+            );
+            assert!(must_fail.is_err());
+            Ok(())
         },
-        JobdefPool::new(vec![]),
-    );
-    assert!(must_fail.is_err());
-    Ok(())
+    )
 }
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
 fn new() -> JfResult<()> {
-    let p = Parallel::try_fixture()?;
-    assert_eq!(p.jobs.len(), 2);
-    Ok(())
+    async_test(
+        #[cfg_attr(coverage, coverage(off))]
+        async {
+            let p = Parallel::try_async_fixture().await?;
+            assert_eq!(p.jobs.len(), 2);
+
+            Ok(())
+        },
+    )
 }
 
 #[test]
@@ -44,7 +59,7 @@ fn start() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let p = Parallel::try_fixture()?;
+            let p = Parallel::try_async_fixture().await?;
             p.start().await?;
             for job in p.jobs {
                 job.as_mock().assert_is_started_eq(true);
@@ -60,7 +75,7 @@ fn cancel() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let p = Parallel::try_fixture()?;
+            let p = Parallel::try_async_fixture().await?;
             p.start().await?.cancel().await?;
             for job in p.jobs {
                 job.as_mock()
@@ -78,7 +93,7 @@ fn join() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let p = Parallel::try_fixture()?;
+            let p = Parallel::try_async_fixture().await?;
             p.start()
                 .await?
                 .join()
@@ -101,7 +116,7 @@ fn bunshin() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let origin = Parallel::try_fixture()?;
+            let origin = Parallel::try_async_fixture().await?;
             origin.start().await?.cancel().await?;
 
             let bunshin = origin.bunshin().await;
@@ -123,7 +138,7 @@ fn is_finished_not_yet_started() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
-            let p = Parallel::try_fixture()?;
+            let p = Parallel::try_async_fixture().await?;
             assert!(!p.is_finished().await?);
             Ok(())
         },

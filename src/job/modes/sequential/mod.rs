@@ -13,7 +13,7 @@ use futures::{stream, StreamExt};
 use tokio::sync::Mutex;
 
 use crate::{
-    ctx::{logger::LogWriter, Ctx},
+    ctx::Ctx,
     job::{runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::{
@@ -28,15 +28,15 @@ pub struct SequentialParams {
 }
 
 #[derive(Clone)]
-pub struct Sequential<LR: LogWriter> {
-    ctx: Ctx<LR>,
-    jobs: ReadOnly<Vec<Job<LR>>>,
+pub struct Sequential {
+    ctx: Ctx,
+    jobs: ReadOnly<Vec<Job>>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<JfHandle>>>,
 }
 
-impl<LR: LogWriter> Sequential<LR> {
-    pub fn new(ctx: Ctx<LR>, params: SequentialParams, pool: JobdefPool) -> JfResult<Self> {
+impl Sequential {
+    pub fn new(ctx: Ctx, params: SequentialParams, pool: JobdefPool) -> JfResult<Self> {
         if params.jobs.is_empty() {
             return Err("mode=sequential must have at least one job".into_jf_error());
         }
@@ -44,7 +44,7 @@ impl<LR: LogWriter> Sequential<LR> {
             .jobs
             .into_iter()
             .map(|job_name| pool.build(ctx.clone(), job_name, Agent::Job))
-            .collect::<JfResult<Vec<Job<LR>>>>()?;
+            .collect::<JfResult<Vec<Job>>>()?;
         Ok(Self {
             ctx,
             jobs: jobs.into(),
@@ -55,13 +55,13 @@ impl<LR: LogWriter> Sequential<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Bunshin for Sequential<LR> {
+impl Bunshin for Sequential {
     async fn bunshin(&self) -> Self {
         Self {
             ctx: self.ctx.clone(),
             jobs: stream::iter(self.jobs.clone().unwrap().into_iter())
                 .then(|j| async move { j.bunshin().await })
-                .collect::<Vec<Job<LR>>>()
+                .collect::<Vec<Job>>()
                 .await
                 .into(),
             is_cancelled: Arc::new(AtomicBool::new(false)),
@@ -71,7 +71,7 @@ impl<LR: LogWriter> Bunshin for Sequential<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Checker for Sequential<LR> {
+impl Checker for Sequential {
     async fn is_finished(&self) -> JfResult<bool> {
         match self.handle.lock().await.deref() {
             Some(handle) => Ok(handle.is_finished()),
@@ -81,7 +81,7 @@ impl<LR: LogWriter> Checker for Sequential<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
+impl Runner for Sequential {
     async fn start(&self) -> JfResult<Self> {
         let mut logger = self.ctx.logger();
         logger.debug("Sequential starting...").await?;
@@ -123,8 +123,8 @@ impl<LR: LogWriter> Runner<LR> for Sequential<LR> {
     }
 }
 
-impl<LR: LogWriter> From<Sequential<LR>> for Job<LR> {
-    fn from(value: Sequential<LR>) -> Self {
+impl From<Sequential> for Job {
+    fn from(value: Sequential) -> Self {
         Self::Sequential(value)
     }
 }

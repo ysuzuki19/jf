@@ -2,10 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use super::{Agent, Jobdef};
 use crate::{
-    ctx::{
-        logger::{JfStdout, LogLevel, LogWriter},
-        Ctx,
-    },
+    ctx::Ctx,
     job::Job,
     util::error::{IntoJfError, JfError, JfResult},
 };
@@ -34,13 +31,11 @@ impl JobdefPool {
             .collect()
     }
 
-    pub fn validate(&self) -> JfResult<()> {
+    pub fn validate(&self, ctx: Ctx) -> JfResult<()> {
         let errs = self
             .map
             .values()
-            .map(|jobdef| {
-                jobdef.build::<JfStdout>(Ctx::new(LogLevel::None), self.clone(), Agent::Job)
-            })
+            .map(|jobdef| jobdef.build(ctx.clone(), self.clone(), Agent::Job))
             .filter_map(|res| match res {
                 Ok(_) => None,
                 Err(e) => Some(e),
@@ -59,12 +54,7 @@ impl JobdefPool {
             .ok_or(format!("Jobdef(name={}) not found", job_name).into_jf_error())
     }
 
-    pub fn build<LR: LogWriter>(
-        &self,
-        ctx: Ctx<LR>,
-        job_name: String,
-        agent: Agent,
-    ) -> JfResult<Job<LR>> {
+    pub fn build(&self, ctx: Ctx, job_name: String, agent: Agent) -> JfResult<Job> {
         self.get(job_name)?.build(ctx, self.clone(), agent)
     }
 
@@ -78,6 +68,7 @@ mod tests {
     use super::*;
     use crate::{
         cfg::job_cfg::{CommonCfg, JobCfg, MockCfg, Visibility, WatchCfg},
+        log_worker::LogWorkerMock,
         util::testutil::*,
     };
 
@@ -92,77 +83,75 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn test() -> JfResult<()> {
-        let pool = JobdefPool::new(vec![
-            Jobdef::new(
-                "job1".into(),
-                JobCfg::Mock(MockCfg {
-                    common: CommonCfg::new(Visibility::Public, "job1-desc".into()),
-                    params: Fixture::fixture(),
-                }),
-            )?,
-            Jobdef::new(
-                "job2".into(),
-                JobCfg::Mock(MockCfg {
-                    common: CommonCfg::new(Visibility::Public, "job2-desc".into()),
-                    params: Fixture::fixture(),
-                }),
-            )?,
-            Jobdef::new(
-                "job3".into(),
-                JobCfg::Mock(MockCfg {
-                    common: CommonCfg::new(Visibility::Private, "job3-desc".into()),
-                    params: Fixture::fixture(),
-                }),
-            )?,
-        ]);
-        assert_eq!(pool.list_public().len(), 2);
-        assert!(pool.validate().is_ok());
-        assert!(pool
-            .build::<JfStdout>(Ctx::new(LogLevel::None), "job1".into(), Agent::Job)
-            .is_ok());
-        assert!(pool
-            .build::<JfStdout>(Ctx::new(LogLevel::None), "job1".into(), Agent::Cli)
-            .is_ok());
-        assert!(pool
-            .build::<JfStdout>(Ctx::new(LogLevel::None), "job3".into(), Agent::Job)
-            .is_ok());
-        assert!(pool
-            .build::<JfStdout>(Ctx::new(LogLevel::None), "job3".into(), Agent::Cli)
-            .is_err());
-        assert_eq!(pool.description("job1".into())?, "job1-desc");
-        Ok(())
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async move {
+                let pool = JobdefPool::new(vec![
+                    Jobdef::new(
+                        "job1".into(),
+                        JobCfg::Mock(MockCfg {
+                            common: CommonCfg::new(Visibility::Public, "job1-desc".into()),
+                            params: Fixture::fixture(),
+                        }),
+                    )?,
+                    Jobdef::new(
+                        "job2".into(),
+                        JobCfg::Mock(MockCfg {
+                            common: CommonCfg::new(Visibility::Public, "job2-desc".into()),
+                            params: Fixture::fixture(),
+                        }),
+                    )?,
+                    Jobdef::new(
+                        "job3".into(),
+                        JobCfg::Mock(MockCfg {
+                            common: CommonCfg::new(Visibility::Private, "job3-desc".into()),
+                            params: Fixture::fixture(),
+                        }),
+                    )?,
+                ]);
+                assert_eq!(pool.list_public().len(), 2);
+                let log_worker_mock = LogWorkerMock::new().await;
+                let ctx = Ctx::new(log_worker_mock.logger);
+                assert!(pool.validate(ctx.clone()).is_ok());
+                assert!(pool.build(ctx.clone(), "job1".into(), Agent::Job).is_ok());
+                assert!(pool.build(ctx.clone(), "job1".into(), Agent::Cli).is_ok());
+                assert!(pool.build(ctx.clone(), "job3".into(), Agent::Job).is_ok());
+                assert!(pool.build(ctx.clone(), "job3".into(), Agent::Cli).is_err());
+                assert_eq!(pool.description("job1".into())?, "job1-desc");
+                Ok(())
+            },
+        )
     }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn fail() -> JfResult<()> {
-        let pool = JobdefPool::new(vec![
-            Jobdef::new("job1".into(), JobCfg::Mock(Fixture::fixture()))?,
-            Jobdef::new("job2".into(), JobCfg::Mock(Fixture::fixture()))?,
-            Jobdef::new(
-                "job3".into(),
-                JobCfg::Watch(WatchCfg {
-                    common: CommonCfg::new(Visibility::Private, "job3-desc".into()),
-                    params: Fixture::fixture(),
-                }),
-            )?,
-        ]);
-        assert_eq!(pool.list_public().len(), 2);
-        assert!(pool.validate().is_err());
-        assert!(pool
-            .build::<JfStdout>(Ctx::new(LogLevel::None), "job1".into(), Agent::Job)
-            .is_ok());
-        assert!(pool
-            .build::<JfStdout>(Ctx::new(LogLevel::None), "job1".into(), Agent::Cli)
-            .is_ok());
-        assert!(pool
-            .build::<JfStdout>(Ctx::new(LogLevel::None), "job3".into(), Agent::Job)
-            .is_err());
-        assert!(pool
-            .build::<JfStdout>(Ctx::new(LogLevel::None), "job3".into(), Agent::Cli)
-            .is_err());
-        assert_eq!(pool.description("job1".into())?, "");
-        assert_eq!(pool.description("job3".into())?, "job3-desc");
-        Ok(())
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async move {
+                let pool = JobdefPool::new(vec![
+                    Jobdef::new("job1".into(), JobCfg::Mock(Fixture::fixture()))?,
+                    Jobdef::new("job2".into(), JobCfg::Mock(Fixture::fixture()))?,
+                    Jobdef::new(
+                        "job3".into(),
+                        JobCfg::Watch(WatchCfg {
+                            common: CommonCfg::new(Visibility::Private, "job3-desc".into()),
+                            params: Fixture::fixture(),
+                        }),
+                    )?,
+                ]);
+                assert_eq!(pool.list_public().len(), 2);
+                let log_worker_mock = LogWorkerMock::new().await;
+                let ctx = Ctx::new(log_worker_mock.logger);
+                assert!(pool.validate(ctx.clone()).is_err());
+                assert!(pool.build(ctx.clone(), "job1".into(), Agent::Job).is_ok());
+                assert!(pool.build(ctx.clone(), "job1".into(), Agent::Cli).is_ok());
+                assert!(pool.build(ctx.clone(), "job3".into(), Agent::Job).is_err());
+                assert!(pool.build(ctx.clone(), "job3".into(), Agent::Cli).is_err());
+                assert_eq!(pool.description("job1".into())?, "");
+                assert_eq!(pool.description("job3".into())?, "job3-desc");
+                Ok(())
+            },
+        )
     }
 }

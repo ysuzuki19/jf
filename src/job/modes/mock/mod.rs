@@ -7,7 +7,6 @@ use std::sync::{atomic::Ordering, Arc};
 use tokio::sync::Mutex;
 
 use crate::{
-    ctx::logger::LogWriter,
     job::{runner::*, Job},
     util::{error::JfResult, testutil::Fixture},
 };
@@ -21,7 +20,7 @@ pub struct MockParams {
 }
 
 #[derive(Clone)]
-pub struct Mock<LR: LogWriter> {
+pub struct Mock {
     each_sleep_time: u64,
     sleep_count: u8,
     id: usize,
@@ -30,10 +29,9 @@ pub struct Mock<LR: LogWriter> {
     is_finished: Arc<AtomicBool>,
     is_cancelled: Arc<AtomicBool>,
     handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
-    _phantom: std::marker::PhantomData<LR>,
 }
 
-impl<LR: LogWriter> Mock<LR> {
+impl Mock {
     pub fn new(params: MockParams) -> Self {
         Self {
             each_sleep_time: params.each_sleep_time,
@@ -44,7 +42,6 @@ impl<LR: LogWriter> Mock<LR> {
             is_finished: Arc::new(AtomicBool::new(false)),
             is_cancelled: Arc::new(AtomicBool::new(false)),
             handle: Arc::new(Mutex::new(None)),
-            _phantom: std::marker::PhantomData,
         }
     }
 
@@ -142,7 +139,7 @@ impl<LR: LogWriter> Mock<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Bunshin for Mock<LR> {
+impl Bunshin for Mock {
     async fn bunshin(&self) -> Self {
         Self::new(MockParams {
             each_sleep_time: self.each_sleep_time,
@@ -152,14 +149,14 @@ impl<LR: LogWriter> Bunshin for Mock<LR> {
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Checker for Mock<LR> {
+impl Checker for Mock {
     async fn is_finished(&self) -> JfResult<bool> {
         Ok(self.is_finished.load(Ordering::Relaxed))
     }
 }
 
 #[async_trait::async_trait]
-impl<LR: LogWriter> Runner<LR> for Mock<LR> {
+impl Runner for Mock {
     async fn start(&self) -> JfResult<Self> {
         self.is_started.store(true, Ordering::Relaxed);
         self.is_running.store(true, Ordering::Relaxed);
@@ -200,8 +197,8 @@ impl<LR: LogWriter> Runner<LR> for Mock<LR> {
     }
 }
 
-impl<LR: LogWriter> From<Mock<LR>> for Job<LR> {
-    fn from(value: Mock<LR>) -> Self {
+impl From<Mock> for Job {
+    fn from(value: Mock) -> Self {
         Self::Mock(value)
     }
 }

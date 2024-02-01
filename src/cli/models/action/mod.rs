@@ -2,7 +2,7 @@ mod configured;
 mod statics;
 
 use crate::ctx::Ctx;
-use crate::{ctx::logger::LogWriter, util::error::JfResult};
+use crate::util::error::JfResult;
 
 pub use self::configured::Configured;
 pub use self::statics::Statics;
@@ -11,7 +11,7 @@ use super::Opts;
 
 #[async_trait::async_trait]
 pub trait CliAction {
-    async fn run<LR: LogWriter>(self, ctx: Ctx<LR>, opts: Opts) -> JfResult<()>;
+    async fn run(self, ctx: Ctx, opts: Opts) -> JfResult<()>;
 }
 
 #[cfg_attr(test, derive(PartialEq, Debug))]
@@ -22,7 +22,7 @@ pub enum Action {
 
 #[async_trait::async_trait]
 impl CliAction for Action {
-    async fn run<LR: LogWriter>(self, ctx: Ctx<LR>, opts: Opts) -> JfResult<()> {
+    async fn run(self, ctx: Ctx, opts: Opts) -> JfResult<()> {
         match self {
             Action::Statics(s) => s.run(ctx, opts).await,
             Action::Configured(c) => c.run(ctx, opts).await,
@@ -50,7 +50,8 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let s = Action::Statics(Statics::Help);
-                s.run(Fixture::fixture(), Fixture::fixture()).await?;
+                s.run(Ctx::async_fixture().await, Fixture::fixture())
+                    .await?;
                 Ok(())
             },
         )
@@ -63,7 +64,8 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async {
                 let c = Action::Configured(Configured::Run(String::from("test-fixture")));
-                c.run(Fixture::fixture(), Fixture::fixture()).await?;
+                c.run(Ctx::async_fixture().await, Fixture::fixture())
+                    .await?;
                 Ok(())
             },
         )
