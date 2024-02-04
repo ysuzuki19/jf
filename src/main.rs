@@ -4,18 +4,18 @@ mod cli;
 mod ctx;
 mod job;
 mod jobdef;
-mod log_worker;
+mod logging;
 mod util;
 
 use clap::Parser;
-use log_worker::JfStdout;
+use logging::Stdout;
 
 #[tokio::main]
 async fn main() {
     let args = cli::Args::parse();
-    let mut log_worker = log_worker::LogWorker::new();
+    let mut log_worker = logging::Worker::new();
     {
-        let mut logger = log_worker.start(JfStdout::new(), args.log_level()).await;
+        let mut logger = log_worker.start(Stdout::new(), args.log_level()).await;
         match cli::Cli::load(logger.clone(), args) {
             Ok(cli) => {
                 if let Err(e) = cli.run().await {

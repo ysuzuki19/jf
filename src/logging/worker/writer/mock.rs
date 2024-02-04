@@ -2,21 +2,21 @@ use std::sync::{Arc, Mutex};
 
 use crate::util::error::JfResult;
 
-use super::LogWriter;
+use super::Writer;
 
 #[derive(Clone)]
 #[cfg_attr(test, derive(Debug))]
-pub struct MockLogWriter {
+pub struct Mock {
     lines: Arc<Mutex<Vec<String>>>,
 }
 
-impl PartialEq for MockLogWriter {
+impl PartialEq for Mock {
     fn eq(&self, other: &Self) -> bool {
         self.lines.lock().unwrap().clone() == other.lines.lock().unwrap().clone()
     }
 }
 
-impl MockLogWriter {
+impl Mock {
     pub fn new() -> Self {
         Self {
             lines: Arc::new(Mutex::new(vec![])),
@@ -25,14 +25,14 @@ impl MockLogWriter {
 }
 
 #[async_trait::async_trait]
-impl LogWriter for MockLogWriter {
+impl Writer for Mock {
     async fn write(&mut self, str: &str) -> JfResult<()> {
         self.lines.lock().as_mut().unwrap().push(str.to_string());
         Ok(())
     }
 }
 
-impl MockLogWriter {
+impl Mock {
     pub fn lines(&self) -> Vec<String> {
         self.lines.lock().unwrap().clone()
     }
@@ -50,7 +50,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async move {
-                let writer = MockLogWriter::new();
+                let writer = Mock::new();
                 assert_eq!(writer.lines(), Vec::<String>::new());
             },
         )
@@ -62,7 +62,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async move {
-                let mut writer = MockLogWriter::new();
+                let mut writer = Mock::new();
                 writer.write("test").await?;
                 assert_eq!(writer.lines(), vec!["test".to_string()]);
                 assert_eq!(writer.clone().lines(), vec!["test".to_string()]);

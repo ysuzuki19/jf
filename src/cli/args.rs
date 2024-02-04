@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     ctx::Ctx,
-    log_worker::{LogLevel, Logger},
+    logging::{LogLevel, Logger},
     util::error::{IntoJfError, JfResult},
 };
 
@@ -112,7 +112,7 @@ mod tests {
     use clap::Parser;
     use clap_complete::Shell;
 
-    use crate::{log_worker::LogWorkerMock, util::testutil::async_test};
+    use crate::{logging::LoggingMock, util::testutil::async_test};
 
     use super::*;
 
@@ -139,9 +139,9 @@ mod tests {
             async move {
                 let args = Args::default();
 
-                let log_worker_mock = LogWorkerMock::new().await;
-                let (ctx, action, opts) = args.setup(log_worker_mock.logger.clone())?;
-                assert_eq!(ctx, args.setup_ctx(log_worker_mock.logger));
+                let logging_mock = LoggingMock::new().await;
+                let (ctx, action, opts) = args.setup(logging_mock.logger.clone())?;
+                assert_eq!(ctx, args.setup_ctx(logging_mock.logger));
                 assert_eq!(action, args.setup_action()?);
                 assert_eq!(opts, args.setup_opts());
                 Ok(())
@@ -157,8 +157,8 @@ mod tests {
             async move {
                 let args = Args::parse_from([fixtures::APP_NAME, "--log-level", "error"]);
 
-                let log_worker_mock = LogWorkerMock::new().await;
-                let ctx = args.setup_ctx(log_worker_mock.logger.clone().update(LogLevel::Error));
+                let logging_mock = LoggingMock::new().await;
+                let ctx = args.setup_ctx(logging_mock.logger.clone().update(LogLevel::Error));
                 assert_eq!(ctx.logger().level(), LogLevel::Error);
             },
         )

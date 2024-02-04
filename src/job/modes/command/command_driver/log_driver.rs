@@ -53,7 +53,7 @@ impl LogDriver {
 
 #[cfg(test)]
 mod tests {
-    use crate::{log_worker::LogWorkerMock, util::testutil::*};
+    use crate::{logging::LoggingMock, util::testutil::*};
 
     use super::*;
 
@@ -98,10 +98,10 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let log_worker_mock = LogWorkerMock::new().await;
-                let ctx = Ctx::new(log_worker_mock.logger);
+                let logging_mock = LoggingMock::new().await;
+                let ctx = Ctx::new(logging_mock.logger);
                 let mut log_driver = LogDriver::new(ctx);
-                assert_eq!(log_worker_mock.log_writer.lines().len(), 0);
+                assert_eq!(logging_mock.log_writer.lines().len(), 0);
 
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
@@ -110,7 +110,7 @@ mod tests {
                 log_driver.mount(child.stdout.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
-                assert_eq!(log_worker_mock.log_writer.lines(), vec!["hello"]);
+                assert_eq!(logging_mock.log_writer.lines(), vec!["hello"]);
 
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
@@ -119,7 +119,7 @@ mod tests {
                 log_driver.mount(child.stdout.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
-                assert_eq!(log_worker_mock.log_writer.lines(), vec!["hello", "hello"]);
+                assert_eq!(logging_mock.log_writer.lines(), vec!["hello", "hello"]);
                 Ok(())
             },
         )

@@ -2,24 +2,24 @@ use tokio::io::AsyncWriteExt;
 
 use crate::util::error::JfResult;
 
-use super::LogWriter;
+use super::Writer;
 
-pub struct JfStdout(tokio::io::Stdout);
+pub struct Stdout(tokio::io::Stdout);
 
-impl Clone for JfStdout {
+impl Clone for Stdout {
     fn clone(&self) -> Self {
         Self(tokio::io::stdout())
     }
 }
 
-impl JfStdout {
+impl Stdout {
     pub fn new() -> Self {
         Self(tokio::io::stdout())
     }
 }
 
 #[async_trait::async_trait]
-impl LogWriter for JfStdout {
+impl Writer for Stdout {
     #[cfg_attr(coverage, coverage(off))]
     async fn write(&mut self, s: &str) -> JfResult<()> {
         // let now = Local::now().format("%H:%M:%S.%3f");
@@ -44,7 +44,7 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async move {
-                let mut js = JfStdout::new();
+                let mut js = Stdout::new();
                 js.write("").await?;
                 Ok(())
             },
@@ -54,7 +54,7 @@ mod tests {
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn instance() {
-        let js = JfStdout::new();
+        let js = Stdout::new();
         let _ = js.clone();
     }
 }

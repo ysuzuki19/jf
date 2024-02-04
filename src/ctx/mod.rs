@@ -1,4 +1,4 @@
-use crate::log_worker::Logger;
+use crate::logging::Logger;
 
 #[derive(Clone)]
 #[cfg_attr(test, derive(PartialEq, Debug))]
@@ -18,16 +18,16 @@ impl Ctx {
 
 #[cfg(test)]
 mod tests {
-    use crate::{log_worker::LogWorkerMock, util::testutil::*};
+    use crate::{logging::LoggingMock, util::testutil::*};
 
     use super::*;
 
     impl AsyncFixture for Ctx {
         #[cfg_attr(coverage, coverage(off))]
         async fn async_fixture() -> Self {
-            let log_worker_mock = LogWorkerMock::new().await;
+            let logging_mock = LoggingMock::new().await;
             Self {
-                logger: log_worker_mock.logger,
+                logger: logging_mock.logger,
             }
         }
     }

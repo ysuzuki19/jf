@@ -3,7 +3,7 @@ mod completion_script;
 mod job_controller;
 mod models;
 
-use crate::{ctx::Ctx, log_worker::Logger, util::error::JfResult};
+use crate::{ctx::Ctx, logging::Logger, util::error::JfResult};
 
 pub use self::args::Args;
 use self::models::{
@@ -33,7 +33,7 @@ mod tests {
     use clap::Parser;
 
     use crate::cli::{args::fixtures, models::action::Configured};
-    use crate::log_worker::LogWorkerMock;
+    use crate::logging::LoggingMock;
     use crate::util::testutil::*;
 
     use super::*;
@@ -56,9 +56,9 @@ mod tests {
             #[cfg_attr(coverage, coverage(off))]
             async move {
                 let args = Args::parse_from(args::fixtures::SIMPLE);
-                let log_worker_mock = LogWorkerMock::new().await;
-                let cli = Cli::load(log_worker_mock.logger.clone(), args)?;
-                assert_eq!(cli.ctx, Ctx::new(log_worker_mock.logger));
+                let logging_mock = LoggingMock::new().await;
+                let cli = Cli::load(logging_mock.logger.clone(), args)?;
+                assert_eq!(cli.ctx, Ctx::new(logging_mock.logger));
                 assert_eq!(
                     cli.action,
                     Configured::Run(fixtures::JOB_NAME.into()).into()

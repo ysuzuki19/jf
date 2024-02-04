@@ -68,7 +68,7 @@ mod tests {
     use super::*;
     use crate::{
         cfg::job_cfg::{CommonCfg, JobCfg, MockCfg, Visibility, WatchCfg},
-        log_worker::LogWorkerMock,
+        logging::LoggingMock,
         util::testutil::*,
     };
 
@@ -110,8 +110,8 @@ mod tests {
                     )?,
                 ]);
                 assert_eq!(pool.list_public().len(), 2);
-                let log_worker_mock = LogWorkerMock::new().await;
-                let ctx = Ctx::new(log_worker_mock.logger);
+                let logging_mock = LoggingMock::new().await;
+                let ctx = Ctx::new(logging_mock.logger);
                 assert!(pool.validate(ctx.clone()).is_ok());
                 assert!(pool.build(ctx.clone(), "job1".into(), Agent::Job).is_ok());
                 assert!(pool.build(ctx.clone(), "job1".into(), Agent::Cli).is_ok());
@@ -141,8 +141,8 @@ mod tests {
                     )?,
                 ]);
                 assert_eq!(pool.list_public().len(), 2);
-                let log_worker_mock = LogWorkerMock::new().await;
-                let ctx = Ctx::new(log_worker_mock.logger);
+                let logging_mock = LoggingMock::new().await;
+                let ctx = Ctx::new(logging_mock.logger);
                 assert!(pool.validate(ctx.clone()).is_err());
                 assert!(pool.build(ctx.clone(), "job1".into(), Agent::Job).is_ok());
                 assert!(pool.build(ctx.clone(), "job1".into(), Agent::Cli).is_ok());
