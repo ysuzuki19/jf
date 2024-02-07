@@ -7,10 +7,6 @@ pub use worker::{Stdout, Worker};
 #[cfg(test)]
 pub use tests::LoggingMock;
 
-pub struct Message {
-    pub line: String,
-}
-
 #[cfg(test)]
 mod tests {
     use crate::util::{error::JfResult, testutil::*};

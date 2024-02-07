@@ -5,7 +5,7 @@ pub enum JfError {
     #[error("IO error occurred: {0}")]
     IoError(#[from] std::io::Error),
     #[error("Tokio JoinError occurred: {0}")]
-    TokioMpscSendError(#[from] tokio::sync::mpsc::error::SendError<crate::logging::Message>),
+    TokioMpscSendError(#[from] tokio::sync::mpsc::error::SendError<String>),
     #[error("std::sync::mpsc::RecvError occurred: {0}")]
     SyncMpscMpscRecvError(#[from] std::sync::mpsc::RecvError),
     #[error("std::sync::mpsc::RecvTimeoutError occurred: {0}")]
