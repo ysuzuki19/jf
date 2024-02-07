@@ -10,7 +10,7 @@ pub(super) async fn interval() {
 }
 
 #[async_trait::async_trait]
-pub(super) trait Bunshin {
+pub trait Bunshin {
     async fn bunshin(&self) -> Self;
 }
 
@@ -23,12 +23,17 @@ pub trait Checker {
 }
 
 #[async_trait::async_trait]
-pub trait Runner: Checker
+pub trait Runner: Checker + Bunshin
 where
     Self: Sized + Clone,
 {
     async fn start(&self) -> JfResult<Self>;
     async fn cancel(&self) -> JfResult<Self>;
+
+    async fn reset(&mut self) -> JfResult<Self> {
+        *self = self.bunshin().await;
+        Ok(self.clone())
+    }
 
     fn link_cancel(&mut self, _: Arc<AtomicBool>) -> Self {
         self.clone()

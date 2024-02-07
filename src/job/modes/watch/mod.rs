@@ -71,29 +71,29 @@ impl Runner for Watch {
         let mut logger = self.ctx.logger();
         logger.debug("Watch starting...").await?;
         let handle = tokio::spawn({
-            let watcher = watcher::JfWatcher::new(&self.watch_list, self.is_cancelled.clone())?;
+            let watch_list = self.watch_list.clone();
             let job = self.job.clone();
             let is_cancelled = self.is_cancelled.clone();
             job.lock().await.start().await?;
 
             async move {
                 loop {
-                    watcher.wait()?;
+                    watcher::JfWatcher::new(&watch_list, is_cancelled.clone())?
+                        .wait()
+                        .await?;
 
                     job.lock().await.cancel().await?.join().await?;
                     if is_cancelled.load(Ordering::Relaxed) {
                         break;
                     }
 
-                    let mut j = job.lock().await;
-                    *j = j.bunshin().await.start().await?;
+                    job.lock().await.reset().await?.start().await?;
                 }
                 Ok(())
             }
         });
         self.handle.lock().await.replace(handle);
         logger.debug("Watch started").await?;
-        logger.info("Watch started").await?;
         Ok(self.clone())
     }
 

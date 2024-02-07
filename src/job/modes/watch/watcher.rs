@@ -1,11 +1,17 @@
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    thread::sleep,
 };
 
 use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
-use crate::util::{error::JfResult, ReadOnly};
+use crate::util::{
+    error::{JfError, JfResult},
+    ReadOnly,
+};
 
 use super::INTERVAL_MILLIS;
 
@@ -35,31 +41,35 @@ impl JfWatcher {
         })
     }
 
-    pub fn wait(&self) -> JfResult<()> {
-        loop {
-            if self.is_cancelled.load(Ordering::Relaxed) {
-                break;
+    pub async fn wait(self) -> JfResult<()> {
+        tokio::task::spawn_blocking(move || {
+            loop {
+                if self.is_cancelled.load(Ordering::Relaxed) {
+                    break;
+                }
+                match self
+                    .rx
+                    .recv_timeout(std::time::Duration::from_millis(INTERVAL_MILLIS))
+                {
+                    Ok(event) => match event?.kind {
+                        EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => {
+                            break;
+                        }
+                        _ => {}
+                    },
+                    Err(e) => match e {
+                        std::sync::mpsc::RecvTimeoutError::Timeout => {
+                            sleep(std::time::Duration::from_millis(INTERVAL_MILLIS));
+                            continue;
+                        }
+                        std::sync::mpsc::RecvTimeoutError::Disconnected => {
+                            return Err(JfError::from(e));
+                        }
+                    },
+                }
             }
-            match self
-                .rx
-                .recv_timeout(std::time::Duration::from_millis(INTERVAL_MILLIS))
-            {
-                Ok(event) => match event?.kind {
-                    EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => {
-                        break;
-                    }
-                    _ => {}
-                },
-                Err(e) => match e {
-                    std::sync::mpsc::RecvTimeoutError::Timeout => {
-                        continue;
-                    }
-                    std::sync::mpsc::RecvTimeoutError::Disconnected => {
-                        return Err(e.into());
-                    }
-                },
-            }
-        }
-        Ok(())
+            Ok(())
+        })
+        .await?
     }
 }
