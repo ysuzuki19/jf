@@ -8,7 +8,7 @@ use super::{logger::Logger, LogLevel};
 pub use writer::*;
 
 pub struct Worker {
-    handle: Option<tokio::task::JoinHandle<()>>,
+    handle: Option<tokio::task::JoinHandle<JfResult<()>>>,
 }
 
 impl Worker {
@@ -20,15 +20,16 @@ impl Worker {
         let (tx, mut rx) = mpsc::channel::<String>(100);
         self.handle = Some(tokio::spawn(async move {
             while let Some(msg) = rx.recv().await {
-                log_writer.write(&msg).await.unwrap();
+                log_writer.write(&msg).await?;
             }
+            Ok(())
         }));
         Logger::new(tx, log_level)
     }
 
     pub async fn join(mut self) -> JfResult<()> {
         if let Some(handle) = self.handle.take() {
-            handle.await?;
+            handle.await??;
         }
         Ok(())
     }
