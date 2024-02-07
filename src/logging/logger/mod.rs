@@ -1,3 +1,4 @@
+mod log_generator;
 mod log_level;
 
 use tokio::sync::mpsc;
@@ -36,14 +37,15 @@ impl Logger {
         self.clone()
     }
 
-    async fn send(&mut self, msg: String) -> JfResult<()> {
-        self.tx.send(msg).await?;
+    async fn send(&mut self, line: String) -> JfResult<()> {
+        self.tx.send(line).await?;
         Ok(())
     }
 
     async fn send_with_guard(&mut self, log_level: LogLevel, msg: String) -> JfResult<()> {
         if self.log_level >= log_level {
-            self.send(msg).await?;
+            let line = log_generator::LogGenerator::new(log_level, msg).gen();
+            self.send(line).await?;
         }
         Ok(())
     }

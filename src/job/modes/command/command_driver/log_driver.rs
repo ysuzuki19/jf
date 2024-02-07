@@ -110,7 +110,7 @@ mod tests {
                 log_driver.mount(child.stdout.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
-                assert_eq!(logging_mock.log_writer.lines(), vec!["hello"]);
+                assert_eq!(logging_mock.log_writer.lines(), vec!["[I] hello"]);
 
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
@@ -119,7 +119,10 @@ mod tests {
                 log_driver.mount(child.stdout.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
-                assert_eq!(logging_mock.log_writer.lines(), vec!["hello", "hello"]);
+                assert_eq!(
+                    logging_mock.log_writer.lines(),
+                    vec!["[I] hello", "[I] hello"]
+                );
                 Ok(())
             },
         )

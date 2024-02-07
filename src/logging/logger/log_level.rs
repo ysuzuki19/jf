@@ -12,6 +12,18 @@ pub enum LogLevel {
     Debug,
 }
 
+impl LogLevel {
+    pub fn short(&self) -> &str {
+        match self {
+            LogLevel::None => "N",
+            LogLevel::Error => "E",
+            LogLevel::Warn => "W",
+            LogLevel::Info => "I",
+            LogLevel::Debug => "D",
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

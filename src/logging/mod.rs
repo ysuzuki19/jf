@@ -54,7 +54,10 @@ mod tests {
                 logger.debug("debug".to_string()).await?;
             } // force to drop logger
             log_worker.join().await?;
-            assert_eq!(log_writer.lines(), vec!["error", "warn", "info", "debug"]);
+            assert_eq!(
+                log_writer.lines(),
+                vec!["[E] error", "[W] warn", "[I] info", "[D] debug"]
+            );
             Ok(())
         })
     }
@@ -75,7 +78,10 @@ mod tests {
                 logger.debug("debug".to_string()).await?;
             }
             log_worker.join().await?;
-            assert_eq!(log_writer.lines(), vec!["error", "warn", "info"]);
+            assert_eq!(
+                log_writer.lines(),
+                vec!["[E] error", "[W] warn", "[I] info"]
+            );
             Ok(())
         })
     }
@@ -96,7 +102,7 @@ mod tests {
                 logger.debug("debug".to_string()).await?;
             }
             log_worker.join().await?;
-            assert_eq!(log_writer.lines(), vec!["error", "warn"]);
+            assert_eq!(log_writer.lines(), vec!["[E] error", "[W] warn"]);
             Ok(())
         })
     }
@@ -117,7 +123,7 @@ mod tests {
                 logger.debug("debug".to_string()).await?;
             }
             log_worker.join().await?;
-            assert_eq!(log_writer.lines(), vec!["error"]);
+            assert_eq!(log_writer.lines(), vec!["[E] error"]);
             Ok(())
         })
     }
