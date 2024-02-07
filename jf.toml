@@ -32,7 +32,7 @@ jobs = ["git-pull", "install"]
 [job."llvm-cov:watch"]
 mode = "watch"
 job = "llvm-cov"
-watch_list = ["src/**", "Cargo.toml"]
+watch_list = ["src/**/*", "Cargo.toml"]
 
 [job."llvm-cov:term"]
 command = "cargo"
@@ -50,7 +50,7 @@ jobs = ["llvm-cov:html:serve", "llvm-cov:html:watch"]
 visibility = "private"
 mode = "watch"
 job = "llvm-cov:html"
-watch_list = ["src/*", "src/**", "Cargo.toml"]
+watch_list = ["src/**/*", "Cargo.toml"]
 
 [job."llvm-cov:html:serve"]
 visibility = "private"
@@ -73,12 +73,12 @@ args = ["+nightly", "llvm-cov", "--html", "--no-clean"]
 [job."test:watch"]
 mode = "watch"
 job = "test"
-watch_list = ["src/*", "src/**", "Cargo.toml"]
+watch_list = ["src/**/*", "Cargo.toml"]
 
 [job."run:watch"]
 mode = "watch"
 job = "run"
-watch_list = ["src/**", "Cargo.toml"]
+watch_list = ["src/**/*", "Cargo.toml"]
 
 [job.test-run]
 mode = "sequential"
