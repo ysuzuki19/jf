@@ -93,6 +93,7 @@ fn watch() -> JfResult<()> {
             w.start().await?;
             assert!(!w.is_finished().await?);
             let id = w.job.lock().await.as_mock().id();
+            runner::interval().await;
             std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
             runner::interval().await;
             let id2 = w.job.lock().await.as_mock().id();
