@@ -23,7 +23,6 @@ mod tests {
     use super::*;
 
     impl AsyncFixture for Ctx {
-        #[cfg_attr(coverage, coverage(off))]
         async fn async_fixture() -> Self {
             let logging_mock = LoggingMock::new().await;
             Self {
@@ -38,7 +37,8 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let _ = Ctx::async_fixture().await;
+                let ctx = Ctx::async_fixture().await;
+                println!("{:?}", ctx)
             },
         );
     }

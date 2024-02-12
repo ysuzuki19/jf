@@ -45,6 +45,12 @@ mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
+    fn cover() {
+        println!("{:?}", Action::Statics(Statics::Help));
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
     fn help() -> JfResult<()> {
         async_test(
             #[cfg_attr(coverage, coverage(off))]

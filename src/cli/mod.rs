@@ -39,7 +39,6 @@ mod tests {
     use super::*;
 
     impl AsyncFixture for Cli {
-        #[cfg_attr(coverage, coverage(off))]
         async fn async_fixture() -> Self {
             Self {
                 ctx: Ctx::async_fixture().await,

@@ -48,3 +48,20 @@ impl CommandDriver {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::util::testutil::AsyncFixture;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_spawn() {
+        let command = "echo".to_owned();
+        let args = vec!["hello".to_owned()];
+        let mut driver = CommandDriver::spawn(Ctx::async_fixture().await, &command, &args)
+            .await
+            .unwrap();
+        assert!(driver.join().await.is_ok());
+    }
+}

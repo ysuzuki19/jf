@@ -3,7 +3,6 @@ use crate::util::testutil::*;
 use super::*;
 
 impl AsyncFixture for Shell {
-    #[cfg_attr(coverage, coverage(off))]
     async fn async_fixture() -> Self {
         let params = ShellParams {
             script: "echo hello".to_string(),

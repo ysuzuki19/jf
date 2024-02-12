@@ -125,6 +125,7 @@ mod tests {
         assert!(!args.validate);
         assert_eq!(args.cfg, None);
         assert_eq!(args.log_level, LogLevel::Info);
+        assert_eq!(args.log_level(), LogLevel::Info);
         assert_eq!(args.completion, None);
         assert!(!args.list);
         assert!(!args.description);

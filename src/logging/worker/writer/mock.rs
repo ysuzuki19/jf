@@ -10,12 +10,6 @@ pub struct Mock {
     lines: Arc<Mutex<Vec<String>>>,
 }
 
-impl PartialEq for Mock {
-    fn eq(&self, other: &Self) -> bool {
-        self.lines.lock().unwrap().clone() == other.lines.lock().unwrap().clone()
-    }
-}
-
 impl Mock {
     pub fn new() -> Self {
         Self {
@@ -69,5 +63,12 @@ mod tests {
                 Ok(())
             },
         )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn cover() {
+        let writer = Mock::new();
+        println!("{:?}", writer);
     }
 }

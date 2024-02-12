@@ -57,13 +57,6 @@ mod tests {
 
     use super::*;
 
-    impl AsyncFixture for LogDriver {
-        #[cfg_attr(coverage, coverage(off))]
-        async fn async_fixture() -> Self {
-            Self::new(Ctx::async_fixture().await)
-        }
-    }
-
     #[test]
     #[cfg_attr(coverage, coverage(off))]
     fn fail_to_mount() -> JfResult<()> {

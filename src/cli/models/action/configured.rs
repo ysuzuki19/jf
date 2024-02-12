@@ -50,8 +50,8 @@ mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn cover() -> JfResult<()> {
-        Ok(())
+    fn cover() {
+        println!("{:?}", Configured::List);
     }
 
     #[test]
