@@ -85,7 +85,6 @@ impl Runner for Command {
         .await?;
         self.command_driver.lock().await.replace(cd);
         logger.debug("Command started").await?;
-        logger.force("").await?; //FIXME: force flush
         Ok(self.clone())
     }
 
@@ -97,7 +96,6 @@ impl Runner for Command {
     }
 
     async fn pre_join(&self) -> JfResult<()> {
-        self.ctx.logger().force("").await?; //FIXME: force flush
         if let Some(command_driver) = self.command_driver.lock().await.deref_mut() {
             command_driver.join().await?;
         }
