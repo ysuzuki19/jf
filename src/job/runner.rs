@@ -17,9 +17,6 @@ pub trait Bunshin {
 #[async_trait::async_trait]
 pub trait Checker {
     async fn is_finished(&self) -> JfResult<bool>;
-    fn is_cancelled(&self) -> bool {
-        false
-    }
 }
 
 #[async_trait::async_trait]
@@ -48,14 +45,14 @@ where
                 return self.pre_join().await;
             }
 
-            if self.is_cancelled() {
-                self.cancel().await?;
-                if !self.pre_join().await? {
-                    self.join().await?;
-                    return Ok(false);
-                }
-                return self.join().await;
-            }
+            // if self.is_cancelled() {
+            //     self.cancel().await?;
+            //     if !self.pre_join().await? {
+            //         self.join().await?;
+            //         return Ok(false);
+            //     }
+            //     return self.join().await;
+            // }
 
             interval().await;
         }

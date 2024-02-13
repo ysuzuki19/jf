@@ -98,7 +98,7 @@ impl Runner for Watch {
     }
 
     async fn pre_join(&self) -> JfResult<bool> {
-        Ok(self.is_cancelled())
+        Ok(!self.is_cancelled.load(Ordering::Relaxed))
     }
 
     async fn cancel(&self) -> JfResult<Self> {

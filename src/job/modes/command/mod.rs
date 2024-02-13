@@ -4,10 +4,7 @@ mod tests;
 
 use std::{
     ops::DerefMut,
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
+    sync::{atomic::AtomicBool, Arc},
 };
 
 use tokio::sync::Mutex;
@@ -65,10 +62,6 @@ impl Checker for Command {
             Some(ref mut cd) => Ok(cd.is_finished().await?),
             None => Ok(false), // not yet started
         }
-    }
-
-    fn is_cancelled(&self) -> bool {
-        self.is_cancelled.load(Ordering::Relaxed)
     }
 }
 
