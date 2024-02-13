@@ -97,6 +97,10 @@ impl Runner for Watch {
         Ok(self.clone())
     }
 
+    async fn pre_join(&self) -> JfResult<bool> {
+        Ok(self.is_cancelled())
+    }
+
     async fn cancel(&self) -> JfResult<Self> {
         self.is_cancelled.store(true, Ordering::Relaxed);
         self.job.lock().await.cancel().await?.join().await?;

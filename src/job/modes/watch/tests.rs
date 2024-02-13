@@ -70,14 +70,15 @@ fn new() -> JfResult<()> {
 
 #[test]
 #[cfg_attr(coverage, coverage(off))]
-fn start() -> JfResult<()> {
+fn start_cancel() -> JfResult<()> {
     async_test(
         #[cfg_attr(coverage, coverage(off))]
         async {
             let w = Watch::try_async_fixture().await?;
-            w.start().await?;
-            assert!(!w.is_finished().await?);
-            w.cancel().await?.join().await?;
+            w.start().await?.cancel().await?;
+            runner::interval().await; // for cover breaking loop
+            assert!(!w.join().await?);
+            assert!(w.is_finished().await?);
             Ok(())
         },
     )
@@ -99,22 +100,6 @@ fn watch() -> JfResult<()> {
             let id2 = w.job.lock().await.as_mock().id();
             assert_ne!(id, id2);
             w.cancel().await?;
-            Ok(())
-        },
-    )
-}
-
-#[test]
-#[cfg_attr(coverage, coverage(off))]
-fn cancel() -> JfResult<()> {
-    async_test(
-        #[cfg_attr(coverage, coverage(off))]
-        async {
-            let w = Watch::try_async_fixture().await?;
-            w.start().await?.cancel().await?;
-            runner::interval().await; // for cover breaking loop
-            w.join().await?;
-            assert!(w.is_finished().await?);
             Ok(())
         },
     )

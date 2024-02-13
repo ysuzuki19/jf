@@ -191,6 +191,15 @@ impl Runner for Mock {
         Ok(self.clone())
     }
 
+    async fn join(&self) -> JfResult<bool> {
+        self.is_running.store(false, Ordering::Relaxed);
+        self.is_finished.store(true, Ordering::Relaxed);
+        if self.is_cancelled.load(Ordering::Relaxed) {
+            return Ok(false);
+        }
+        Ok(true)
+    }
+
     fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
         self.is_cancelled = is_cancelled;
         self.clone()

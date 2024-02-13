@@ -112,7 +112,8 @@ fn join() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let s = Sequential::try_async_fixture().await?;
-            s.start().await?.join().await?;
+            s.start().await?;
+            assert!(s.join().await?);
             assert!(s.is_finished().await?);
             s.jobs.read().iter().for_each(|job| {
                 job.as_mock().assert_is_finished_eq(true);

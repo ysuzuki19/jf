@@ -39,24 +39,25 @@ where
         self.clone()
     }
 
-    async fn pre_join(&self) -> JfResult<()> {
-        Ok(())
+    async fn pre_join(&self) -> JfResult<bool> {
+        Ok(true)
     }
     async fn join(&self) -> JfResult<bool> {
         loop {
             if self.is_finished().await? {
-                break;
+                return self.pre_join().await;
             }
 
             if self.is_cancelled() {
                 self.cancel().await?;
-                self.pre_join().await?;
-                self.join().await?;
-                return Ok(false);
+                if !self.pre_join().await? {
+                    self.join().await?;
+                    return Ok(false);
+                }
+                return self.join().await;
             }
 
             interval().await;
         }
-        Ok(true)
     }
 }

@@ -95,11 +95,12 @@ impl Runner for Command {
         Ok(self.clone())
     }
 
-    async fn pre_join(&self) -> JfResult<()> {
+    async fn pre_join(&self) -> JfResult<bool> {
         if let Some(command_driver) = self.command_driver.lock().await.deref_mut() {
-            command_driver.join().await?;
+            command_driver.join().await
+        } else {
+            Ok(true)
         }
-        Ok(())
     }
 
     fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {

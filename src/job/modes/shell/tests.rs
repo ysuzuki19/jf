@@ -34,7 +34,8 @@ fn join() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let shell = Shell::async_fixture().await;
-            shell.start().await?.join().await?;
+            shell.start().await?;
+            assert!(shell.join().await?);
             assert!(shell.is_finished().await?);
             assert!(shell.command.is_finished().await?);
             Ok(())

@@ -34,7 +34,7 @@ fn join() -> JfResult<()> {
         async {
             let command = Command::async_fixture().await;
             command.start().await?;
-            command.join().await?;
+            assert!(command.join().await?);
             assert!(command.is_finished().await?);
             Ok(())
         },
@@ -49,6 +49,7 @@ fn cancel() -> JfResult<()> {
         async {
             let command = Command::async_fixture().await;
             command.start().await?.cancel().await?;
+            assert!(!command.join().await?);
             assert!(command.is_finished().await?);
             Ok(())
         },
@@ -63,7 +64,7 @@ fn bunshin() -> JfResult<()> {
         async {
             let origin = Command::async_fixture().await;
             origin.start().await?;
-            origin.join().await?;
+            assert!(origin.join().await?);
             assert!(origin.is_finished().await?);
             let bunshin = origin.bunshin().await;
             assert!(!bunshin.is_finished().await?);
