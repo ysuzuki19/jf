@@ -39,29 +39,68 @@ impl CommandDriver {
                 _ => return Err(e.into()),
             }
         }
-        self.log_driver.join().await?;
+        // self.log_driver.join().await?;
         Ok(())
     }
 
-    pub async fn join(&mut self) -> JfResult<()> {
+    pub async fn join(&mut self) -> JfResult<bool> {
+        let status = self.child.wait().await?;
         self.log_driver.join().await?;
-        Ok(())
+        Ok(status.success())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::util::testutil::AsyncFixture;
+    use crate::util::testutil::{async_test, AsyncFixture};
 
     use super::*;
 
-    #[tokio::test]
-    async fn test_spawn() {
-        let command = "echo".to_owned();
-        let args = vec!["hello".to_owned()];
-        let mut driver = CommandDriver::spawn(Ctx::async_fixture().await, &command, &args)
-            .await
-            .unwrap();
-        assert!(driver.join().await.is_ok());
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn test_spawn() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let command = "echo".to_owned();
+                let args = vec!["hello".to_owned()];
+                let ctx = Ctx::async_fixture().await;
+                let mut driver = CommandDriver::spawn(ctx, &command, &args).await?;
+                assert!(driver.join().await?);
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn test_cancel() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let command = "sleep".to_owned();
+                let args = vec!["10".to_owned()];
+                let ctx = Ctx::async_fixture().await;
+                let mut driver = CommandDriver::spawn(ctx, &command, &args).await?;
+                driver.cancel().await?;
+                assert!(!driver.join().await?);
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[cfg_attr(coverage, coverage(off))]
+    fn test_failed() -> JfResult<()> {
+        async_test(
+            #[cfg_attr(coverage, coverage(off))]
+            async {
+                let command = "false".to_owned();
+                let ctx = Ctx::async_fixture().await;
+                let mut driver = CommandDriver::spawn(ctx, &command, &vec![]).await?;
+                assert!(!driver.join().await?);
+                Ok(())
+            },
+        )
     }
 }
