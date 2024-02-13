@@ -94,17 +94,13 @@ fn join() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_async_fixture().await?;
-            p.start()
-                .await?
-                .join()
-                .await?
-                .jobs
-                .into_iter()
-                .for_each(|job| {
-                    job.as_mock()
-                        .assert_is_started_eq(true)
-                        .assert_is_finished_eq(true);
-                });
+            p.start().await?;
+            p.join().await?;
+            p.jobs.into_iter().for_each(|job| {
+                job.as_mock()
+                    .assert_is_started_eq(true)
+                    .assert_is_finished_eq(true);
+            });
             Ok(())
         },
     )

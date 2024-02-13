@@ -39,10 +39,9 @@ fn run_join() -> JfResult<()> {
                 .await?
                 .assert_is_started_eq(true)
                 .assert_is_running_eq(true)
-                .assert_is_cancelled_eq(false)
-                .join()
-                .await?
-                .assert_id_eq(id) // not changed mock instance
+                .assert_is_cancelled_eq(false);
+            mock.join().await?;
+            mock.assert_id_eq(id) // not changed mock instance
                 .assert_is_started_eq(true)
                 .assert_is_running_eq(false)
                 .assert_is_finished_eq(true)
@@ -66,10 +65,9 @@ fn run_cancel_join() -> JfResult<()> {
                 .await?
                 .cancel()
                 .await?
-                .assert_is_cancelled_eq(true)
-                .join()
-                .await?
-                .assert_id_eq(id)
+                .assert_is_cancelled_eq(true);
+            mock.join().await?;
+            mock.assert_id_eq(id)
                 .assert_is_running_eq(false)
                 .assert_is_finished_eq(true);
 
