@@ -89,7 +89,7 @@ impl Runner for Watch {
 
                     job.lock().await.reset().await?.start().await?;
                 }
-                Ok(())
+                Ok(true)
             }
         });
         self.handle.lock().await.replace(handle);

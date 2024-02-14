@@ -36,17 +36,17 @@ impl LogDriver {
                     logger.info(line).await?;
                 }
 
-                Ok(())
+                Ok(true)
             }
         });
         self.handle.replace(handle);
     }
 
-    pub async fn join(&mut self) -> JfResult<()> {
+    pub async fn join(&mut self) -> JfResult<bool> {
         if let Some(handle) = self.handle.take() {
             handle.await?
         } else {
-            Ok(())
+            Ok(false)
         }
     }
 }

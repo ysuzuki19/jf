@@ -98,13 +98,17 @@ impl Runner for Sequential {
                         job.cancel().await?;
                         continue;
                     }
-                    job.link_cancel(is_cancelled.clone())
+                    let status = job
+                        .link_cancel(is_cancelled.clone())
                         .start()
                         .await?
                         .join()
                         .await?;
+                    if !status {
+                        return Ok(false);
+                    }
                 }
-                Ok(())
+                Ok(true)
             }
         });
         self.handle.lock().await.replace(handle);

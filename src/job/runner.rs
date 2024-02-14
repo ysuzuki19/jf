@@ -2,7 +2,7 @@ use std::sync::{atomic::AtomicBool, Arc};
 
 use crate::util::error::JfResult;
 
-pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<()>>;
+pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<bool>>;
 
 pub(super) const INTERVAL_MILLIS: u64 = 100;
 pub(super) async fn interval() {
