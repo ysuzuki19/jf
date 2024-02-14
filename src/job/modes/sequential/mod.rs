@@ -1,20 +1,14 @@
 #[cfg(test)]
 mod tests;
 
-use std::{
-    ops::Deref,
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
-};
+use std::{ops::Deref, sync::Arc};
 
 use futures::{stream, StreamExt};
 use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{join_status::JoinStatus, runner::*, Job},
+    job::{canceller::Canceller, join_status::JoinStatus, runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::{
         error::{IntoJfError, JfResult},
@@ -31,7 +25,7 @@ pub struct SequentialParams {
 pub struct Sequential {
     ctx: Ctx,
     jobs: ReadOnly<Vec<Job>>,
-    is_cancelled: Arc<AtomicBool>,
+    canceller: Canceller,
     handle: Arc<Mutex<Option<JfHandle>>>,
 }
 
@@ -48,7 +42,7 @@ impl Sequential {
         Ok(Self {
             ctx,
             jobs: jobs.into(),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
         })
     }
@@ -64,7 +58,7 @@ impl Bunshin for Sequential {
                 .collect::<Vec<Job>>()
                 .await
                 .into(),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
         }
     }
@@ -87,19 +81,19 @@ impl Runner for Sequential {
         logger.debug("Sequential starting...").await?;
         let handle: JfHandle = tokio::spawn({
             let mut jobs = self.jobs.clone().unwrap();
-            let is_cancelled = self.is_cancelled.clone();
-            let job = jobs[0].link_cancel(is_cancelled.clone()).start().await?; // start first job immediately
+            let canceller = self.canceller.clone();
+            let job = jobs[0].link_cancel(canceller.clone()).start().await?; // start first job immediately
 
             async move {
                 job.join().await?;
                 for mut job in jobs.into_iter().skip(1) {
                     //TODO: remove this statement
-                    if is_cancelled.load(Ordering::Relaxed) {
+                    if canceller.is_canceled() {
                         job.cancel().await?;
-                        continue;
+                        break;
                     }
                     let status = job
-                        .link_cancel(is_cancelled.clone())
+                        .link_cancel(canceller.clone())
                         .start()
                         .await?
                         .join()
@@ -117,12 +111,12 @@ impl Runner for Sequential {
     }
 
     async fn cancel(&self) -> JfResult<Self> {
-        self.is_cancelled.store(true, Ordering::Relaxed);
+        self.canceller.cancel();
         Ok(self.clone())
     }
 
-    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
-        self.is_cancelled = is_cancelled;
+    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+        self.canceller = canceller;
         self.clone()
     }
 }

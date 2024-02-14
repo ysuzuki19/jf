@@ -2,16 +2,13 @@ mod command_driver;
 #[cfg(test)]
 mod tests;
 
-use std::{
-    ops::DerefMut,
-    sync::{atomic::AtomicBool, Arc},
-};
+use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{join_status::JoinStatus, runner::*, Job},
+    job::{canceller::Canceller, join_status::JoinStatus, runner::*, Job},
     util::{error::JfResult, ReadOnly},
 };
 
@@ -29,7 +26,7 @@ pub struct Command {
     ctx: Ctx,
     params: ReadOnly<CommandParams>,
     command_driver: Arc<Mutex<Option<CommandDriver>>>,
-    is_cancelled: Arc<AtomicBool>,
+    canceller: Canceller,
 }
 
 impl Command {
@@ -38,7 +35,7 @@ impl Command {
             ctx,
             params: params.into(),
             command_driver: Arc::new(Mutex::new(None)),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
         }
     }
 }
@@ -50,7 +47,7 @@ impl Bunshin for Command {
             ctx: self.ctx.clone(),
             params: self.params.clone(),
             command_driver: Arc::new(Mutex::new(None)),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
         }
     }
 }
@@ -96,8 +93,8 @@ impl Runner for Command {
         }
     }
 
-    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
-        self.is_cancelled = is_cancelled;
+    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+        self.canceller = canceller;
         self.clone()
     }
 }

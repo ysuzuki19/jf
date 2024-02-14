@@ -6,6 +6,7 @@ use std::sync::{atomic::Ordering, Arc};
 
 use tokio::sync::Mutex;
 
+use crate::job::canceller::Canceller;
 use crate::job::join_status::JoinStatus;
 use crate::{
     job::{runner::*, Job},
@@ -28,7 +29,7 @@ pub struct Mock {
     is_started: Arc<AtomicBool>,
     is_running: Arc<AtomicBool>,
     is_finished: Arc<AtomicBool>,
-    is_cancelled: Arc<AtomicBool>,
+    canceller: Canceller,
     handle: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
 }
 
@@ -41,7 +42,7 @@ impl Mock {
             is_started: Arc::new(AtomicBool::new(false)),
             is_running: Arc::new(AtomicBool::new(false)),
             is_finished: Arc::new(AtomicBool::new(false)),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
         }
     }
@@ -128,12 +129,12 @@ impl Mock {
     #[cfg_attr(coverage, coverage(off))]
     pub fn assert_is_cancelled_eq(&self, is_cancelled: bool) -> Self {
         assert_eq!(
-            self.is_cancelled.load(Ordering::Relaxed),
+            self.canceller.is_canceled(),
             is_cancelled,
             "Mock({}).is_cancelled is expected {} but {}",
             self.id,
             is_cancelled,
-            self.is_cancelled.load(Ordering::Relaxed)
+            self.canceller.is_canceled()
         );
         self.clone()
     }
@@ -166,11 +167,11 @@ impl Runner for Mock {
             let sleep_count = self.sleep_count;
             let is_running = self.is_running.clone();
             let is_finished = self.is_finished.clone();
-            let is_cancelled = self.is_cancelled.clone();
+            let canceller = self.canceller.clone();
             async move {
                 for _ in 0..sleep_count {
                     tokio::time::sleep(tokio::time::Duration::from_millis(each_sleep_time)).await;
-                    if is_cancelled.load(Ordering::Relaxed) {
+                    if canceller.is_canceled() {
                         break;
                     }
                 }
@@ -183,7 +184,7 @@ impl Runner for Mock {
     }
 
     async fn cancel(&self) -> JfResult<Self> {
-        self.is_cancelled.store(true, Ordering::Relaxed);
+        self.canceller.cancel();
         if let Some(handle) = self.handle.lock().await.take() {
             handle.abort();
         }
@@ -195,14 +196,14 @@ impl Runner for Mock {
     async fn join(&self) -> JfResult<JoinStatus> {
         self.is_running.store(false, Ordering::Relaxed);
         self.is_finished.store(true, Ordering::Relaxed);
-        match self.is_cancelled.load(Ordering::Relaxed) {
+        match self.canceller.is_canceled() {
             true => Ok(JoinStatus::Failed),
             false => Ok(JoinStatus::Succeed),
         }
     }
 
-    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
-        self.is_cancelled = is_cancelled;
+    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+        self.canceller = canceller;
         self.clone()
     }
 }

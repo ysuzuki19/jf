@@ -99,7 +99,7 @@ fn cancel() -> JfResult<()> {
             let s = Sequential::try_async_fixture().await?;
             s.cancel().await?;
             runner::interval().await; // sleep for job interval
-            assert!(s.is_cancelled.load(Ordering::Relaxed));
+            assert!(s.canceller.is_canceled());
             Ok(())
         },
     )

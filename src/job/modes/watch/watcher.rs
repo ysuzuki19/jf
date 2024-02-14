@@ -1,16 +1,13 @@
-use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
-    thread::sleep,
-};
+use std::thread::sleep;
 
 use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
-use crate::util::{
-    error::{JfError, JfResult},
-    ReadOnly,
+use crate::{
+    job::canceller::Canceller,
+    util::{
+        error::{JfError, JfResult},
+        ReadOnly,
+    },
 };
 
 use super::INTERVAL_MILLIS;
@@ -20,11 +17,11 @@ type NotifyPayload = Result<notify::Event, notify::Error>;
 pub struct JfWatcher {
     _watcher: ReadOnly<RecommendedWatcher>, // not used but needed to keep the watcher alive
     rx: std::sync::mpsc::Receiver<NotifyPayload>,
-    is_cancelled: Arc<AtomicBool>,
+    canceller: Canceller,
 }
 
 impl JfWatcher {
-    pub fn new(watch_list: &Vec<String>, parent_cancelled: Arc<AtomicBool>) -> JfResult<Self> {
+    pub fn new(watch_list: &Vec<String>, canceller: Canceller) -> JfResult<Self> {
         let (tx, rx) = std::sync::mpsc::channel();
         let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
 
@@ -37,14 +34,14 @@ impl JfWatcher {
         Ok(Self {
             _watcher: watcher.into(),
             rx,
-            is_cancelled: parent_cancelled,
+            canceller,
         })
     }
 
     pub async fn wait(self) -> JfResult<()> {
         tokio::task::spawn_blocking(move || {
             loop {
-                if self.is_cancelled.load(Ordering::Relaxed) {
+                if self.canceller.is_canceled() {
                     break;
                 }
                 match self

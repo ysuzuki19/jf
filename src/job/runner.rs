@@ -1,8 +1,6 @@
-use std::sync::{atomic::AtomicBool, Arc};
-
 use crate::util::error::JfResult;
 
-use super::join_status::JoinStatus;
+use super::{canceller::Canceller, join_status::JoinStatus};
 
 pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<JoinStatus>>;
 
@@ -34,7 +32,7 @@ where
         Ok(self.clone())
     }
 
-    fn link_cancel(&mut self, _: Arc<AtomicBool>) -> Self {
+    fn link_cancel(&mut self, _: Canceller) -> Self {
         self.clone()
     }
 

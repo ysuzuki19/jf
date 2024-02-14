@@ -2,16 +2,13 @@
 mod tests;
 mod watcher;
 
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-};
+use std::sync::Arc;
 
 use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{join_status::JoinStatus, runner::*, Job},
+    job::{canceller::Canceller, join_status::JoinStatus, runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
 };
@@ -27,7 +24,7 @@ pub struct Watch {
     ctx: Ctx,
     job: Arc<Mutex<Job>>,
     watch_list: Vec<String>,
-    is_cancelled: Arc<AtomicBool>,
+    canceller: Canceller,
     handle: Arc<Mutex<Option<JfHandle>>>,
 }
 
@@ -38,7 +35,7 @@ impl Watch {
             ctx,
             job: Arc::new(Mutex::new(job)),
             watch_list: params.watch_list,
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
         })
     }
@@ -51,7 +48,7 @@ impl Bunshin for Watch {
             ctx: self.ctx.clone(),
             job: Arc::new(Mutex::new(self.job.lock().await.bunshin().await)),
             watch_list: self.watch_list.clone(),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
         }
     }
@@ -60,8 +57,7 @@ impl Bunshin for Watch {
 #[async_trait::async_trait]
 impl Checker for Watch {
     async fn is_finished(&self) -> JfResult<bool> {
-        let is_finished = self.is_cancelled.load(Ordering::Relaxed);
-        Ok(is_finished)
+        Ok(self.canceller.is_canceled())
     }
 }
 
@@ -73,17 +69,17 @@ impl Runner for Watch {
         let handle = tokio::spawn({
             let watch_list = self.watch_list.clone();
             let job = self.job.clone();
-            let is_cancelled = self.is_cancelled.clone();
+            let canceller = self.canceller.clone();
             job.lock().await.start().await?;
 
             async move {
                 loop {
-                    watcher::JfWatcher::new(&watch_list, is_cancelled.clone())?
+                    watcher::JfWatcher::new(&watch_list, canceller.clone())?
                         .wait()
                         .await?;
 
                     job.lock().await.cancel().await?.join().await?;
-                    if is_cancelled.load(Ordering::Relaxed) {
+                    if canceller.is_canceled() {
                         break;
                     }
 
@@ -98,20 +94,20 @@ impl Runner for Watch {
     }
 
     async fn pre_join(&self) -> JfResult<JoinStatus> {
-        match self.is_cancelled.load(Ordering::Relaxed) {
+        match self.canceller.is_canceled() {
             true => Ok(JoinStatus::Failed),
             false => Ok(JoinStatus::Succeed),
         }
     }
 
     async fn cancel(&self) -> JfResult<Self> {
-        self.is_cancelled.store(true, Ordering::Relaxed);
+        self.canceller.cancel();
         self.job.lock().await.cancel().await?.join().await?;
         Ok(self.clone())
     }
 
-    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
-        self.is_cancelled = is_cancelled;
+    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+        self.canceller = canceller;
         self.clone()
     }
 }

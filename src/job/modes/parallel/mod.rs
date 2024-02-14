@@ -1,19 +1,13 @@
 #[cfg(test)]
 mod tests;
 
-use std::{
-    ops::DerefMut,
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
-};
+use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{runner::*, Job},
+    job::{canceller::Canceller, runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
 };
@@ -27,7 +21,7 @@ pub struct ParallelParams {
 pub struct Parallel {
     ctx: Ctx,
     jobs: Vec<Job>,
-    is_cancelled: Arc<AtomicBool>,
+    canceller: Canceller,
     running_jobs: Arc<Mutex<Vec<Job>>>,
 }
 
@@ -41,7 +35,7 @@ impl Parallel {
         Ok(Self {
             ctx,
             jobs: jobs.clone(),
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
             running_jobs: Arc::new(Mutex::new(jobs)),
         })
     }
@@ -53,7 +47,7 @@ impl Bunshin for Parallel {
         Self {
             ctx: self.ctx.clone(),
             jobs: self.jobs.bunshin().await,
-            is_cancelled: Arc::new(AtomicBool::new(false)),
+            canceller: Canceller::new(),
             running_jobs: Arc::new(Mutex::new(self.running_jobs.lock().await.bunshin().await)),
         }
     }
@@ -77,22 +71,22 @@ impl Runner for Parallel {
         let mut logger = self.ctx.logger();
         logger.debug("Parallel starting...").await?;
         for job in self.running_jobs.lock().await.deref_mut() {
-            job.link_cancel(self.is_cancelled.clone()).start().await?;
+            job.link_cancel(self.canceller.clone()).start().await?;
         }
         logger.debug("Parallel started").await?;
         Ok(self.clone())
     }
 
     async fn cancel(&self) -> JfResult<Self> {
-        self.is_cancelled.store(true, Ordering::SeqCst);
         for job in self.running_jobs.lock().await.deref_mut() {
             job.cancel().await?.join().await?;
         }
+        self.canceller.cancel();
         Ok(self.clone())
     }
 
-    fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {
-        self.is_cancelled = is_cancelled;
+    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+        self.canceller = canceller;
         self.clone()
     }
 }
