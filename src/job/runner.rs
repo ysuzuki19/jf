@@ -2,7 +2,9 @@ use std::sync::{atomic::AtomicBool, Arc};
 
 use crate::util::error::JfResult;
 
-pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<bool>>;
+use super::join_status::JoinStatus;
+
+pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<JoinStatus>>;
 
 pub(super) const INTERVAL_MILLIS: u64 = 100;
 pub(super) async fn interval() {
@@ -36,10 +38,10 @@ where
         self.clone()
     }
 
-    async fn pre_join(&self) -> JfResult<bool> {
-        Ok(true)
+    async fn pre_join(&self) -> JfResult<JoinStatus> {
+        Ok(JoinStatus::Succeed)
     }
-    async fn join(&self) -> JfResult<bool> {
+    async fn join(&self) -> JfResult<JoinStatus> {
         loop {
             if self.is_finished().await? {
                 return self.pre_join().await;

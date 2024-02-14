@@ -2,6 +2,7 @@ mod log_driver;
 
 use crate::{
     ctx::Ctx,
+    job::join_status::JoinStatus,
     util::error::{IntoJfError, JfResult},
 };
 
@@ -43,10 +44,13 @@ impl CommandDriver {
         Ok(())
     }
 
-    pub async fn join(&mut self) -> JfResult<bool> {
+    pub async fn join(&mut self) -> JfResult<JoinStatus> {
         let status = self.child.wait().await?;
         self.log_driver.join().await?;
-        Ok(status.success())
+        match status.success() {
+            true => Ok(JoinStatus::Succeed),
+            false => Ok(JoinStatus::Failed),
+        }
     }
 }
 
@@ -66,7 +70,7 @@ mod tests {
                 let args = vec!["hello".to_owned()];
                 let ctx = Ctx::async_fixture().await;
                 let mut driver = CommandDriver::spawn(ctx, &command, &args).await?;
-                assert!(driver.join().await?);
+                assert!(driver.join().await?.is_succeed());
                 Ok(())
             },
         )
@@ -83,7 +87,7 @@ mod tests {
                 let ctx = Ctx::async_fixture().await;
                 let mut driver = CommandDriver::spawn(ctx, &command, &args).await?;
                 driver.cancel().await?;
-                assert!(!driver.join().await?);
+                assert!(driver.join().await?.is_failed());
                 Ok(())
             },
         )
@@ -98,7 +102,7 @@ mod tests {
                 let command = "false".to_owned();
                 let ctx = Ctx::async_fixture().await;
                 let mut driver = CommandDriver::spawn(ctx, &command, &vec![]).await?;
-                assert!(!driver.join().await?);
+                assert!(driver.join().await?.is_failed());
                 Ok(())
             },
         )

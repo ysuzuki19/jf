@@ -95,7 +95,7 @@ fn join() -> JfResult<()> {
         async {
             let p = Parallel::try_async_fixture().await?;
             p.start().await?;
-            assert!(p.join().await?);
+            assert!(p.join().await?.is_succeed());
             p.jobs.into_iter().for_each(|job| {
                 job.as_mock()
                     .assert_is_started_eq(true)

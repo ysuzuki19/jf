@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{runner::*, Job},
+    job::{join_status::JoinStatus, runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::{
         error::{IntoJfError, JfResult},
@@ -104,11 +104,11 @@ impl Runner for Sequential {
                         .await?
                         .join()
                         .await?;
-                    if !status {
-                        return Ok(false);
+                    if status.is_failed() {
+                        return Ok(JoinStatus::Failed);
                     }
                 }
-                Ok(true)
+                Ok(JoinStatus::Succeed)
             }
         });
         self.handle.lock().await.replace(handle);

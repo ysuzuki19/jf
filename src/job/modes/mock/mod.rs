@@ -6,6 +6,7 @@ use std::sync::{atomic::Ordering, Arc};
 
 use tokio::sync::Mutex;
 
+use crate::job::join_status::JoinStatus;
 use crate::{
     job::{runner::*, Job},
     util::{error::JfResult, testutil::Fixture},
@@ -191,13 +192,13 @@ impl Runner for Mock {
         Ok(self.clone())
     }
 
-    async fn join(&self) -> JfResult<bool> {
+    async fn join(&self) -> JfResult<JoinStatus> {
         self.is_running.store(false, Ordering::Relaxed);
         self.is_finished.store(true, Ordering::Relaxed);
-        if self.is_cancelled.load(Ordering::Relaxed) {
-            return Ok(false);
+        match self.is_cancelled.load(Ordering::Relaxed) {
+            true => Ok(JoinStatus::Failed),
+            false => Ok(JoinStatus::Succeed),
         }
-        Ok(true)
     }
 
     fn link_cancel(&mut self, is_cancelled: Arc<AtomicBool>) -> Self {

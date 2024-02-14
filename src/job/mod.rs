@@ -1,3 +1,4 @@
+mod join_status;
 pub mod modes;
 mod runner;
 #[cfg(test)]

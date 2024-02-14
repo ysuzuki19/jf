@@ -11,7 +11,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{runner::*, Job},
+    job::{join_status::JoinStatus, runner::*, Job},
     util::{error::JfResult, ReadOnly},
 };
 
@@ -88,11 +88,11 @@ impl Runner for Command {
         Ok(self.clone())
     }
 
-    async fn pre_join(&self) -> JfResult<bool> {
+    async fn pre_join(&self) -> JfResult<JoinStatus> {
         if let Some(command_driver) = self.command_driver.lock().await.deref_mut() {
             command_driver.join().await
         } else {
-            Ok(true)
+            Ok(JoinStatus::Succeed)
         }
     }
 

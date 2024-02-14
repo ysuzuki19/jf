@@ -77,7 +77,7 @@ fn start_cancel() -> JfResult<()> {
             let w = Watch::try_async_fixture().await?;
             w.start().await?.cancel().await?;
             runner::interval().await; // for cover breaking loop
-            assert!(!w.join().await?);
+            assert!(w.join().await?.is_failed());
             assert!(w.is_finished().await?);
             Ok(())
         },

@@ -11,7 +11,7 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{runner::*, Job},
+    job::{join_status::JoinStatus, runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
 };
@@ -89,7 +89,7 @@ impl Runner for Watch {
 
                     job.lock().await.reset().await?.start().await?;
                 }
-                Ok(true)
+                Ok(JoinStatus::Succeed)
             }
         });
         self.handle.lock().await.replace(handle);
@@ -97,8 +97,11 @@ impl Runner for Watch {
         Ok(self.clone())
     }
 
-    async fn pre_join(&self) -> JfResult<bool> {
-        Ok(!self.is_cancelled.load(Ordering::Relaxed))
+    async fn pre_join(&self) -> JfResult<JoinStatus> {
+        match self.is_cancelled.load(Ordering::Relaxed) {
+            true => Ok(JoinStatus::Failed),
+            false => Ok(JoinStatus::Succeed),
+        }
     }
 
     async fn cancel(&self) -> JfResult<Self> {

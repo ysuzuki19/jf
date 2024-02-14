@@ -2,7 +2,7 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 
 use crate::{
     ctx::Ctx,
-    job::JfHandle,
+    job::{join_status::JoinStatus, JfHandle},
     util::error::{IntoJfError, JfResult},
 };
 
@@ -36,17 +36,17 @@ impl LogDriver {
                     logger.info(line).await?;
                 }
 
-                Ok(true)
+                Ok(JoinStatus::Succeed)
             }
         });
         self.handle.replace(handle);
     }
 
-    pub async fn join(&mut self) -> JfResult<bool> {
+    pub async fn join(&mut self) -> JfResult<JoinStatus> {
         if let Some(handle) = self.handle.take() {
             handle.await?
         } else {
-            Ok(false)
+            Ok(JoinStatus::Failed)
         }
     }
 }

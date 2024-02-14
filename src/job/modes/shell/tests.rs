@@ -35,7 +35,7 @@ fn join() -> JfResult<()> {
         async {
             let shell = Shell::async_fixture().await;
             shell.start().await?;
-            assert!(shell.join().await?);
+            assert!(shell.join().await?.is_succeed());
             assert!(shell.is_finished().await?);
             assert!(shell.command.is_finished().await?);
             Ok(())
