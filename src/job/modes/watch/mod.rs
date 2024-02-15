@@ -2,7 +2,7 @@
 mod tests;
 mod watcher;
 
-use std::sync::Arc;
+use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
@@ -80,12 +80,11 @@ impl Runner for Watch {
 
                     job.lock().await.cancel().await?.join().await?;
                     if canceller.is_canceled() {
-                        break;
+                        return Ok(JoinStatus::Failed);
                     }
 
                     job.lock().await.reset().await?.start().await?;
                 }
-                Ok(JoinStatus::Succeed)
             }
         });
         self.handle.lock().await.replace(handle);
@@ -93,17 +92,22 @@ impl Runner for Watch {
         Ok(self.clone())
     }
 
-    async fn pre_join(&self) -> JfResult<JoinStatus> {
-        match self.canceller.is_canceled() {
-            true => Ok(JoinStatus::Failed),
-            false => Ok(JoinStatus::Succeed),
-        }
-    }
-
     async fn cancel(&self) -> JfResult<Self> {
         self.canceller.cancel();
         self.job.lock().await.cancel().await?.join().await?;
         Ok(self.clone())
+    }
+
+    async fn join(&self) -> JfResult<JoinStatus> {
+        loop {
+            if self.is_finished().await? {
+                if let Some(handle) = self.handle.lock().await.deref_mut() {
+                    return handle.await?;
+                }
+            }
+
+            interval().await;
+        }
     }
 
     fn set_canceller(&mut self, canceller: Canceller) -> Self {

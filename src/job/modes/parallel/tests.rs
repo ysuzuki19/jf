@@ -76,7 +76,8 @@ fn cancel() -> JfResult<()> {
         #[cfg_attr(coverage, coverage(off))]
         async {
             let p = Parallel::try_async_fixture().await?;
-            p.start().await?.cancel().await?;
+            let status = p.start().await?.cancel().await?.join().await?;
+            assert!(status.is_failed());
             for job in p.jobs {
                 job.as_mock()
                     .assert_is_started_eq(true)

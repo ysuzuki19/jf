@@ -85,12 +85,11 @@ impl Runner for Command {
         Ok(self.clone())
     }
 
-    async fn pre_join(&self) -> JfResult<JoinStatus> {
+    async fn join(&self) -> JfResult<JoinStatus> {
         if let Some(command_driver) = self.command_driver.lock().await.deref_mut() {
-            command_driver.join().await
-        } else {
-            Ok(JoinStatus::Failed)
+            return command_driver.join().await;
         }
+        return Ok(JoinStatus::Failed);
     }
 
     fn set_canceller(&mut self, canceller: Canceller) -> Self {

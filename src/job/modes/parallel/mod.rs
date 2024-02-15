@@ -1,13 +1,16 @@
 #[cfg(test)]
 mod tests;
 
-use std::{ops::DerefMut, sync::Arc};
+use std::{
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
 
 use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{canceller::Canceller, runner::*, Job},
+    job::{canceller::Canceller, join_status::JoinStatus, runner::*, Job},
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
 };
@@ -70,19 +73,34 @@ impl Runner for Parallel {
     async fn start(&self) -> JfResult<Self> {
         let mut logger = self.ctx.logger();
         logger.debug("Parallel starting...").await?;
-        for job in self.running_jobs.lock().await.deref_mut() {
-            job.set_canceller(self.canceller.clone()).start().await?;
+        for job in self.running_jobs.lock().await.deref() {
+            job.start().await?;
         }
         logger.debug("Parallel started").await?;
         Ok(self.clone())
     }
 
     async fn cancel(&self) -> JfResult<Self> {
-        for job in self.running_jobs.lock().await.deref_mut() {
-            job.cancel().await?.join().await?;
+        for job in self.running_jobs.lock().await.deref() {
+            job.cancel().await?;
         }
         self.canceller.cancel();
         Ok(self.clone())
+    }
+
+    async fn join(&self) -> JfResult<JoinStatus> {
+        loop {
+            if self.is_finished().await? {
+                for job in self.running_jobs.lock().await.deref_mut() {
+                    if let JoinStatus::Failed = job.join().await? {
+                        return Ok(JoinStatus::Failed);
+                    }
+                }
+                return Ok(JoinStatus::Succeed);
+            }
+
+            interval().await;
+        }
     }
 
     fn set_canceller(&mut self, canceller: Canceller) -> Self {

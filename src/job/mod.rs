@@ -7,8 +7,8 @@ mod tests;
 
 use futures::{stream, StreamExt};
 
-use self::canceller::Canceller;
 pub use self::runner::*;
+use self::{canceller::Canceller, join_status::JoinStatus};
 use crate::{cfg::job_cfg::JobCfg, ctx::Ctx, jobdef::JobdefPool, util::error::JfResult};
 
 #[derive(Clone)]
@@ -90,6 +90,18 @@ impl Runner for Job {
             #[cfg(test)]
             Self::Mock(t) => t.cancel().await?.into(),
         })
+    }
+
+    async fn join(&self) -> JfResult<JoinStatus> {
+        match self {
+            Self::Command(t) => t.join().await,
+            Self::Parallel(t) => t.join().await,
+            Self::Sequential(t) => t.join().await,
+            Self::Shell(t) => t.join().await,
+            Self::Watch(t) => t.join().await,
+            #[cfg(test)]
+            Self::Mock(t) => t.join().await,
+        }
     }
 
     fn set_canceller(&mut self, canceller: Canceller) -> Self {

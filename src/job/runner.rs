@@ -26,32 +26,12 @@ where
 {
     async fn start(&self) -> JfResult<Self>;
     async fn cancel(&self) -> JfResult<Self>;
+    async fn join(&self) -> JfResult<JoinStatus>;
+
     fn set_canceller(&mut self, _: Canceller) -> Self;
 
     async fn reset(&mut self) -> JfResult<Self> {
         *self = self.bunshin().await;
         Ok(self.clone())
-    }
-
-    async fn pre_join(&self) -> JfResult<JoinStatus> {
-        Ok(JoinStatus::Succeed)
-    }
-    async fn join(&self) -> JfResult<JoinStatus> {
-        loop {
-            if self.is_finished().await? {
-                return self.pre_join().await;
-            }
-
-            // if self.is_cancelled() {
-            //     self.cancel().await?;
-            //     if !self.pre_join().await? {
-            //         self.join().await?;
-            //         return Ok(false);
-            //     }
-            //     return self.join().await;
-            // }
-
-            interval().await;
-        }
     }
 }

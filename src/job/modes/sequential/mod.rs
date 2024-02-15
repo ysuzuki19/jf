@@ -1,9 +1,11 @@
 #[cfg(test)]
 mod tests;
 
-use std::{ops::Deref, sync::Arc};
+use std::{
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
 
-use futures::{stream, StreamExt};
 use tokio::sync::Mutex;
 
 use crate::{
@@ -53,11 +55,7 @@ impl Bunshin for Sequential {
     async fn bunshin(&self) -> Self {
         Self {
             ctx: self.ctx.clone(),
-            jobs: stream::iter(self.jobs.clone().into_inner().into_iter())
-                .then(|j| async move { j.bunshin().await })
-                .collect::<Vec<Job>>()
-                .await
-                .into(),
+            jobs: self.jobs.clone().into_inner().bunshin().await.into(),
             canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
         }
@@ -113,6 +111,21 @@ impl Runner for Sequential {
     async fn cancel(&self) -> JfResult<Self> {
         self.canceller.cancel();
         Ok(self.clone())
+    }
+
+    async fn join(&self) -> JfResult<JoinStatus> {
+        loop {
+            if self.is_finished().await? {
+                return match self.handle.lock().await.deref_mut() {
+                    Some(handle) => {
+                        return handle.await?;
+                    }
+                    None => Ok(JoinStatus::Succeed), // not started yet
+                };
+            }
+
+            interval().await;
+        }
     }
 
     fn set_canceller(&mut self, canceller: Canceller) -> Self {
