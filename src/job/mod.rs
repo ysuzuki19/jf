@@ -7,6 +7,7 @@ mod tests;
 
 use futures::{stream, StreamExt};
 
+use self::canceller::Canceller;
 pub use self::runner::*;
 use crate::{cfg::job_cfg::JobCfg, ctx::Ctx, jobdef::JobdefPool, util::error::JfResult};
 
@@ -89,6 +90,18 @@ impl Runner for Job {
             #[cfg(test)]
             Self::Mock(t) => t.cancel().await?.into(),
         })
+    }
+
+    fn set_canceller(&mut self, canceller: Canceller) -> Self {
+        match self {
+            Self::Command(t) => Self::Command(t.set_canceller(canceller)),
+            Self::Parallel(t) => Self::Parallel(t.set_canceller(canceller)),
+            Self::Sequential(t) => Self::Sequential(t.set_canceller(canceller)),
+            Self::Shell(t) => Self::Shell(t.set_canceller(canceller)),
+            Self::Watch(t) => Self::Watch(t.set_canceller(canceller)),
+            #[cfg(test)]
+            Self::Mock(t) => Self::Mock(t.set_canceller(canceller)),
+        }
     }
 }
 

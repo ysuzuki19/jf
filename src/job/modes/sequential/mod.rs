@@ -82,7 +82,7 @@ impl Runner for Sequential {
         let handle: JfHandle = tokio::spawn({
             let mut jobs = self.jobs.clone().into_inner();
             let canceller = self.canceller.clone();
-            let job = jobs[0].link_cancel(canceller.clone()).start().await?; // start first job immediately
+            let job = jobs[0].set_canceller(canceller.clone()).start().await?; // start first job immediately
 
             async move {
                 job.join().await?;
@@ -93,7 +93,7 @@ impl Runner for Sequential {
                         break;
                     }
                     let status = job
-                        .link_cancel(canceller.clone())
+                        .set_canceller(canceller.clone())
                         .start()
                         .await?
                         .join()
@@ -115,7 +115,7 @@ impl Runner for Sequential {
         Ok(self.clone())
     }
 
-    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+    fn set_canceller(&mut self, canceller: Canceller) -> Self {
         self.canceller = canceller;
         self.clone()
     }

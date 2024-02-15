@@ -89,11 +89,11 @@ impl Runner for Command {
         if let Some(command_driver) = self.command_driver.lock().await.deref_mut() {
             command_driver.join().await
         } else {
-            Ok(JoinStatus::Succeed)
+            Ok(JoinStatus::Failed)
         }
     }
 
-    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+    fn set_canceller(&mut self, canceller: Canceller) -> Self {
         self.canceller = canceller;
         self.clone()
     }

@@ -26,14 +26,11 @@ where
 {
     async fn start(&self) -> JfResult<Self>;
     async fn cancel(&self) -> JfResult<Self>;
+    fn set_canceller(&mut self, _: Canceller) -> Self;
 
     async fn reset(&mut self) -> JfResult<Self> {
         *self = self.bunshin().await;
         Ok(self.clone())
-    }
-
-    fn link_cancel(&mut self, _: Canceller) -> Self {
-        self.clone()
     }
 
     async fn pre_join(&self) -> JfResult<JoinStatus> {

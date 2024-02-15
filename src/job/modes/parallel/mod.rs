@@ -71,7 +71,7 @@ impl Runner for Parallel {
         let mut logger = self.ctx.logger();
         logger.debug("Parallel starting...").await?;
         for job in self.running_jobs.lock().await.deref_mut() {
-            job.link_cancel(self.canceller.clone()).start().await?;
+            job.set_canceller(self.canceller.clone()).start().await?;
         }
         logger.debug("Parallel started").await?;
         Ok(self.clone())
@@ -85,7 +85,7 @@ impl Runner for Parallel {
         Ok(self.clone())
     }
 
-    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+    fn set_canceller(&mut self, canceller: Canceller) -> Self {
         self.canceller = canceller;
         self.clone()
     }

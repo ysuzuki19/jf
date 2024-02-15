@@ -3,7 +3,7 @@ mod tests;
 
 use crate::{
     ctx::Ctx,
-    job::{runner::*, Job},
+    job::{canceller::Canceller, runner::*, Job},
     util::{error::JfResult, ReadOnly},
 };
 
@@ -70,6 +70,11 @@ impl Runner for Shell {
     async fn cancel(&self) -> JfResult<Self> {
         self.command.cancel().await?;
         Ok(self.clone())
+    }
+
+    fn set_canceller(&mut self, canceller: Canceller) -> Self {
+        self.command.set_canceller(canceller);
+        self.clone()
     }
 }
 

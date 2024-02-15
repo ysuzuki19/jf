@@ -106,7 +106,7 @@ impl Runner for Watch {
         Ok(self.clone())
     }
 
-    fn link_cancel(&mut self, canceller: Canceller) -> Self {
+    fn set_canceller(&mut self, canceller: Canceller) -> Self {
         self.canceller = canceller;
         self.clone()
     }
