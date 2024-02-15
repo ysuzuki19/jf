@@ -53,7 +53,7 @@ impl Bunshin for Sequential {
     async fn bunshin(&self) -> Self {
         Self {
             ctx: self.ctx.clone(),
-            jobs: stream::iter(self.jobs.clone().unwrap().into_iter())
+            jobs: stream::iter(self.jobs.clone().into_inner().into_iter())
                 .then(|j| async move { j.bunshin().await })
                 .collect::<Vec<Job>>()
                 .await
@@ -80,7 +80,7 @@ impl Runner for Sequential {
         let mut logger = self.ctx.logger();
         logger.debug("Sequential starting...").await?;
         let handle: JfHandle = tokio::spawn({
-            let mut jobs = self.jobs.clone().unwrap();
+            let mut jobs = self.jobs.clone().into_inner();
             let canceller = self.canceller.clone();
             let job = jobs[0].link_cancel(canceller.clone()).start().await?; // start first job immediately
 

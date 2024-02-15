@@ -10,7 +10,7 @@ impl<T> ReadOnly<T> {
         &self.0
     }
 
-    pub fn unwrap(self) -> T {
+    pub fn into_inner(self) -> T {
         self.0
     }
 }
