@@ -22,8 +22,6 @@ impl Stdout {
 impl Writer for Stdout {
     #[cfg_attr(coverage, coverage(off))]
     async fn write(&mut self, s: &str) -> JfResult<()> {
-        // let now = Local::now().format("%H:%M:%S.%3f");
-        // let line = format!("[{}] {}", now, s);
         let line = s.to_string();
         self.0.write_all(line.as_bytes()).await?;
         #[cfg(not(test))]
