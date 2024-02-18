@@ -40,7 +40,7 @@ mod tests {
     }
 
     #[test]
-    fn test_log_generator() {
+    fn log_generator() {
         let log_gen = LogGenerator::fixture();
         assert_eq!(String::from("[D] test"), log_gen.gen());
     }

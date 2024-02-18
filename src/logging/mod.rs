@@ -39,7 +39,7 @@ mod tests {
     }
 
     #[test]
-    fn test_log_debug() -> JfResult<()> {
+    fn log_debug() -> JfResult<()> {
         async_test(async move {
             let log_writer = Mock::new();
             let mut log_worker = Worker::new();
@@ -63,7 +63,7 @@ mod tests {
     }
 
     #[test]
-    fn test_log_info() -> JfResult<()> {
+    fn log_info() -> JfResult<()> {
         async_test(async move {
             let log_writer = Mock::new();
             let mut log_worker = Worker::new();
@@ -87,7 +87,7 @@ mod tests {
     }
 
     #[test]
-    fn test_log_warn() -> JfResult<()> {
+    fn log_warn() -> JfResult<()> {
         async_test(async move {
             let log_writer = Mock::new();
             let mut log_worker = Worker::new();
@@ -108,7 +108,7 @@ mod tests {
     }
 
     #[test]
-    fn test_log_error() -> JfResult<()> {
+    fn log_error() -> JfResult<()> {
         async_test(async move {
             let log_writer = Mock::new();
             let mut log_worker = Worker::new();
@@ -129,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn test_log_none() -> JfResult<()> {
+    fn log_none() -> JfResult<()> {
         async_test(async move {
             let log_writer = Mock::new();
             let mut log_worker = Worker::new();

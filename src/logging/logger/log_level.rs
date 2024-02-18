@@ -36,7 +36,7 @@ mod tests {
     }
 
     #[test]
-    fn test_log_level() {
+    fn log_level() {
         assert_eq!(LogLevel::None, LogLevel::from_str("none", false).unwrap());
         assert_eq!(LogLevel::Error, LogLevel::from_str("error", false).unwrap());
         assert_eq!(LogLevel::Warn, LogLevel::from_str("warn", false).unwrap());
@@ -46,12 +46,12 @@ mod tests {
     }
 
     #[test]
-    fn test_log_level_default() {
+    fn log_level_default() {
         assert_eq!(LogLevel::Info, LogLevel::default());
     }
 
     #[test]
-    fn test_log_level_fixture() {
+    fn log_level_fixture() {
         assert_eq!(LogLevel::Debug, LogLevel::fixture());
     }
 }

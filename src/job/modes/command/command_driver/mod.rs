@@ -62,7 +62,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn test_spawn() -> JfResult<()> {
+    fn spawn() -> JfResult<()> {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
@@ -78,7 +78,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn test_cancel() -> JfResult<()> {
+    fn cancel() -> JfResult<()> {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn test_failed() -> JfResult<()> {
+    fn failed() -> JfResult<()> {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {

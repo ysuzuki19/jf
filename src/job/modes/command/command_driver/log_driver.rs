@@ -87,7 +87,7 @@ mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn test_log_driver() -> JfResult<()> {
+    fn log_driver() -> JfResult<()> {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {

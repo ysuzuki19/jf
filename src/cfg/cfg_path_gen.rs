@@ -41,14 +41,14 @@ pub mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn test_gen_default() {
+    fn gen_default() {
         let path = CfgPathGen::new(None).gen();
         assert_eq!(path, PathBuf::from(DEFAULT_CFG_NAME));
     }
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn test_gen_from_dir() {
+    fn gen_from_dir() {
         let dir = fixtures_dir();
         let path = CfgPathGen::new(Some(dir.clone())).gen();
         assert_eq!(path, dir.join(DEFAULT_CFG_NAME));
@@ -56,7 +56,7 @@ pub mod tests {
 
     #[test]
     #[cfg_attr(coverage, coverage(off))]
-    fn test_gen_from_cfg() {
+    fn gen_from_cfg() {
         let file_path = fixtures_dir().join(DEFAULT_CFG_NAME);
         let path = CfgPathGen::new(Some(file_path.clone())).gen();
         assert_eq!(path, file_path);
