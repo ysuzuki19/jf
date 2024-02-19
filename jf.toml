@@ -2,29 +2,40 @@
 version = "0.1.0"
 
 [job.setup-dev]
-mode = "shell"
-script = """
-cargo install cargo-binstall
-cargo binstall cargo-llvm-cov
-"""
+mode = "sequential"
+jobs = ["setup-binstall", "setup-llvm-cov"]
+
+[job.setup-binstall]
+visibility = "private"
+command = "cargo"
+args = ["install", "binstall"]
+
+[job.setup-llvm-cov]
+visibility = "private"
+command = "cargo"
+args = ["binstall", "llvm-cov"]
 
 [job.ci]
 mode = "sequential"
 jobs = ["ci_fmt", "ci_clippy", "ci_test", "ci_build"]
 
 [job.ci_fmt]
+visibility = "private"
 command = "cargo"
 args = ["fmt", "--", "--check"]
 
 [job.ci_clippy]
+visibility = "private"
 command = "cargo"
 args = ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"]
 
 [job.ci_test]
+visibility = "private"
 command = "cargo"
 args = ["test", "--verbose"]
 
 [job.ci_build]
+visibility = "private"
 command = "cargo"
 args = ["build", "--verbose"]
 
