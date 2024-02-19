@@ -11,10 +11,7 @@ pub use tests::LoggingMock;
 mod tests {
     use crate::util::{error::JfResult, testutil::*};
 
-    use self::{
-        logger::Logger,
-        worker::{Mock, Worker},
-    };
+    use self::worker::Mock;
 
     use super::*;
 

@@ -47,7 +47,7 @@ mod fixtures {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::{error::JfResult, testutil::*};
+    use crate::util::testutil::*;
 
     use super::*;
 
