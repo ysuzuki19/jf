@@ -29,7 +29,10 @@ impl CliAction for Configured {
         let jc = job_controller::JobController::new(cfg)?;
         match self {
             Configured::List => ctx.logger().force(jc.list_public().join(" ")).await?,
-            Configured::Validate => jc.validate(ctx)?,
+            Configured::Validate => match jc.validate(ctx.clone()) {
+                Ok(_) => ctx.logger().force("All jobs are valid").await?,
+                Err(e) => ctx.logger().force(format!("{}", e)).await?,
+            },
             Configured::Run(name) => jc.run(ctx, name).await?,
             Configured::Description(name) => ctx.logger().force(jc.description(name)?).await?,
         }
@@ -60,8 +63,8 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let c = Configured::List;
-                c.run(Ctx::async_fixture().await, Fixture::fixture())
+                Configured::List
+                    .run(Ctx::async_fixture().await, Fixture::fixture())
                     .await?;
                 Ok(())
             },
@@ -74,8 +77,8 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let c = Configured::Validate;
-                c.run(Ctx::async_fixture().await, Fixture::fixture())
+                Configured::Validate
+                    .run(Ctx::async_fixture().await, Fixture::fixture())
                     .await?;
                 Ok(())
             },
@@ -88,8 +91,8 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let c = Configured::Run(fixtures::JOB_NAME.to_owned());
-                c.run(Ctx::async_fixture().await, Fixture::fixture())
+                Configured::Run(fixtures::JOB_NAME.to_owned())
+                    .run(Ctx::async_fixture().await, Fixture::fixture())
                     .await?;
                 Ok(())
             },
@@ -102,8 +105,8 @@ mod tests {
         async_test(
             #[cfg_attr(coverage, coverage(off))]
             async {
-                let c = Configured::Description(fixtures::JOB_NAME.to_owned());
-                c.run(Ctx::async_fixture().await, Fixture::fixture())
+                Configured::Description(fixtures::JOB_NAME.to_owned())
+                    .run(Ctx::async_fixture().await, Fixture::fixture())
                     .await?;
                 Ok(())
             },
