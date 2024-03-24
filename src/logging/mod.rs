@@ -16,7 +16,7 @@ mod tests {
     use super::*;
 
     pub struct LoggingMock {
-        pub worker: Worker,
+        pub _worker: Worker,
         pub logger: Logger,
         pub log_writer: Mock,
     }
@@ -28,7 +28,7 @@ mod tests {
                 .start(log_writer.clone(), Fixture::fixture())
                 .await;
             Self {
-                worker: log_worker,
+                _worker: log_worker,
                 logger,
                 log_writer,
             }
