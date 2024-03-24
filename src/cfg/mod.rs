@@ -1,4 +1,4 @@
-mod cfg_path_gen;
+pub mod cfg_path_gen;
 pub mod job_cfg;
 
 use std::{collections::HashMap, path::PathBuf};

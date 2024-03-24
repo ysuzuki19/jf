@@ -12,6 +12,7 @@ pub enum Statics {
     Completion(clap_complete::Shell),
     Help,
     Version,
+    Init(super::init::Mode),
 }
 
 impl From<Statics> for Action {
@@ -28,6 +29,7 @@ impl CliAction for Statics {
             Statics::Completion(shell) => completion_script::generate(shell),
             Statics::Help => cmd.render_help().to_string(),
             Statics::Version => cmd.render_version().to_string(),
+            Statics::Init(mode) => mode.render().await,
         };
         ctx.logger().force(s).await?;
         Ok(())

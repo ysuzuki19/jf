@@ -31,6 +31,9 @@ pub struct Args {
     help: bool,
 
     #[arg(long)]
+    init: Option<super::models::action::init::Mode>,
+
+    #[arg(long)]
     validate: bool,
 
     #[arg(long)]
@@ -79,6 +82,8 @@ impl Args {
             Ok(Statics::Version.into())
         } else if self.help {
             Ok(Statics::Help.into())
+        } else if let Some(init_mode) = self.init {
+            Ok(Statics::Init(init_mode).into())
         } else if let Some(shell) = self.completion {
             Ok(Statics::Completion(shell).into())
         } else if self.list {
