@@ -40,6 +40,12 @@ $ cd jf
 jf $ cargo install --path .
 ```
 
+# Setup Project
+
+```bash
+$ jf --init template # or "empty"
+```
+
 # Job Definition
 
 You can define job in `jf.toml`.
