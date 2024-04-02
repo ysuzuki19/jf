@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use std::sync::{Arc, Mutex};
 
 use crate::util::error::JfResult;

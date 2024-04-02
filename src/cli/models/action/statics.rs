@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use crate::{
     cli::{completion_script, models::Opts, Args},
     ctx::Ctx,

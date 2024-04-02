@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use super::LogLevel;
 
 pub(super) struct LogGenerator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 mod writable_string;
 
 use super::args::Args;

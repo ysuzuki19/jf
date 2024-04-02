@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use std::thread::sleep;
 
 use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use tokio::io::{AsyncBufReadExt, BufReader};
 
 use crate::{

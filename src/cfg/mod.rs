@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 pub mod cfg_path_gen;
 pub mod job_cfg;
 

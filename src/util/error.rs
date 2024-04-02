@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 pub type JfResult<T> = Result<T, JfError>;
 
 #[derive(Debug, thiserror::Error)]

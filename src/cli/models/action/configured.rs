@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use crate::{
     cfg,
     cli::{job_controller, models::Opts},

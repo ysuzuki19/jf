@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 #[derive(Clone)]
 pub struct ReadOnly<T>(T);
 

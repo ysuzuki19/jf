@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 mod args;
 mod completion_script;
 mod job_controller;

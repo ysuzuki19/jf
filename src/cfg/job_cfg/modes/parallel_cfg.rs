@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 #[derive(serde::Deserialize)]
 pub struct ParallelCfg {
     #[serde(flatten)]

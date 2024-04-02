@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use super::{
     modes::{CommandCfg, ParallelCfg, SequentialCfg, ShellCfg, WatchCfg},
     JobCfg,

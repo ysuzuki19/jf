@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 pub mod command_cfg;
 pub mod parallel_cfg;
 pub mod sequential_cfg;

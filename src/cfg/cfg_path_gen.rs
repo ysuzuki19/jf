@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use std::path::PathBuf;
 
 pub struct CfgPathGen(Option<PathBuf>);

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use crate::util::error::JfResult;
 
 use super::{canceller::Canceller, join_status::JoinStatus};

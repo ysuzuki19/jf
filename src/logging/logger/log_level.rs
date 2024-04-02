@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 use clap::ValueEnum;
 
 #[derive(Clone, Default, Copy, PartialEq, PartialOrd, ValueEnum)]
