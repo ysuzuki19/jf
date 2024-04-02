@@ -46,6 +46,12 @@ jf $ cargo install --path .
 $ jf --init template # or "empty"
 ```
 
+# Exec job
+
+```bash
+$ jf <job-name>
+```
+
 # Job Definition
 
 You can define job in `jf.toml`.
