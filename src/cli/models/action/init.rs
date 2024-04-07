@@ -66,7 +66,7 @@ jobs = ["test", "build"]
 [job."test:live"]
 mode = "watch"
 job = "test"
-watch = ["src/**/*"]
+watch_list = ["src/**/*"]
 
 [job.run]
 command = "echo"
@@ -75,4 +75,4 @@ args = ["run"]
 [job."run:live"]
 mode = "watch"
 job = "run"
-watch = ["src/**/*"]"#;
+watch_list = ["src/**/*"]"#;
