@@ -44,24 +44,24 @@ mod tests {
     use super::*;
 
     impl Fixture for Statics {
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         fn fixture() -> Self {
             Statics::Help
         }
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn fixture() {
         let s = Statics::fixture();
         assert_eq!(s, Statics::Help);
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn completion() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let s = Statics::Completion(clap_complete::Shell::Bash);
                 s.run(Ctx::async_fixture().await, Fixture::fixture())
@@ -72,10 +72,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn help() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let s = Statics::Help;
                 s.run(Ctx::async_fixture().await, Fixture::fixture())
@@ -86,10 +86,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn version() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let s = Statics::Version;
                 s.run(Ctx::async_fixture().await, Fixture::fixture())

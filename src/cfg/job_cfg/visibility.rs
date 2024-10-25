@@ -28,7 +28,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn deserialize_default() -> JfResult<()> {
         let visibility = Visibility::Public;
         assert!(visibility.is_public());
@@ -37,7 +37,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn deserialize_private() -> JfResult<()> {
         let visibility = Visibility::Private;
         assert!(visibility.is_private());

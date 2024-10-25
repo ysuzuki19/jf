@@ -27,7 +27,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn deserialize() -> JfResult<()> {
         let cfg: CommandCfg = toml::from_str(fixtures::SIMPLE)?;
         assert_eq!(cfg.params.command, fixtures::COMMAND);

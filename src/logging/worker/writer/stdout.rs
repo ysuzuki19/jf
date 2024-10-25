@@ -21,7 +21,7 @@ impl Stdout {
 
 #[async_trait::async_trait]
 impl Writer for Stdout {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     async fn write(&mut self, s: &str) -> JfResult<()> {
         let line = s.to_string();
         self.0.write_all(line.as_bytes()).await?;
@@ -38,10 +38,10 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn cover() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async move {
                 let mut js = Stdout::new();
                 js.write("").await?;
@@ -51,7 +51,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn instance() {
         let js = Stdout::new();
         let _ = js.clone();

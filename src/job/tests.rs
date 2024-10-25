@@ -4,7 +4,7 @@ use crate::util::testutil::*;
 use super::*;
 
 impl Job {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn as_mock(&self) -> &modes::Mock {
         if let Self::Mock(t) = self {
             t
@@ -15,10 +15,10 @@ impl Job {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn command() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let job: Job = modes::Command::async_fixture().await.into();
             job.start().await?.cancel().await?.join().await?;
@@ -32,10 +32,10 @@ fn command() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn parallel() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let job: Job = modes::Parallel::try_async_fixture().await?.into();
             job.start().await?.cancel().await?.join().await?;
@@ -49,10 +49,10 @@ fn parallel() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn sequential() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let job: Job = modes::Sequential::try_async_fixture().await?.into();
             job.start().await?.cancel().await?.join().await?;
@@ -66,10 +66,10 @@ fn sequential() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn shell() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let job: Job = modes::Shell::async_fixture().await.into();
             job.start().await?.cancel().await?.join().await?;
@@ -83,10 +83,10 @@ fn shell() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn watch() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let job: Job = modes::Watch::try_async_fixture().await?.into();
             job.start().await?.cancel().await?.join().await?;

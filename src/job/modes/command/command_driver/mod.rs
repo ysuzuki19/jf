@@ -62,10 +62,10 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn spawn() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let command = "echo".to_owned();
                 let args = vec!["hello".to_owned()];
@@ -78,10 +78,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn cancel() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let command = "sleep".to_owned();
                 let args = vec!["10".to_owned()];
@@ -95,10 +95,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn failed() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let command = "false".to_owned();
                 let ctx = Ctx::async_fixture().await;

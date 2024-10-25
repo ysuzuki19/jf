@@ -123,7 +123,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn parse() {
         let args = Args::parse_from(fixtures::SIMPLE);
         assert!(!args.version);
@@ -139,10 +139,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async move {
                 let args = Args::default();
 
@@ -157,10 +157,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_ctx() {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async move {
                 let args = Args::parse_from([fixtures::APP_NAME, "--log-level", "error"]);
 
@@ -172,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_opts() {
         let args = Args::parse_from([fixtures::APP_NAME, "--cfg", fixtures::CFG_PATH]);
 
@@ -181,7 +181,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_action_completion() -> JfResult<()> {
         let args = Args::parse_from([fixtures::APP_NAME, "--completion", "bash"]);
 
@@ -191,7 +191,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_action_list() -> JfResult<()> {
         let args = Args::parse_from([fixtures::APP_NAME, "--list"]);
 
@@ -201,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_action_validate() -> JfResult<()> {
         let args = Args::parse_from([fixtures::APP_NAME, "--validate"]);
 
@@ -211,7 +211,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_action_description() -> JfResult<()> {
         let args = Args::parse_from([fixtures::APP_NAME, "--description", fixtures::JOB_NAME]);
 
@@ -224,7 +224,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_action_description_without_job_name() {
         let args = Args::parse_from([fixtures::APP_NAME, "--description"]);
 
@@ -233,7 +233,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_action_run() -> JfResult<()> {
         let args = Args::parse_from([fixtures::APP_NAME, fixtures::JOB_NAME]);
 
@@ -246,7 +246,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_action_help() -> JfResult<()> {
         let args = Args::parse_from([fixtures::APP_NAME, "--help"]);
 
@@ -256,7 +256,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn setup_action_version() -> JfResult<()> {
         let args = Args::parse_from([fixtures::APP_NAME, "--version"]);
 

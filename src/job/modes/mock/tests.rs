@@ -7,7 +7,7 @@ const MOCK_SLEEP_TIME: u64 = 1;
 const MOCK_SLEEP_COUNT: u8 = 3;
 
 impl Fixture for Mock {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn fixture() -> Self {
         Self::new(MockParams {
             each_sleep_time: MOCK_SLEEP_TIME,
@@ -17,7 +17,7 @@ impl Fixture for Mock {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn new() {
     let mock = Mock::fixture();
 
@@ -28,10 +28,10 @@ fn new() {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn run_join() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let mock = Mock::fixture();
             let id = mock.id();
@@ -54,10 +54,10 @@ fn run_join() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn run_cancel_join() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let mock = Mock::fixture();
             let id = mock.id();
@@ -78,10 +78,10 @@ fn run_cancel_join() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn bunshin() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let origin = Mock::fixture();
 
@@ -107,7 +107,7 @@ fn bunshin() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn into_job() {
     let mock = Mock::fixture();
     let id = mock.id();

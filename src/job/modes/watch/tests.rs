@@ -8,14 +8,14 @@ use super::*;
 
 #[cfg(test)]
 mod fixtures {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn watch_list() -> Vec<String> {
         vec!["./tests/dummy_entities/*".to_string()]
     }
 }
 
 impl Fixture for WatchParams {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn fixture() -> Self {
         WatchParams {
             job: "fast".to_string(),
@@ -25,7 +25,7 @@ impl Fixture for WatchParams {
 }
 
 impl TryAsyncFixture for Watch {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     async fn try_async_fixture() -> JfResult<Self> {
         Watch::new(
             Ctx::async_fixture().await,
@@ -36,10 +36,10 @@ impl TryAsyncFixture for Watch {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn invalid_new_with_unknown_job() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let params = WatchParams {
                 job: "unknown".to_string(),
@@ -57,10 +57,10 @@ fn invalid_new_with_unknown_job() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn new() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let w = Watch::try_async_fixture().await?;
             assert!(!w.is_finished().await?);
@@ -70,10 +70,10 @@ fn new() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn start_cancel() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let w = Watch::try_async_fixture().await?;
             w.start().await?.cancel().await?;
@@ -86,10 +86,10 @@ fn start_cancel() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn watch() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let w = Watch::try_async_fixture().await?;
             w.start().await?;
@@ -108,10 +108,10 @@ fn watch() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn bunshin() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let origin = Watch::try_async_fixture().await?;
             let bunshin = origin.bunshin().await;

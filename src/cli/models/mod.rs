@@ -15,7 +15,7 @@ mod tests {
     use super::*;
 
     impl Fixture for Opts {
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         fn fixture() -> Self {
             let cfg = PathBuf::from(".").join("tests").join("fixtures");
             Opts { cfg: Some(cfg) }
@@ -23,7 +23,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn cover() {
         println!("{:?}", Opts::fixture()); // Cover derive(Debug)
     }

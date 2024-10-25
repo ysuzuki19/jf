@@ -79,17 +79,17 @@ mod tests {
     use super::*;
 
     impl TryFixture for Jobdef {
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         fn try_fixture() -> JfResult<Self> {
             Self::new("fast".into(), TryFixture::try_fixture()?)
         }
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn visibility_guard() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let jobdef_public = Jobdef::new(
                     "dummy".into(),

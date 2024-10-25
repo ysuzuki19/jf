@@ -39,23 +39,23 @@ mod tests {
     use super::*;
 
     impl Fixture for Action {
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         fn fixture() -> Self {
             Action::Statics(Fixture::fixture())
         }
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn cover() {
         println!("{:?}", Action::Statics(Statics::Help));
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn help() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let s = Action::Statics(Statics::Help);
                 s.run(Ctx::async_fixture().await, Fixture::fixture())
@@ -66,10 +66,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn run() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let c = Action::Configured(Configured::Run(String::from("test-fixture")));
                 c.run(Ctx::async_fixture().await, Fixture::fixture())

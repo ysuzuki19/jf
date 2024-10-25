@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-#![cfg_attr(coverage, feature(coverage_attribute))]
+#![feature(coverage_attribute)]
 mod cfg;
 mod cli;
 mod ctx;

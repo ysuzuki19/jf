@@ -29,14 +29,14 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn load() -> JfResult<()> {
         Cfg::load(Some(cfg_path_gen::tests::fixtures_dir()))?;
         Ok(())
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn load_unexist() -> JfResult<()> {
         let must_fail = Cfg::load(Some(cfg_path_gen::tests::unexist_dir()));
         assert!(must_fail.is_err());

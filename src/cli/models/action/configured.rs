@@ -53,16 +53,16 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn cover() {
         println!("{:?}", Configured::List);
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn list() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 Configured::List
                     .run(Ctx::async_fixture().await, Fixture::fixture())
@@ -73,10 +73,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn validate() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 Configured::Validate
                     .run(Ctx::async_fixture().await, Fixture::fixture())
@@ -87,10 +87,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn run() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 Configured::Run(fixtures::JOB_NAME.to_owned())
                     .run(Ctx::async_fixture().await, Fixture::fixture())
@@ -101,10 +101,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn description() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 Configured::Description(fixtures::JOB_NAME.to_owned())
                     .run(Ctx::async_fixture().await, Fixture::fixture())

@@ -14,10 +14,10 @@ impl AsyncFixture for Shell {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn run_without_blocking() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let shell = Shell::async_fixture().await;
             shell.start().await?;
@@ -29,10 +29,10 @@ fn run_without_blocking() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn join() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let shell = Shell::async_fixture().await;
             shell.start().await?;
@@ -45,10 +45,10 @@ fn join() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn cancel() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let shell = Shell::async_fixture().await;
             shell.start().await?.cancel().await?;
@@ -60,10 +60,10 @@ fn cancel() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn bunshin() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let origin = Shell::async_fixture().await;
             origin.start().await?.cancel().await?;
@@ -76,10 +76,10 @@ fn bunshin() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn is_finished_not_yet_started() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let shell = Shell::async_fixture().await;
             assert!(!shell.is_finished().await?);

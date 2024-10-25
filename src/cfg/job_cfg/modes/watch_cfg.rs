@@ -23,7 +23,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn deserialize() -> JfResult<()> {
         let cfg: WatchCfg = toml::from_str(fixtures::SIMPLE)?;
 

@@ -50,10 +50,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn load() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async move {
                 let args = Args::parse_from(args::fixtures::SIMPLE);
                 let logging_mock = LoggingMock::new().await;
@@ -70,10 +70,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn run() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let cli = Cli::async_fixture().await;
                 assert_eq!(cli.ctx, Ctx::async_fixture().await);

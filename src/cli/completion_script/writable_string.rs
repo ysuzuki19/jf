@@ -35,14 +35,14 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn new() {
         let buf = WritableString::new();
         assert_eq!(buf.to_string(), "");
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn write_flush() {
         let mut buf = WritableString::new();
         buf.write_all("test".as_bytes()).unwrap();
@@ -52,7 +52,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn error() {
         let mut buf = WritableString::new();
         let result = buf.write_all(&[0, 159, 146, 150]);

@@ -59,10 +59,10 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn fail_to_mount() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let ctx = Ctx::async_fixture().await;
                 let mut log_driver = LogDriver::new(ctx);
@@ -73,10 +73,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn empty_join() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let ctx = Ctx::async_fixture().await;
                 let mut log_driver = LogDriver::new(ctx);
@@ -87,10 +87,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn log_driver() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async {
                 let logging_mock = LoggingMock::new().await;
                 let ctx = Ctx::new(logging_mock.logger);

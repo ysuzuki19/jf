@@ -22,7 +22,7 @@ mod tests {
     use super::*;
 
     impl Fixture for MockCfg {
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         fn fixture() -> Self {
             Self {
                 common: Fixture::fixture(),
@@ -32,7 +32,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn deserialize() -> JfResult<()> {
         let cfg: MockCfg = toml::from_str(fixtures::SIMPLE)?;
 

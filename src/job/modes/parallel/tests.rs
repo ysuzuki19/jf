@@ -4,7 +4,7 @@ use crate::util::testutil::*;
 use super::*;
 
 impl TryAsyncFixture for Parallel {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     async fn try_async_fixture() -> JfResult<Self> {
         let params = ParallelParams {
             jobs: vec!["fast".into(), "fast".into()],
@@ -18,10 +18,10 @@ impl TryAsyncFixture for Parallel {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn invalid_new_with_unknown_job() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let must_fail = Parallel::new(
                 Ctx::async_fixture().await,
@@ -37,10 +37,10 @@ fn invalid_new_with_unknown_job() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn new() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let p = Parallel::try_async_fixture().await?;
             assert_eq!(p.jobs.len(), 2);
@@ -51,10 +51,10 @@ fn new() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn start() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let p = Parallel::try_async_fixture().await?;
             p.start().await?;
@@ -67,10 +67,10 @@ fn start() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn cancel() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let p = Parallel::try_async_fixture().await?;
             let status = p.start().await?.cancel().await?.join().await?;
@@ -86,10 +86,10 @@ fn cancel() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn join() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let p = Parallel::try_async_fixture().await?;
             p.start().await?;
@@ -105,10 +105,10 @@ fn join() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn bunshin() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let origin = Parallel::try_async_fixture().await?;
             origin.start().await?.cancel().await?;
@@ -127,10 +127,10 @@ fn bunshin() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn is_finished_not_yet_started() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let p = Parallel::try_async_fixture().await?;
             assert!(!p.is_finished().await?);

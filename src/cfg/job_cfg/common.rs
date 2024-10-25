@@ -23,7 +23,7 @@ impl CommonCfg {
 
 #[cfg(test)]
 impl CommonCfg {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn new(visibility: Visibility, description: String) -> Self {
         Self {
             visibility,
@@ -39,7 +39,7 @@ mod tests {
     use super::*;
 
     impl Fixture for CommonCfg {
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         fn fixture() -> Self {
             Self {
                 visibility: Default::default(),
@@ -49,7 +49,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn deserialize_default() -> JfResult<()> {
         let cfg: CommonCfg = toml::from_str("")?;
 
@@ -59,7 +59,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn deserialize_private() -> JfResult<()> {
         let cfg: CommonCfg = toml::from_str(
             r#"
@@ -74,7 +74,7 @@ description = "test"
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn deserialize_public() -> JfResult<()> {
         let cfg: CommonCfg = toml::from_str(
             r#"

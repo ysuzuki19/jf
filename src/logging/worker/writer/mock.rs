@@ -40,10 +40,10 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn init() {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async move {
                 let writer = Mock::new();
                 assert_eq!(writer.lines(), Vec::<String>::new());
@@ -52,10 +52,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn write() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async move {
                 let mut writer = Mock::new();
                 writer.write("test").await?;
@@ -67,7 +67,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn cover() {
         let writer = Mock::new();
         println!("{:?}", writer);

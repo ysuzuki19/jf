@@ -23,7 +23,7 @@ pub trait TryFixture {
         Self: Sized;
 }
 
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 pub fn async_test<F: std::future::Future>(f: F) -> F::Output {
     tokio::runtime::Runtime::new()
         .expect("Failed to initialize tokio::runtime::Runtime")

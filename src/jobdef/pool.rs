@@ -74,7 +74,7 @@ mod tests {
     };
 
     impl TryFixture for JobdefPool {
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         fn try_fixture() -> JfResult<Self> {
             let jobdef = TryFixture::try_fixture()?;
             Ok(Self::new(vec![jobdef]))
@@ -82,10 +82,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn test() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async move {
                 let pool = JobdefPool::new(vec![
                     Jobdef::new(
@@ -125,10 +125,10 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn fail() -> JfResult<()> {
         async_test(
-            #[cfg_attr(coverage, coverage(off))]
+            #[coverage(off)]
             async move {
                 let pool = JobdefPool::new(vec![
                     Jobdef::new("job1".into(), JobCfg::Mock(Fixture::fixture()))?,

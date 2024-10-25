@@ -5,7 +5,7 @@ use crate::util::testutil::*;
 use super::*;
 
 impl TryAsyncFixture for Sequential {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     async fn try_async_fixture() -> JfResult<Self> {
         let params = SequentialParams {
             jobs: vec!["fast".into(), "fast".into()],
@@ -19,10 +19,10 @@ impl TryAsyncFixture for Sequential {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn invalid_new_with_empty_job() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let params = SequentialParams { jobs: vec![] };
             let must_faile = Sequential::new(
@@ -38,10 +38,10 @@ fn invalid_new_with_empty_job() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn invalid_new_with_unknown_job() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let params = SequentialParams {
                 jobs: vec!["unknown".into()],
@@ -58,10 +58,10 @@ fn invalid_new_with_unknown_job() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn new() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             Sequential::try_async_fixture().await?;
             Ok(())
@@ -70,10 +70,10 @@ fn new() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn start() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let s = Sequential::try_async_fixture().await?.start().await?;
             assert!(!s.is_finished().await?);
@@ -92,10 +92,10 @@ fn start() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn cancel() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let s = Sequential::try_async_fixture().await?;
             s.cancel().await?;
@@ -107,10 +107,10 @@ fn cancel() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn join() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let s = Sequential::try_async_fixture().await?;
             s.start().await?;
@@ -125,10 +125,10 @@ fn join() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn bunshin() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let origin = Sequential::try_async_fixture().await?;
             origin.start().await?.cancel().await?;
@@ -148,10 +148,10 @@ fn bunshin() -> JfResult<()> {
 }
 
 #[test]
-#[cfg_attr(coverage, coverage(off))]
+#[coverage(off)]
 fn is_finished_not_yet_started() -> JfResult<()> {
     async_test(
-        #[cfg_attr(coverage, coverage(off))]
+        #[coverage(off)]
         async {
             let s = Sequential::try_async_fixture().await?;
             assert!(!s.is_finished().await?);

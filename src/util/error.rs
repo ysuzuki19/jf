@@ -46,7 +46,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn cover() {
         let err = JfError::Custom("test".into());
         assert_eq!(err.to_string(), "test");
@@ -54,7 +54,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn multi() {
         let err = JfError::Multi(vec![
             JfError::Custom("test1".into()),

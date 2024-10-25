@@ -52,7 +52,7 @@ impl Mock {
         self.id
     }
 
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn assert_id_eq(&self, id: usize) -> Self {
         assert_eq!(
             self.id, id,
@@ -62,13 +62,13 @@ impl Mock {
         self.clone()
     }
 
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn assert_id_ne(&self, id: usize) -> Self {
         assert_ne!(self.id, id, "Mock({}).id is expected not {}", self.id, id);
         self.clone()
     }
 
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn assert_each_sleep_time_eq(&self, sleep_time: u64) -> Self {
         assert_eq!(
             self.each_sleep_time, sleep_time,
@@ -78,7 +78,7 @@ impl Mock {
         self.clone()
     }
 
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn assert_sleep_count_eq(&self, sleep_count: u8) -> Self {
         assert_eq!(
             self.sleep_count, sleep_count,
@@ -88,7 +88,7 @@ impl Mock {
         self.clone()
     }
 
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn assert_is_started_eq(&self, is_started: bool) -> Self {
         assert_eq!(
             self.is_started.load(Ordering::Relaxed),
@@ -101,7 +101,7 @@ impl Mock {
         self.clone()
     }
 
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn assert_is_running_eq(&self, is_running: bool) -> Self {
         assert_eq!(
             self.is_running.load(Ordering::Relaxed),
@@ -114,7 +114,7 @@ impl Mock {
         self.clone()
     }
 
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn assert_is_finished_eq(&self, is_finished: bool) -> Self {
         assert_eq!(
             self.is_finished.load(Ordering::Relaxed),
@@ -127,7 +127,7 @@ impl Mock {
         self.clone()
     }
 
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     pub fn assert_is_cancelled_eq(&self, is_cancelled: bool) -> Self {
         assert_eq!(
             self.canceller.is_canceled(),
@@ -216,7 +216,7 @@ impl From<Mock> for Job {
 }
 
 impl Fixture for MockParams {
-    #[cfg_attr(coverage, coverage(off))]
+    #[coverage(off)]
     fn fixture() -> Self {
         Self {
             each_sleep_time: 1,
