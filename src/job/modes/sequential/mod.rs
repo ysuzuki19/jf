@@ -2,16 +2,15 @@
 #[cfg(test)]
 mod tests;
 
-use std::{
-    ops::{Deref, DerefMut},
-    sync::Arc,
-};
+use std::{ops::DerefMut, sync::Arc};
 
 use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{canceller::Canceller, join_status::JoinStatus, runner::*, Job},
+    job::{
+        canceller::Canceller, finish_notify::FinishNotify, join_status::JoinStatus, runner::*, Job,
+    },
     jobdef::{Agent, JobdefPool},
     util::{
         error::{IntoJfError, JfResult},
@@ -30,6 +29,7 @@ pub struct Sequential {
     jobs: ReadOnly<Vec<Job>>,
     canceller: Canceller,
     handle: Arc<Mutex<Option<JfHandle>>>,
+    finish_notify: Arc<FinishNotify>,
 }
 
 impl Sequential {
@@ -47,6 +47,7 @@ impl Sequential {
             jobs: jobs.into(),
             canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
+            finish_notify: FinishNotify::new_arc(),
         })
     }
 }
@@ -59,6 +60,7 @@ impl Bunshin for Sequential {
             jobs: self.jobs.clone().into_inner().bunshin().await.into(),
             canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
+            finish_notify: FinishNotify::new_arc(),
         }
     }
 }
@@ -66,10 +68,7 @@ impl Bunshin for Sequential {
 #[async_trait::async_trait]
 impl Checker for Sequential {
     async fn is_finished(&self) -> JfResult<bool> {
-        match self.handle.lock().await.deref() {
-            Some(handle) => Ok(handle.is_finished()),
-            None => Ok(false), // not started yet
-        }
+        Ok(self.finish_notify.is_finished())
     }
 }
 
@@ -82,6 +81,7 @@ impl Runner for Sequential {
             let mut jobs = self.jobs.clone().into_inner();
             let canceller = self.canceller.clone();
             let job = jobs[0].set_canceller(canceller.clone()).start().await?; // start first job immediately
+            let finish_notify = self.finish_notify.clone();
 
             async move {
                 job.join().await?;
@@ -98,9 +98,11 @@ impl Runner for Sequential {
                         .join()
                         .await?;
                     if status.is_failed() {
+                        finish_notify.notify();
                         return Ok(JoinStatus::Failed);
                     }
                 }
+                finish_notify.notify();
                 Ok(JoinStatus::Succeed)
             }
         });
@@ -115,17 +117,10 @@ impl Runner for Sequential {
     }
 
     async fn join(&self) -> JfResult<JoinStatus> {
-        loop {
-            if self.is_finished().await? {
-                return match self.handle.lock().await.deref_mut() {
-                    Some(handle) => {
-                        return handle.await?;
-                    }
-                    None => Ok(JoinStatus::Succeed), // not started yet
-                };
-            }
-
-            interval().await;
+        self.finish_notify.wait().await;
+        match self.handle.lock().await.deref_mut() {
+            Some(handle) => handle.await?,
+            None => Ok(JoinStatus::Succeed), // not started yet
         }
     }
 

@@ -5,10 +5,10 @@ use super::{canceller::Canceller, join_status::JoinStatus};
 
 pub(super) type JfHandle = tokio::task::JoinHandle<crate::util::error::JfResult<JoinStatus>>;
 
-pub(super) const INTERVAL_MILLIS: u64 = 100;
-pub(super) async fn interval() {
-    tokio::time::sleep(tokio::time::Duration::from_millis(INTERVAL_MILLIS)).await;
-}
+// pub(super) const INTERVAL_MILLIS: u64 = 100;
+// pub(super) async fn interval() {
+//     tokio::time::sleep(tokio::time::Duration::from_millis(INTERVAL_MILLIS)).await;
+// }
 
 #[async_trait::async_trait]
 pub trait Bunshin {

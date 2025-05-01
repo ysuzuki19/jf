@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-use super::INTERVAL_MILLIS;
+// use super::INTERVAL_MILLIS;
 
 type NotifyPayload = Result<notify::Event, notify::Error>;
 
@@ -41,6 +41,7 @@ impl JfWatcher {
 
     pub async fn wait(self) -> JfResult<()> {
         tokio::task::spawn_blocking(move || {
+            const INTERVAL_MILLIS: u64 = 100;
             loop {
                 if self.canceller.is_canceled() {
                     break;
