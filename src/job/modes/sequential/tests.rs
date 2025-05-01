@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-use crate::job::runner;
+// use crate::job::runner;
 use crate::util::testutil::*;
 
 use super::*;
@@ -99,7 +99,7 @@ fn cancel() -> JfResult<()> {
         async {
             let s = Sequential::try_async_fixture().await?;
             s.cancel().await?;
-            runner::interval().await; // sleep for job interval
+            // runner::interval().await; // sleep for job interval
             assert!(s.canceller.is_canceled());
             Ok(())
         },

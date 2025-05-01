@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 use std::io::Write;
 
-use crate::job::runner;
+// use crate::job::runner;
 use crate::util::testutil::*;
 
 use super::*;
@@ -77,7 +77,7 @@ fn start_cancel() -> JfResult<()> {
         async {
             let w = Watch::try_async_fixture().await?;
             w.start().await?.cancel().await?;
-            runner::interval().await; // for cover breaking loop
+            // runner::interval().await; // for cover breaking loop
             assert!(w.join().await?.is_failed());
             assert!(w.is_finished().await?);
             Ok(())
@@ -95,10 +95,9 @@ fn watch() -> JfResult<()> {
             w.start().await?;
             assert!(!w.is_finished().await?);
             let id = w.job.lock().await.as_mock().id();
-            runner::interval().await;
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
             std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
-            runner::interval().await;
-            runner::interval().await;
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
             let id2 = w.job.lock().await.as_mock().id();
             assert_ne!(id, id2);
             w.cancel().await?;

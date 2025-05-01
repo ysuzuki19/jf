@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 mod canceller;
+mod finish_notify;
 mod join_status;
 pub mod modes;
 mod runner;

@@ -7,11 +7,13 @@ use std::{
     sync::Arc,
 };
 
-use tokio::sync::Mutex;
+use tokio::{sync::Mutex, task::JoinHandle};
 
 use crate::{
     ctx::Ctx,
-    job::{canceller::Canceller, join_status::JoinStatus, runner::*, Job},
+    job::{
+        canceller::Canceller, finish_notify::FinishNotify, join_status::JoinStatus, runner::*, Job,
+    },
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
 };
@@ -27,6 +29,8 @@ pub struct Parallel {
     jobs: Vec<Job>,
     canceller: Canceller,
     running_jobs: Arc<Mutex<Vec<Job>>>,
+    finish_handle: Arc<Mutex<Option<JoinHandle<JfResult<()>>>>>,
+    finish_notify: Arc<FinishNotify>,
 }
 
 impl Parallel {
@@ -41,6 +45,8 @@ impl Parallel {
             jobs: jobs.clone(),
             canceller: Canceller::new(),
             running_jobs: Arc::new(Mutex::new(jobs)),
+            finish_handle: Arc::new(Mutex::new(None)),
+            finish_notify: FinishNotify::new_arc(),
         })
     }
 }
@@ -53,6 +59,8 @@ impl Bunshin for Parallel {
             jobs: self.jobs.bunshin().await,
             canceller: Canceller::new(),
             running_jobs: Arc::new(Mutex::new(self.running_jobs.lock().await.bunshin().await)),
+            finish_handle: Arc::new(Mutex::new(None)),
+            finish_notify: FinishNotify::new_arc(),
         }
     }
 }
@@ -77,6 +85,18 @@ impl Runner for Parallel {
         for job in self.running_jobs.lock().await.deref() {
             job.start().await?;
         }
+        let handle: JoinHandle<JfResult<()>> = tokio::spawn({
+            let jobs = self.jobs.clone();
+            let finish_notify = self.finish_notify.clone();
+            async move {
+                for job in jobs {
+                    job.join().await?;
+                }
+                finish_notify.notify();
+                Ok(())
+            }
+        });
+        self.finish_handle.lock().await.replace(handle);
         logger.debug("Parallel started").await?;
         Ok(self.clone())
     }
@@ -90,18 +110,13 @@ impl Runner for Parallel {
     }
 
     async fn join(&self) -> JfResult<JoinStatus> {
-        loop {
-            if self.is_finished().await? {
-                for job in self.running_jobs.lock().await.deref_mut() {
-                    if let JoinStatus::Failed = job.join().await? {
-                        return Ok(JoinStatus::Failed);
-                    }
-                }
-                return Ok(JoinStatus::Succeed);
+        self.finish_notify.wait().await;
+        for job in self.running_jobs.lock().await.deref_mut() {
+            if let JoinStatus::Failed = job.join().await? {
+                return Ok(JoinStatus::Failed);
             }
-
-            interval().await;
         }
+        return Ok(JoinStatus::Succeed);
     }
 
     fn set_canceller(&mut self, canceller: Canceller) -> Self {
