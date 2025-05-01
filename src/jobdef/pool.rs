@@ -37,10 +37,7 @@ impl JobdefPool {
             .map
             .values()
             .map(|jobdef| jobdef.build(ctx.clone(), self.clone(), Agent::Job))
-            .filter_map(|res| match res {
-                Ok(_) => None,
-                Err(e) => Some(e),
-            })
+            .filter_map(|res| res.err())
             .collect::<Vec<_>>();
         if errs.is_empty() {
             Ok(())
