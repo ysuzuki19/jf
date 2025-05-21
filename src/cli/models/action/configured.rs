@@ -32,7 +32,7 @@ impl CliAction for Configured {
             Configured::List => ctx.logger().force(jc.list_public().join(" ")).await?,
             Configured::Validate => match jc.validate(ctx.clone()) {
                 Ok(_) => ctx.logger().force("All jobs are valid").await?,
-                Err(e) => ctx.logger().force(format!("{}", e)).await?,
+                Err(e) => ctx.logger().force(format!("{e}")).await?,
             },
             Configured::Run(name) => jc.run(ctx, name).await?,
             Configured::Description(name) => ctx.logger().force(jc.description(name)?).await?,

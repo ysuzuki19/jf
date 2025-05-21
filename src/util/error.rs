@@ -50,7 +50,7 @@ mod tests {
     fn cover() {
         let err = JfError::Custom("test".into());
         assert_eq!(err.to_string(), "test");
-        println!("{:?}", err)
+        println!("{err:?}")
     }
 
     #[test]

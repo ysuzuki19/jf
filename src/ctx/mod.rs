@@ -39,7 +39,7 @@ mod tests {
             #[coverage(off)]
             async {
                 let ctx = Ctx::async_fixture().await;
-                println!("{:?}", ctx)
+                println!("{ctx:?}")
             },
         );
     }

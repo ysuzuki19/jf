@@ -25,7 +25,7 @@ impl Mode {
             Self::Template => TEMPLATE,
         };
 
-        let cfg_text = format!("{}{}", meta_text, job_text);
+        let cfg_text = format!("{meta_text}{job_text}");
 
         tokio::fs::write(cfg_path.clone(), cfg_text).await.unwrap();
 
@@ -44,9 +44,8 @@ async fn exist(path: PathBuf) -> bool {
 fn render_meta(version: &str) -> String {
     format!(
         r#"[meta]
-version = "{}"
-"#,
-        version
+version = "{version}"
+"#
     )
 }
 

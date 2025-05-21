@@ -25,7 +25,7 @@ async fn main() {
                 }
             }
             Err(e) => {
-                eprintln!("Failed to start: {}", e);
+                eprintln!("Failed to start: {e}");
                 std::process::exit(1);
             }
         }

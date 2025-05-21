@@ -70,6 +70,6 @@ mod tests {
     #[coverage(off)]
     fn cover() {
         let writer = Mock::new();
-        println!("{:?}", writer);
+        println!("{writer:?}");
     }
 }

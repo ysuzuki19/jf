@@ -49,7 +49,7 @@ impl JobdefPool {
     fn get(&self, job_name: String) -> JfResult<&Jobdef> {
         self.map
             .get(&job_name)
-            .ok_or(format!("Jobdef(name={}) not found", job_name).into_jf_error())
+            .ok_or(format!("Jobdef(name={job_name}) not found").into_jf_error())
     }
 
     pub fn build(&self, ctx: Ctx, job_name: String, agent: Agent) -> JfResult<Job> {
