@@ -93,9 +93,9 @@ fn watch() -> JfResult<()> {
             w.start().await?;
             assert!(!w.is_finished().await?);
             let id = w.job.lock().await.as_mock().id();
-            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await; // wait for the watcher to start
             std::fs::File::create("./tests/dummy_entities/file1.txt")?.write_all(b"")?;
-            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await; // wait for the watcher to detect the change and restart the job
             let id2 = w.job.lock().await.as_mock().id();
             assert_ne!(id, id2);
             w.cancel().await?;

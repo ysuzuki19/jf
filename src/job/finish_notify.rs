@@ -60,7 +60,7 @@ mod tests {
                 notify.wait().await;
             }
         });
-        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await; // wait for the task to start
         assert!(!notify.is_finished());
         notify.notify();
         handle.await.unwrap();
