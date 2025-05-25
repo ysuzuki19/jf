@@ -11,8 +11,6 @@ use crate::{
     },
 };
 
-// use super::INTERVAL_MILLIS;
-
 type NotifyPayload = Result<notify::Event, notify::Error>;
 
 pub struct JfWatcher {
@@ -58,7 +56,7 @@ impl JfWatcher {
                     },
                     Err(e) => match e {
                         std::sync::mpsc::RecvTimeoutError::Timeout => {
-                            sleep(std::time::Duration::from_millis(INTERVAL_MILLIS));
+                            sleep(std::time::Duration::from_millis(INTERVAL_MILLIS)); //TODO: delete with check
                             continue;
                         }
                         std::sync::mpsc::RecvTimeoutError::Disconnected => {

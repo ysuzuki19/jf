@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 use std::io::Write;
 
-// use crate::job::runner;
 use crate::util::testutil::*;
 
 use super::*;
@@ -77,7 +76,6 @@ fn start_cancel() -> JfResult<()> {
         async {
             let w = Watch::try_async_fixture().await?;
             w.start().await?.cancel().await?;
-            // runner::interval().await; // for cover breaking loop
             assert!(w.join().await?.is_failed());
             assert!(w.is_finished().await?);
             Ok(())
