@@ -85,7 +85,7 @@ impl Runner for Parallel {
         for job in self.running_jobs.lock().await.deref() {
             job.start().await?;
         }
-        let handle: JoinHandle<JfResult<()>> = tokio::spawn({
+        let handle = tokio::spawn({
             let jobs = self.jobs.clone();
             let finish_notify = self.finish_notify.clone();
             async move {
