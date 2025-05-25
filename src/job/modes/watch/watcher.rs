@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MPL-2.0
-use std::thread::sleep;
-
 use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
 use crate::{
@@ -49,16 +47,11 @@ impl JfWatcher {
                     .recv_timeout(std::time::Duration::from_millis(INTERVAL_MILLIS))
                 {
                     Ok(event) => match event?.kind {
-                        EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => {
-                            break;
-                        }
+                        EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => break,
                         _ => {}
                     },
                     Err(e) => match e {
-                        std::sync::mpsc::RecvTimeoutError::Timeout => {
-                            sleep(std::time::Duration::from_millis(INTERVAL_MILLIS)); //TODO: delete with check
-                            continue;
-                        }
+                        std::sync::mpsc::RecvTimeoutError::Timeout => continue,
                         std::sync::mpsc::RecvTimeoutError::Disconnected => {
                             return Err(JfError::from(e));
                         }
