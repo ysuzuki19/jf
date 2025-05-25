@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: MPL-2.0
-use std::thread::sleep;
-
 use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
 use crate::{
@@ -10,8 +8,6 @@ use crate::{
         ReadOnly,
     },
 };
-
-use super::INTERVAL_MILLIS;
 
 type NotifyPayload = Result<notify::Event, notify::Error>;
 
@@ -41,6 +37,7 @@ impl JfWatcher {
 
     pub async fn wait(self) -> JfResult<()> {
         tokio::task::spawn_blocking(move || {
+            const INTERVAL_MILLIS: u64 = 100;
             loop {
                 if self.canceller.is_canceled() {
                     break;
@@ -50,16 +47,11 @@ impl JfWatcher {
                     .recv_timeout(std::time::Duration::from_millis(INTERVAL_MILLIS))
                 {
                     Ok(event) => match event?.kind {
-                        EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => {
-                            break;
-                        }
+                        EventKind::Modify(_) | EventKind::Create(_) | EventKind::Remove(_) => break,
                         _ => {}
                     },
                     Err(e) => match e {
-                        std::sync::mpsc::RecvTimeoutError::Timeout => {
-                            sleep(std::time::Duration::from_millis(INTERVAL_MILLIS));
-                            continue;
-                        }
+                        std::sync::mpsc::RecvTimeoutError::Timeout => continue,
                         std::sync::mpsc::RecvTimeoutError::Disconnected => {
                             return Err(JfError::from(e));
                         }

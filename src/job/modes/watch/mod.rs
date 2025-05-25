@@ -9,7 +9,9 @@ use tokio::sync::Mutex;
 
 use crate::{
     ctx::Ctx,
-    job::{canceller::Canceller, join_status::JoinStatus, runner::*, Job},
+    job::{
+        canceller::Canceller, finish_notify::FinishNotify, join_status::JoinStatus, runner::*, Job,
+    },
     jobdef::{Agent, JobdefPool},
     util::error::JfResult,
 };
@@ -27,6 +29,7 @@ pub struct Watch {
     watch_list: Vec<String>,
     canceller: Canceller,
     handle: Arc<Mutex<Option<JfHandle>>>,
+    finish_notify: Arc<FinishNotify>,
 }
 
 impl Watch {
@@ -38,6 +41,7 @@ impl Watch {
             watch_list: params.watch_list,
             canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
+            finish_notify: FinishNotify::new_arc(),
         })
     }
 }
@@ -51,6 +55,7 @@ impl Bunshin for Watch {
             watch_list: self.watch_list.clone(),
             canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),
+            finish_notify: FinishNotify::new_arc(),
         }
     }
 }
@@ -58,7 +63,7 @@ impl Bunshin for Watch {
 #[async_trait::async_trait]
 impl Checker for Watch {
     async fn is_finished(&self) -> JfResult<bool> {
-        Ok(self.canceller.is_canceled())
+        Ok(self.finish_notify.is_finished())
     }
 }
 
@@ -68,6 +73,7 @@ impl Runner for Watch {
         let mut logger = self.ctx.logger();
         logger.debug("Watch starting...").await?;
         let handle = tokio::spawn({
+            let finish_notify = self.finish_notify.clone();
             let watch_list = self.watch_list.clone();
             let job = self.job.clone();
             let canceller = self.canceller.clone();
@@ -81,6 +87,7 @@ impl Runner for Watch {
 
                     job.lock().await.cancel().await?.join().await?;
                     if canceller.is_canceled() {
+                        finish_notify.notify();
                         return Ok(JoinStatus::Failed);
                     }
 
@@ -100,14 +107,11 @@ impl Runner for Watch {
     }
 
     async fn join(&self) -> JfResult<JoinStatus> {
-        loop {
-            if self.is_finished().await? {
-                if let Some(handle) = self.handle.lock().await.deref_mut() {
-                    return handle.await?;
-                }
-            }
-
-            interval().await;
+        self.finish_notify.wait().await;
+        if let Some(handle) = self.handle.lock().await.deref_mut() {
+            return handle.await?;
+        } else {
+            return Ok(JoinStatus::Succeed);
         }
     }
 
