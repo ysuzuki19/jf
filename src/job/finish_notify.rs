@@ -18,17 +18,17 @@ impl FinishNotify {
     }
 
     pub fn is_finished(&self) -> bool {
-        self.is_finished.load(std::sync::atomic::Ordering::Relaxed)
+        self.is_finished.load(std::sync::atomic::Ordering::Acquire)
     }
 
     pub fn notify(&self) {
         self.is_finished
-            .store(true, std::sync::atomic::Ordering::Relaxed);
+            .store(true, std::sync::atomic::Ordering::Release);
         self.notify.notify_waiters();
     }
 
     pub async fn wait(&self) {
-        while !self.is_finished.load(std::sync::atomic::Ordering::Relaxed) {
+        while !self.is_finished.load(std::sync::atomic::Ordering::Acquire) {
             self.notify.notified().await;
         }
     }
