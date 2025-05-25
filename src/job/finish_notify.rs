@@ -10,6 +10,7 @@ impl FinishNotify {
     pub fn new_arc() -> std::sync::Arc<Self> {
         Arc::new(Self::new())
     }
+
     pub fn new() -> Self {
         Self {
             is_finished: AtomicBool::new(false),
