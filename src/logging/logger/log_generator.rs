@@ -43,6 +43,7 @@ mod tests {
     #[test]
     fn log_generator() {
         let log_gen = LogGenerator::fixture();
-        assert_eq!(String::from("[D] test"), log_gen.gen());
+        let text = log_gen.gen();
+        assert_eq!(String::from("[D] test"), text);
     }
 }
