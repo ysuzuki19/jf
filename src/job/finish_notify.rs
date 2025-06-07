@@ -18,6 +18,7 @@ impl FinishNotify {
         }
     }
 
+    #[allow(dead_code)]
     pub fn is_finished(&self) -> bool {
         self.is_finished.load(std::sync::atomic::Ordering::Acquire)
     }

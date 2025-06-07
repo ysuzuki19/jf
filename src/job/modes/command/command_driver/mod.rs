@@ -30,6 +30,7 @@ impl CommandDriver {
         }
     }
 
+    #[allow(dead_code)]
     pub async fn is_finished(&mut self) -> JfResult<bool> {
         Ok(self.child.try_wait()?.is_some())
     }

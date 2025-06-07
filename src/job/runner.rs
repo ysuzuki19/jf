@@ -12,6 +12,7 @@ pub trait Bunshin {
 
 #[async_trait::async_trait]
 pub trait Checker {
+    #[allow(dead_code)]
     async fn is_finished(&self) -> JfResult<bool>;
 }
 
