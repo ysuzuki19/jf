@@ -109,7 +109,7 @@ mod tests {
                 ]);
                 assert_eq!(pool.list_public().len(), 2);
                 let logging_mock = LoggingMock::new().await;
-                let ctx = Ctx::new(logging_mock.logger);
+                let ctx = Ctx::new(logging_mock.logger, "test", true);
                 assert!(pool.validate(ctx.clone()).is_ok());
                 assert!(pool.build(ctx.clone(), "job1".into(), Agent::Job).is_ok());
                 assert!(pool.build(ctx.clone(), "job1".into(), Agent::Cli).is_ok());
@@ -140,7 +140,7 @@ mod tests {
                 ]);
                 assert_eq!(pool.list_public().len(), 2);
                 let logging_mock = LoggingMock::new().await;
-                let ctx = Ctx::new(logging_mock.logger);
+                let ctx = Ctx::new(logging_mock.logger, "test", true);
                 assert!(pool.validate(ctx.clone()).is_err());
                 assert!(pool.build(ctx.clone(), "job1".into(), Agent::Job).is_ok());
                 assert!(pool.build(ctx.clone(), "job1".into(), Agent::Cli).is_ok());

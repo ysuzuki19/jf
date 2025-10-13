@@ -36,7 +36,7 @@ impl Watch {
     pub fn new(ctx: Ctx, params: WatchParams, pool: JobdefPool) -> JfResult<Self> {
         let job = pool.build(ctx.clone(), params.job, Agent::Job)?;
         Ok(Self {
-            ctx,
+            ctx: ctx.new_span("watch"),
             job: Arc::new(Mutex::new(job)),
             watch_list: params.watch_list,
             canceller: Canceller::new(),

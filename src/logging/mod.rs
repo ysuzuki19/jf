@@ -2,7 +2,7 @@
 mod logger;
 mod worker;
 
-pub use logger::{LogLevel, Logger};
+pub use logger::{log_generator, LogLevel, Logger};
 pub use worker::{Stdout, Worker};
 
 #[cfg(test)]

@@ -48,7 +48,10 @@ impl Jobdef {
     }
 
     fn build(&self, ctx: Ctx, pool: JobdefPool, agent: Agent) -> JfResult<Job> {
+        let ctx = ctx.new_span(&self.name);
         self.visibility_guard(agent)?;
+        ctx.engine_log("creating job runner");
+        ctx.scopeout_engine_log("created job runner");
         Job::new(ctx, &self.job_cfg, pool)
     }
 

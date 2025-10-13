@@ -24,12 +24,11 @@ impl JobController {
     }
 
     pub async fn run(&self, ctx: Ctx, job_name: String) -> JfResult<()> {
-        self.pool
-            .build(ctx, job_name, Agent::Cli)?
-            .start()
-            .await?
-            .join()
-            .await?;
+        ctx.engine_log("building job runner");
+        let job = self.pool.build(ctx.clone(), job_name, Agent::Cli)?;
+
+        ctx.engine_log("starting job runner");
+        job.start().await?.join().await?;
         Ok(())
     }
 
