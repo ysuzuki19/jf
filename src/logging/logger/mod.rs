@@ -56,6 +56,7 @@ impl Logger {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub async fn error<S: AsRef<str>>(&mut self, line: S) -> JfResult<()> {
         self.send_with_guard(LogLevel::Error, line.as_ref().to_string())
             .await?;
