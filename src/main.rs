@@ -16,11 +16,11 @@ async fn main() {
     let args = cli::Args::parse();
     let mut log_worker = logging::Worker::new();
     {
-        let mut logger = log_worker.start(Stdout::new(), args.log_level()).await;
+        let logger = log_worker.start(Stdout::new(), args.log_level()).await;
         match cli::Cli::load(logger.clone(), args) {
             Ok(cli) => {
                 if let Err(e) = cli.run().await {
-                    let _ = logger.error(e.to_string()).await;
+                    eprintln!("Error: {e}");
                     std::process::exit(1);
                 }
             }
