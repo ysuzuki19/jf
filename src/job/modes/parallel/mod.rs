@@ -41,7 +41,7 @@ impl Parallel {
             .map(|job_name| pool.build(ctx.clone(), job_name, Agent::Job))
             .collect::<JfResult<Vec<Job>>>()?;
         Ok(Self {
-            ctx,
+            ctx: ctx.new_span("parallel"),
             jobs: jobs.clone(),
             canceller: Canceller::new(),
             running_jobs: Arc::new(Mutex::new(jobs)),

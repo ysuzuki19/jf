@@ -40,6 +40,9 @@ pub struct Args {
     #[arg(long)]
     cfg: Option<PathBuf>,
 
+    #[arg(long, short, default_value = "false")]
+    pub verbose: bool,
+
     #[arg(long, default_value = "info")]
     log_level: LogLevel,
 
@@ -69,7 +72,7 @@ impl Args {
     }
 
     fn setup_ctx(&self, logger: Logger) -> Ctx {
-        Ctx::new(logger)
+        Ctx::new(logger, "jf", self.verbose)
     }
 
     fn setup_opts(&self) -> Opts {

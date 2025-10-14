@@ -33,7 +33,7 @@ pub struct Command {
 impl Command {
     pub fn new(ctx: Ctx, params: CommandParams) -> Self {
         Self {
-            ctx,
+            ctx: ctx.new_span("command"),
             params: params.into(),
             command_driver: Arc::new(Mutex::new(None)),
             canceller: Canceller::new(),

@@ -43,7 +43,7 @@ impl Sequential {
             .map(|job_name| pool.build(ctx.clone(), job_name, Agent::Job))
             .collect::<JfResult<Vec<Job>>>()?;
         Ok(Self {
-            ctx,
+            ctx: ctx.new_span("sequential"),
             jobs: jobs.into(),
             canceller: Canceller::new(),
             handle: Arc::new(Mutex::new(None)),

@@ -93,7 +93,7 @@ mod tests {
             #[coverage(off)]
             async {
                 let logging_mock = LoggingMock::new().await;
-                let ctx = Ctx::new(logging_mock.logger);
+                let ctx = Ctx::new(logging_mock.logger, "test", true);
                 let mut log_driver = LogDriver::new(ctx);
                 assert_eq!(logging_mock.log_writer.lines().len(), 0);
 

@@ -33,7 +33,7 @@ impl Shell {
             },
         );
         Self {
-            ctx,
+            ctx: ctx.new_span("shell"),
             params: params.into(),
             command,
         }

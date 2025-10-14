@@ -57,8 +57,9 @@ mod tests {
             async move {
                 let args = Args::parse_from(args::fixtures::SIMPLE);
                 let logging_mock = LoggingMock::new().await;
+                let verbose = args.verbose;
                 let cli = Cli::load(logging_mock.logger.clone(), args)?;
-                assert_eq!(cli.ctx, Ctx::new(logging_mock.logger));
+                assert_eq!(cli.ctx, Ctx::new(logging_mock.logger, "jf", verbose));
                 assert_eq!(
                     cli.action,
                     Configured::Run(fixtures::JOB_NAME.into()).into()
