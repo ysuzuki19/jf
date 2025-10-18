@@ -17,15 +17,20 @@ pub struct Cfg {
 impl Cfg {
     pub fn load(cfg: Option<PathBuf>) -> JfResult<Self> {
         let file_path = cfg_path_gen::CfgPathGen::new(cfg).gen();
-        let content = std::fs::read_to_string(file_path)?;
-        Ok(toml::from_str(&content)?)
+        match std::fs::read_to_string(file_path) {
+            Ok(c) => Ok(toml::from_str(&c)?),
+            Err(e) => match e.kind() {
+                std::io::ErrorKind::NotFound => Ok(Self {
+                    jobs: HashMap::new(),
+                }),
+                _ => Err(crate::util::error::JfError::IoError(e)),
+            },
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::util::error::JfError;
-
     use super::*;
 
     #[test]
@@ -38,9 +43,8 @@ mod tests {
     #[test]
     #[coverage(off)]
     fn load_unexist() -> JfResult<()> {
-        let must_fail = Cfg::load(Some(cfg_path_gen::tests::unexist_dir()));
-        assert!(must_fail.is_err());
-        assert!(matches!(must_fail.err().unwrap(), JfError::IoError(_)));
+        let cfg = Cfg::load(Some(cfg_path_gen::tests::unexist_dir()))?;
+        assert_eq!(cfg.jobs.len(), 0);
         Ok(())
     }
 }
