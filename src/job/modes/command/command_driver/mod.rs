@@ -13,9 +13,15 @@ pub struct CommandDriver {
 }
 
 impl CommandDriver {
-    pub async fn spawn(ctx: Ctx, command: &String, args: &Vec<String>) -> JfResult<Self> {
+    pub async fn spawn(
+        ctx: Ctx,
+        command: &String,
+        args: &Vec<String>,
+        env: &std::collections::HashMap<String, String>,
+    ) -> JfResult<Self> {
         let mut cmd = tokio::process::Command::new(command);
         cmd.args(args);
+        cmd.envs(env);
         cmd.stdout(std::process::Stdio::piped());
 
         let mut child = cmd.spawn()?;
@@ -70,8 +76,9 @@ mod tests {
             async {
                 let command = "echo".to_owned();
                 let args = vec!["hello".to_owned()];
+                let env = std::collections::HashMap::new();
                 let ctx = Ctx::async_fixture().await;
-                let mut driver = CommandDriver::spawn(ctx, &command, &args).await?;
+                let mut driver = CommandDriver::spawn(ctx, &command, &args, &env).await?;
                 assert!(driver.join().await?.is_succeed());
                 Ok(())
             },
@@ -86,8 +93,9 @@ mod tests {
             async {
                 let command = "sleep".to_owned();
                 let args = vec!["10".to_owned()];
+                let env = std::collections::HashMap::new();
                 let ctx = Ctx::async_fixture().await;
-                let mut driver = CommandDriver::spawn(ctx, &command, &args).await?;
+                let mut driver = CommandDriver::spawn(ctx, &command, &args, &env).await?;
                 driver.cancel().await?;
                 assert!(driver.join().await?.is_failed());
                 Ok(())
@@ -102,9 +110,28 @@ mod tests {
             #[coverage(off)]
             async {
                 let command = "false".to_owned();
+                let env = std::collections::HashMap::new();
                 let ctx = Ctx::async_fixture().await;
-                let mut driver = CommandDriver::spawn(ctx, &command, &vec![]).await?;
+                let mut driver = CommandDriver::spawn(ctx, &command, &vec![], &env).await?;
                 assert!(driver.join().await?.is_failed());
+                Ok(())
+            },
+        )
+    }
+
+    #[test]
+    #[coverage(off)]
+    fn spawn_with_env() -> JfResult<()> {
+        async_test(
+            #[coverage(off)]
+            async {
+                let command = "sh".to_owned();
+                let args = vec!["-c".to_owned(), "echo $TEST_VAR".to_owned()];
+                let mut env = std::collections::HashMap::new();
+                env.insert("TEST_VAR".to_string(), "test_value".to_string());
+                let ctx = Ctx::async_fixture().await;
+                let mut driver = CommandDriver::spawn(ctx, &command, &args, &env).await?;
+                assert!(driver.join().await?.is_succeed());
                 Ok(())
             },
         )

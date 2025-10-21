@@ -18,6 +18,15 @@ pub mod fixtures {
     pub const COMMAND_WITH_ARGS: &str = r#"
 command = "test"
 args = ["test1", "test2"]"#;
+
+    pub const COMMAND_WITH_ENV: &str = r#"
+command = "test"
+args = []
+
+[env]
+MY_VAR = "my_value"
+ANOTHER_VAR = "another_value"
+"#;
 }
 
 #[cfg(test)]
@@ -36,6 +45,14 @@ mod tests {
         let cfg: CommandCfg = toml::from_str(fixtures::COMMAND_WITH_ARGS)?;
         assert_eq!(cfg.params.command, fixtures::COMMAND);
         assert_eq!(cfg.params.args, fixtures::ARGS);
+
+        let cfg: CommandCfg = toml::from_str(fixtures::COMMAND_WITH_ENV)?;
+        assert_eq!(cfg.params.command, fixtures::COMMAND);
+        assert_eq!(cfg.params.env.get("MY_VAR"), Some(&"my_value".to_string()));
+        assert_eq!(
+            cfg.params.env.get("ANOTHER_VAR"),
+            Some(&"another_value".to_string())
+        );
 
         Ok(())
     }

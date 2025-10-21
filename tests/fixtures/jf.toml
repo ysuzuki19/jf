@@ -3,6 +3,14 @@ description = "this is a fixture job for testing"
 command = "echo"
 args = ["hello"]
 
+[job.test-env]
+description = "test job with environment variables"
+command = "sh"
+args = ["-c", "echo $MY_VAR"]
+
+[job.test-env.env]
+MY_VAR = "Hello from env!"
+
 [job.run]
 command = "cargo"
 args = ["run"]
