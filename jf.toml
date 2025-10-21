@@ -1,6 +1,15 @@
 [meta]
 version = "0.1.0"
 
+[job.example-env]
+description = "Example job demonstrating environment variable support"
+command = "sh"
+args = ["-c", "echo \"Name: $USER_NAME, Environment: $APP_ENV\""]
+
+[job.example-env.env]
+USER_NAME = "jf-user"
+APP_ENV = "development"
+
 [job.setup-dev]
 mode = "sequential"
 jobs = ["setup-binstall", "setup-llvm-cov"]

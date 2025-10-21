@@ -78,6 +78,18 @@ command = "cargo"             # required; shell command
 args = ["test"]               # required; command arguments
 ```
 
+You can also set environment variables for the command:
+
+```toml
+[job.myjob]
+command = "mycommand"
+args = []
+
+[job.myjob.env]
+MY_VAR = "my_value"
+ANOTHER_VAR = "another_value"
+```
+
 ### shell
 
 ```toml
