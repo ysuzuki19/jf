@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio_stream::StreamExt;
 
 use crate::{
     ctx::Ctx,
@@ -17,24 +18,48 @@ impl LogDriver {
         Self { ctx, handle: None }
     }
 
-    pub fn mount(&mut self, stdout: Option<tokio::process::ChildStdout>) -> JfResult<()> {
-        match stdout {
-            Some(stdout) => {
-                self.start(stdout);
+    pub fn mount(
+        &mut self,
+        stdout: Option<tokio::process::ChildStdout>,
+        stderr: Option<tokio::process::ChildStderr>,
+    ) -> JfResult<()> {
+        match (stdout, stderr) {
+            (Some(stdout), Some(stderr)) => {
+                self.start(stdout, stderr);
                 Ok(())
             }
-            None => Err("".into_jf_error()),
+            _ => Err("".into_jf_error()),
         }
     }
 
-    pub fn start(&mut self, stdout: tokio::process::ChildStdout) {
+    pub fn start(
+        &mut self,
+        stdout: tokio::process::ChildStdout,
+        stderr: tokio::process::ChildStderr,
+    ) {
         let handle = tokio::spawn({
             let mut logger = self.ctx.logger();
             async move {
-                let mut reader = BufReader::new(stdout).lines();
+                enum StreamLine {
+                    Stdout(String),
+                    Stderr(String),
+                }
 
-                while let Some(line) = reader.next_line().await? {
-                    logger.info(line).await?;
+                let stdout = BufReader::new(stdout).lines();
+                let stderr = BufReader::new(stderr).lines();
+
+                let stdout = tokio_stream::wrappers::LinesStream::new(stdout)
+                    .map(|line| JfResult::Ok(StreamLine::Stdout(line?)));
+                let stderr = tokio_stream::wrappers::LinesStream::new(stderr)
+                    .map(|line| JfResult::Ok(StreamLine::Stderr(line?)));
+
+                let mut reader = tokio_stream::StreamExt::merge(stdout, stderr);
+
+                while let Some(Ok(line)) = reader.next().await {
+                    match line {
+                        StreamLine::Stdout(line) => logger.info(line).await?,
+                        StreamLine::Stderr(line) => logger.error(line).await?,
+                    }
                 }
 
                 Ok(JoinStatus::Succeed)
@@ -66,7 +91,7 @@ mod tests {
             async {
                 let ctx = Ctx::async_fixture().await;
                 let mut log_driver = LogDriver::new(ctx);
-                assert!(log_driver.mount(None).is_err());
+                assert!(log_driver.mount(None, None).is_err());
                 Ok(())
             },
         )
@@ -100,8 +125,9 @@ mod tests {
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
                     .stdout(std::process::Stdio::piped())
+                    .stderr(std::process::Stdio::piped())
                     .spawn()?;
-                log_driver.mount(child.stdout.take())?;
+                log_driver.mount(child.stdout.take(), child.stderr.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
                 assert_eq!(logging_mock.log_writer.lines(), vec!["[I] hello"]);
@@ -109,8 +135,9 @@ mod tests {
                 let mut child = tokio::process::Command::new("echo")
                     .arg("hello")
                     .stdout(std::process::Stdio::piped())
+                    .stderr(std::process::Stdio::piped())
                     .spawn()?;
-                log_driver.mount(child.stdout.take())?;
+                log_driver.mount(child.stdout.take(), child.stderr.take())?;
                 child.wait().await?;
                 log_driver.join().await?;
                 assert_eq!(

@@ -17,11 +17,12 @@ impl CommandDriver {
         let mut cmd = tokio::process::Command::new(command);
         cmd.args(args);
         cmd.stdout(std::process::Stdio::piped());
+        cmd.stderr(std::process::Stdio::piped());
 
         let mut child = cmd.spawn()?;
         let mut log_driver = log_driver::LogDriver::new(ctx);
 
-        match log_driver.mount(child.stdout.take()) {
+        match log_driver.mount(child.stdout.take(), child.stderr.take()) {
             Ok(_) => Ok(Self { child, log_driver }),
             Err(_) => {
                 child.kill().await?;
