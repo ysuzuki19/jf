@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'Cargo.toml'
 
 env:
   CARGO_TERM_COLOR: always
