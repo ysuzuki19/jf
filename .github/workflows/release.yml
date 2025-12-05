@@ -41,15 +41,12 @@ jobs:
         include:
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
-            artifact_name: jf
             asset_name: jf-linux-x86_64
           - target: x86_64-apple-darwin
             os: macos-13
-            artifact_name: jf
             asset_name: jf-darwin-x86_64
           - target: aarch64-apple-darwin
             os: macos-latest
-            artifact_name: jf
             asset_name: jf-darwin-aarch64
 
     runs-on: ${{ matrix.os }}
@@ -79,10 +76,19 @@ jobs:
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
 
+      - name: Verify binary (Linux)
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: |
+          docker run --rm -v $(pwd)/target/${{ matrix.target }}/release/jf:/jf alpine:latest /jf --version
+
+      - name: Verify binary (macOS)
+        if: matrix.target != 'x86_64-unknown-linux-musl'
+        run: ./target/${{ matrix.target }}/release/jf --version
+
       - name: Create tarball
         run: |
           cd target/${{ matrix.target }}/release
-          tar czvf ../../../${{ matrix.asset_name }}.tar.gz ${{ matrix.artifact_name }}
+          tar czvf ../../../${{ matrix.asset_name }}.tar.gz jf
           cd ../../..
 
       - name: Upload artifact
