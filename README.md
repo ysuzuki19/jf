@@ -1,6 +1,6 @@
 # jf
 
-```
+```plain
 This tool is currently in development.
 
 Please note that it is not yet stable
@@ -13,7 +13,7 @@ Command Line Tool for Running Job.
 
 Furthermore, `jf` offers some running modes out-of-the-box.
 
-# Running Mode
+## Running Mode
 
 `jf` has some built-in running mode.
 
@@ -27,38 +27,53 @@ Furthermore, `jf` offers some running modes out-of-the-box.
 
 The default mode is `command`.
 
-# Dependencies
+## Supported OS and Architecture
 
-- Rust
-- Cargo
+- Linux x86_64
+- macOS x86_64
+- macOS aarch64
 
-# Installation
+## Installation
 
-```bash
-$ git clone https://github.com/ysuzuki19/jf
-$ cd jf
-jf $ cargo install --path .
-```
-
-# Setup Project
+### Binary
 
 ```bash
-$ jf --init template # or "empty"
+curl -sSL https://raw.githubusercontent.com/ysuzuki19/jf/main/install.sh | bash
 ```
 
-# Exec job
+### Without Clone
 
 ```bash
-$ jf <job-name>
+cargo install --git https://github.com/ysuzuki19/jf
 ```
 
-# Job Definition
+### With Clone
+
+```bash
+git clone https://github.com/ysuzuki19/jf
+cd jf
+cargo install --path .
+```
+
+## Setup Project
+
+```bash
+jf --init template # or "empty"
+```
+
+## Exec job
+
+```bash
+jf <job-name>
+```
+
+## Job Definition
 
 You can define job in `jf.toml`.
 
 `description` is optional parameter for `jf description <job>`.
 
-## Common Config
+### Common Config
 
 All modes have parameter of fo
 
@@ -67,9 +82,9 @@ description = "this is sample job" # optional; description of this job for `jf d
 visibility = "private"             # or "public", default is "public"
 ```
 
-## Modes
+### Modes
 
-### command
+#### command
 
 ```toml
 [job.test]
@@ -78,7 +93,7 @@ command = "cargo"             # required; shell command
 args = ["test"]               # required; command arguments
 ```
 
-### shell
+#### shell
 
 ```toml
 [job.hello_world]
@@ -89,7 +104,7 @@ echo World
 """            # required; shell script to run
 ```
 
-### parallel
+#### parallel
 
 ```toml
 [job.test-build]
@@ -97,7 +112,7 @@ mode = "parallel"         # required;
 jobs = ["test", "build"]  # required; job names defined in `jf.toml`
 ```
 
-### sequential
+#### sequential
 
 ```toml
 [job.test-run]
@@ -105,7 +120,7 @@ mode = "sequential"    # required;
 jobs = ["test", "run"] # required; job names defined in `jf.toml`
 ```
 
-### watch
+#### watch
 
 ```toml
 [job.live-test]
@@ -114,18 +129,18 @@ job = "cargo-test"                    # required; job name defined in `jf.toml`
 watch_list = ["src/**", "Cargo.toml"] # required; watch list (glob pattern)
 ```
 
-# Setup Completion
+## Setup Completion
 
 By the following command, you can setup completion.
 
 ```bash
-$ source <(jf completion bash) # or zsh, powershell, elvish, fish
+source <(jf completion bash) # or zsh, powershell, elvish, fish
 ```
 
 If you want to setup completion permanently, command is following.
 
 ```bash
-$ echo "source <(jf completion bash)" >> ~/.bashrc
+echo "source <(jf completion bash)" >> ~/.bashrc
 ```
 
 Completion is optimized for `bash`.
