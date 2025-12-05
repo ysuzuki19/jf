@@ -27,13 +27,13 @@ Furthermore, `jf` offers some running modes out-of-the-box.
 
 The default mode is `command`.
 
-## Supported OS and Architecture
+## Installation
+
+Supported OS and Architecture is following:
 
 - Linux x86_64
 - macOS x86_64
 - macOS aarch64
-
-## Installation
 
 ### Binary
 
