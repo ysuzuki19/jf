@@ -30,6 +30,7 @@ impl Shell {
             super::CommandParams {
                 command: "sh".to_string(),
                 args,
+                env: std::collections::HashMap::new(),
             },
         );
         Self {

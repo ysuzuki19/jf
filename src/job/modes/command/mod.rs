@@ -20,6 +20,8 @@ pub struct CommandParams {
     pub command: String,
     #[serde(default)]
     pub args: Vec<String>,
+    #[serde(default)]
+    pub env: std::collections::HashMap<String, String>,
 }
 
 #[derive(Clone)]
@@ -72,6 +74,7 @@ impl Runner for Command {
             self.ctx.clone(),
             &self.params.read().command,
             &self.params.read().args,
+            &self.params.read().env,
         )
         .await?;
         self.command_driver.lock().await.replace(cd);

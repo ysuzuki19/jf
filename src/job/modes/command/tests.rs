@@ -8,6 +8,7 @@ impl AsyncFixture for Command {
         let params = CommandParams {
             command: String::from("sleep"),
             args: vec![String::from("1")],
+            env: std::collections::HashMap::new(),
         };
         Command::new(Ctx::async_fixture().await, params)
     }
