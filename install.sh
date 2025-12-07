@@ -12,6 +12,7 @@ case "$OS" in
   linux)
     case "$ARCH" in
       x86_64) ASSET="jf-linux-x86_64.tar.gz" ;;
+      aarch64|arm64) ASSET="jf-linux-aarch64.tar.gz" ;;
       *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
     esac
     ;;
