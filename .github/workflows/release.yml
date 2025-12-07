@@ -42,37 +42,32 @@ jobs:
       matrix:
         include:
           - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
+            os: linux
+            runner: ubuntu-latest
             asset_name: jf-linux-x86_64
           - target: aarch64-unknown-linux-musl
-            os: ubuntu-latest
+            os: linux
+            runner: ubuntu-24.04-arm
             asset_name: jf-linux-aarch64
           - target: x86_64-apple-darwin
-            os: macos-13
+            os: macos
+            runner: macos-13
             asset_name: jf-darwin-x86_64
           - target: aarch64-apple-darwin
-            os: macos-latest
+            os: macos
+            runner: macos-latest
             asset_name: jf-darwin-aarch64
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install musl-tools (Linux x86_64)
-        if: matrix.target == 'x86_64-unknown-linux-musl'
+      - name: Install musl-tools (Linux)
+        if: matrix.os == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y musl-tools musl-dev
-
-      - name: Install cross-compilation tools (Linux aarch64)
-        if: matrix.target == 'aarch64-unknown-linux-musl'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-          wget -q https://musl.cc/aarch64-linux-musl-cross.tgz
-          tar xzf aarch64-linux-musl-cross.tgz
-          echo "$PWD/aarch64-linux-musl-cross/bin" >> $GITHUB_PATH
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -80,35 +75,23 @@ jobs:
       - name: Add target
         run: rustup target add ${{ matrix.target }}
 
-      - name: Configure linker (Linux x86_64 musl)
-        if: matrix.target == 'x86_64-unknown-linux-musl'
+      - name: Configure linker (Linux musl)
+        if: matrix.os == 'linux'
         run: |
           mkdir -p .cargo
-          echo '[target.x86_64-unknown-linux-musl]' >> .cargo/config.toml
+          echo '[target.${{ matrix.target }}]' >> .cargo/config.toml
           echo 'linker = "musl-gcc"' >> .cargo/config.toml
-
-      - name: Configure linker (Linux aarch64 musl)
-        if: matrix.target == 'aarch64-unknown-linux-musl'
-        run: |
-          mkdir -p .cargo
-          echo '[target.aarch64-unknown-linux-musl]' >> .cargo/config.toml
-          echo 'linker = "aarch64-linux-musl-gcc"' >> .cargo/config.toml
 
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
 
-      - name: Verify binary (Linux x86_64)
-        if: matrix.target == 'x86_64-unknown-linux-musl'
+      - name: Verify binary (Linux)
+        if: matrix.os == 'linux'
         run: |
           docker run --rm -v $(pwd)/target/${{ matrix.target }}/release/jf:/jf alpine:latest /jf --version
 
-      - name: Verify binary (Linux aarch64)
-        if: matrix.target == 'aarch64-unknown-linux-musl'
-        run: |
-          docker run --rm --platform linux/arm64 -v $(pwd)/target/${{ matrix.target }}/release/jf:/jf arm64v8/alpine:latest /jf --version
-
       - name: Verify binary (macOS)
-        if: matrix.os != 'ubuntu-latest'
+        if: matrix.os == 'macos'
         run: ./target/${{ matrix.target }}/release/jf --version
 
       - name: Create tarball
